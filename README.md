@@ -1,4 +1,4 @@
-brainspell
+BrainSpell
 ==========
 
-brainspell is a web platform to facilitate the creation of an open, human-curated, classification of the neuroimaging literature
+Brainspell is a web platform to create the first open, collaborative, human-curated, classification of the neuroimaging literature
