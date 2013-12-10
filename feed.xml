@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/">
+<channel>
+<title>brainspell.org RSS Feed</title>
+<link>http://brainspell.org/</link>
+<description>brainspell</description>
+<atom:link href="http://brainspell.org/feed.xml" rel="self" type="application/rss+xml" />
+
+<item>
+  <title>Full text</title>
+  <link>http://brainspell.org/news</link>
+  <guid isPermaLink="false">1</guid>
+  <pubDate>Tue, 4 Jul 2013 08:40:01 GMT</pubDate>
+  <dc:creator>rbrto</dc:creator>
+  <description>
+  	  <![CDATA[
+	  <h1>Full text links</h1>
+		<p>Now articles present a link to the full text version in the journal's website (Additionally, several bugs have been corrected - from the many that may still lurk around)</p>
+	  ]]>
+  </description>
+  <category><![CDATA[brainspell]]></category>
+</item>
+
+<item>
+  <title>First</title>
+  <link>http://brainspell.org/news</link>
+  <guid isPermaLink="false">1</guid>
+  <pubDate>Tue, 4 Jun 2013 19:46:08 GMT</pubDate>
+  <dc:creator>rbrto</dc:creator>
+  <description>
+  	  <![CDATA[
+	  <h1>Many first things today!</h1>
+		<p>First functional version of brainspell is now on-line, taking queries, user registrations, and tags!</p>
+		<p>First version of the database is also available for download.</p>
+		<p>First round	of beta testing (with mostly "sandbox" tagging).</p>
+		<p>In summary, the first day of our open, human curated, classification of the neuroimaging literature!</p>
+	  ]]>
+  </description>
+  <category><![CDATA[brainspell]]></category>
+</item>
+
+<item>
+  <title>Welcome</title>
+  <link>http://brainspell.org/news</link>
+  <guid isPermaLink="false">1</guid>
+  <pubDate>Sun, 2 Jun 2013 19:46:08 GMT</pubDate>
+  <dc:creator>rbrto</dc:creator>
+  <description>
+  	  <![CDATA[
+	  <h1>Welcome to brainspell!</h1>
+	  <p>The first functional version of the application was finished today. For the moment, it only works locally in my computer, but I should be uploading it to its definitive location very soon.</p>	  
+	  ]]>
+  </description>
+  <category><![CDATA[brainspell]]></category>
+</item>
+
+</channel>
+</rss>

@@ -1,0 +1,307 @@
+<div class="content-section">
+	<table style="width:100%;margin-left:auto;margin-right:auto">
+	<tr><td>
+	<form method="get" action="<!--ROOTDIR-->search"">
+		<fieldset class="section" id="home-search">
+			<input type="text" id="search" name="query" placeholder="Search articles by title, author, keyword…" value="<!--%SearchString%-->"/>
+			<button style="border:0;top:5px;width:25px;height:25px;background-color:white">
+				<img src="<!--ROOTDIR-->img/bt_search.svg" alt="Search" width=25px height=25px/>
+			</button>
+		</fieldset>
+	</form>
+	</td></tr>
+	</table>
+</div>
+
+<div class="content-section">
+	<table style="width:100%;margin-left:auto;margin-right:auto;">
+	<tr><td>
+		<table>
+			<tr>
+			<td>
+				<canvas id="brainCanvas" width=320 height=320 style="border:1px solid black"></canvas>
+			</td>
+			</tr>
+			<tr>
+			<td>
+				<button style="width:40px;height:24px" onclick="javascript:changeView('sagittal')">Sag</button>
+				<button style="width:40px;height:24px" onclick="javascript:changeView('coronal')">Cor</button>
+				<button style="width:40px;height:24px" onclick="javascript:changeView('axial')">Axi</button>
+				<input type="range" name="slice" oninput="javascript:changeSlice(this.value)"style="width:100%;vertical-align:middle"/>
+			</td>
+			</tr>
+		</table>
+		<h2><b><!--%SearchResultsNumber%--> article<!--%SearchResultsMultiplicity%--> corresponding to the search "<!--%SearchString%-->"</b></h2>
+	</td></tr>
+	<tr><td>
+	<!--%SearchResults%-->
+	</td></tr>
+	</table>
+</div>
+<script>
+	var sum=new Array();
+	var	view=0;
+	var offcn=document.createElement('canvas');
+	var offtx=offcn.getContext('2d');
+	var tmpl_offcn=document.createElement('canvas');
+	var tmpl_offtx=tmpl_offcn.getContext('2d');
+	var canvas = document.getElementById('brainCanvas');
+	var ctx = canvas.getContext('2d');
+	var px,tmpl_px;
+	var	W,H;
+	var	tmpl_W,tmpl_H;
+	var	max=0;
+	var	LR=45,PA=54,IS=45;
+	var	tmpl_LR=180,tmpl_PA=216,tmpl_IS=180;
+	var	slice=50;
+	var	template=0;
+	var	flagLocationsLoaded,nLocationsLoaded;
+	var	negpos=[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.0053,0.0105,0.0158,0.0211,0.0263,0.0316,0.0368,0.0421,0.0474,0.0526,0.0579,0.0632,0.0684,0.0737,0.0789,0.0842,0.0895,0.0947,0.1000,0.1053,0.1105,0.1158,0.1211,0.1263,0.1316,0.1368,0.1421,0.1474,0.1526,0.1579,0.1632,0.3368,0.3474,0.3579,0.3684,0.3789,0.3895,0.4000,0.4105,0.4211,0.4316,0.4421,0.4526,0.4632,0.4737,0.4842,0.4947,0.5053,0.5158,0.5263,0.5368,0.5474,0.5579,0.5684,0.5789,0.5895,0.6000,0.6105,0.6211,0.6316,0.6421,0.6526,0.6632,0.6737,0.6842,0.6947,0.7053,0.7158,0.7263,0.7368,0.7474,0.7579,0.7684,0.7789,0.7895,0.8000,0.8105,0.8211,0.8316,0.8421,0.8526,0.8632,0.8737,0.8842,0.8947,0.9053,0.9158,0.9263,0.9368,0.9474,0.9579,0.9684,0.9789,0.9895,1.0000,
+			0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.3316,0.3263,0.3211,0.3158,0.3105,0.3053,0.3000,0.2947,0.2895,0.2842,0.2789,0.2737,0.2684,0.2632,0.2579,0.2526,0.2474,0.2421,0.2368,0.2316,0.2263,0.2211,0.2158,0.2105,0.2053,0.2000,0.1947,0.1895,0.1842,0.1789,0.1737,0.1684,0.3263,0.3158,0.3053,0.2947,0.2842,0.2737,0.2632,0.2526,0.2421,0.2316,0.2211,0.2105,0.2000,0.1895,0.1789,0.1684,0.1579,0.1474,0.1368,0.1263,0.1158,0.1053,0.0947,0.0842,0.0737,0.0632,0.0526,0.0421,0.0316,0.0211,0.0105,0,0,0.0105,0.0211,0.0316,0.0421,0.0526,0.0632,0.0737,0.0842,0.0947,0.1053,0.1158,0.1263,0.1368,0.1474,0.1579,0.1684,0.1789,0.1895,0.2000,0.2105,0.2211,0.2316,0.2421,0.2526,0.2632,0.2737,0.2842,0.2947,0.3053,0.3158,0.3263,0.1684,0.1737,0.1789,0.1842,0.1895,0.1947,0.2000,0.2053,0.2105,0.2158,0.2211,0.2263,0.2316,0.2368,0.2421,0.2474,0.2526,0.2579,0.2632,0.2684,0.2737,0.2789,0.2842,0.2895,0.2947,0.3000,0.3053,0.3105,0.3158,0.3211,0.3263,0.3316,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+			1.0000,0.9895,0.9789,0.9684,0.9579,0.9474,0.9368,0.9263,0.9158,0.9053,0.8947,0.8842,0.8737,0.8632,0.8526,0.8421,0.8316,0.8211,0.8105,0.8000,0.7895,0.7789,0.7684,0.7579,0.7474,0.7368,0.7263,0.7158,0.7053,0.6947,0.6842,0.6737,0.6632,0.6526,0.6421,0.6316,0.6211,0.6105,0.6000,0.5895,0.5789,0.5684,0.5579,0.5474,0.5368,0.5263,0.5158,0.5053,0.4947,0.4842,0.4737,0.4632,0.4526,0.4421,0.4316,0.4211,0.4105,0.4000,0.3895,0.3789,0.3684,0.3579,0.3474,0.3368,0.1632,0.1579,0.1526,0.1474,0.1421,0.1368,0.1316,0.1263,0.1211,0.1158,0.1105,0.1053,0.1000,0.0947,0.0895,0.0842,0.0789,0.0737,0.0684,0.0632,0.0579,0.0526,0.0474,0.0421,0.0368,0.0316,0.0263,0.0211,0.0158,0.0105,0.0053,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+	
+	configureTemplateImage();
+	configureLocationsImage();
+	loadTemplate();
+	loadLocations();
+	
+	function changeView(theView)
+	{
+		switch(theView)
+		{
+			case 'sagittal':
+				view=0;
+				break;
+			case 'coronal':
+				view=1;
+				break;
+			case 'axial':
+				view=2;
+				break;
+		}
+		configureTemplateImage();
+		configureLocationsImage();
+		drawImages();
+	}
+	function changeSlice(val)
+	{
+		slice=val;
+		drawImages();
+	}
+	
+	function configureTemplateImage()
+	{
+		// init query image
+		switch(view)
+		{	case 0:	tmpl_W=tmpl_PA; tmpl_H=tmpl_IS; break; // sagital
+			case 1:	tmpl_W=tmpl_LR; tmpl_H=tmpl_IS; break; // coronal
+			case 2:	tmpl_W=tmpl_LR; tmpl_H=tmpl_PA; break; // axial
+		}
+		tmpl_offcn.width=tmpl_W;
+		tmpl_offcn.height=tmpl_H;
+		tmpl_px=tmpl_offtx.getImageData(0,0,tmpl_offcn.width,tmpl_offcn.height);
+	}
+	function configureLocationsImage()
+	{
+		// init query image
+		switch(view)
+		{	case 0:	W=PA; H=IS; break; // sagital
+			case 1:	W=LR; H=IS; break; // coronal
+			case 2:	W=LR; H=PA; break; // axial
+		}
+		offcn.width=W;
+		offcn.height=H;
+		px=offtx.getImageData(0,0,offcn.width,offcn.height);
+		ctx.canvas.height=ctx.canvas.width*H/W;
+	}
+	function drawImages()
+	{
+		ctx.clearRect(0,0,ctx.canvas.width,canvas.height);
+		
+		// draw template
+		if(template)
+		{
+			drawTemplateImage();
+			ctx.globalAlpha = 0.8;
+			ctx.globalCompositeOperation = "lighter";
+		}
+		
+		// draw locations
+		drawLocationsImage();
+		
+		// draw slice MNI coordinate
+		ctx.globalCompositeOperation = "source-over";
+		ctx.font = "14px sans-serif";
+		ctx.textAlign = "end";
+		ctx.textBaseline = "top";
+		ctx.fillStyle="#fff";
+		switch(view)
+		{
+			case 0: c="X";y=Math.round(tmpl_LR*slice/100)-88; break;
+			case 1: c="Y";y=Math.round(tmpl_PA*slice/100)-124; break;
+			case 2:	c="Z";y=Math.round(tmpl_IS*slice/100)-70; break;
+		}
+		ctx.fillText(c+": "+y,ctx.canvas.width,1);
+
+		if(flagLocationsLoaded==0)
+		{
+			ctx.textAlign = "start";
+			ctx.fillText("Loading: "+nLocationsLoaded+"%",1,1);
+		}
+	}
+	function drawTemplateImage()
+	{
+		if(template==0)
+			return;
+		ys=Math.floor(tmpl_LR*slice/100);
+		yc=Math.floor(tmpl_PA*slice/100);
+		ya=Math.floor(tmpl_IS*slice/100);
+		for(y=0;y<tmpl_H;y++)
+		for(x=0;x<tmpl_W;x++)
+		{
+			switch(view)
+			{	case 0:i=y*tmpl_PA*tmpl_LR+x*tmpl_LR+ys; break;
+				case 1:i=y*tmpl_PA*tmpl_LR+yc*tmpl_LR+x; break;
+				case 2:i=ya*tmpl_PA*tmpl_LR+y*tmpl_LR+x; break;
+			}
+			val=template[i];
+			i=((tmpl_H-y-1)*tmpl_offcn.width+x)*4;
+			tmpl_px.data[ i ]  =val;
+			tmpl_px.data[ i+1 ]=val;
+			tmpl_px.data[ i+2 ]=val;
+			tmpl_px.data[ i+3 ]=255;
+		}
+		tmpl_offtx.putImageData(tmpl_px, 0, 0);
+		ctx.drawImage(tmpl_offcn,0,0,ctx.canvas.width,canvas.width*tmpl_H/tmpl_W);
+	}
+	function drawLocationsImage()
+	{
+		ys=Math.floor(LR*slice/100);
+		yc=Math.floor(PA*slice/100);
+		ya=Math.floor(IS*slice/100);
+		for(y=0;y<H;y++)
+		for(x=0;x<W;x++)
+		{
+			switch(view)
+			{	case 0:i=y*PA*LR+x*LR+ys; break;
+				case 1:i=y*PA*LR+yc*LR+x; break;
+				case 2:i=ya*PA*LR+y*LR+x; break;
+			}
+			val=colourmap(0.5+0.5*(sum[i]/max));
+			i =((H-y-1)*offcn.width+x)*4;
+			px.data[ i ]  =val[0];
+			px.data[ i+1 ]=val[1];
+			px.data[ i+2 ]=val[2];
+			px.data[ i+3 ]=255;
+		}
+		offtx.putImageData(px, 0, 0);
+		ctx.drawImage(offcn,0,0,ctx.canvas.width,canvas.width*H/W);
+	}
+	function loadTemplate()
+	{
+		var oReq = new XMLHttpRequest();
+		oReq.open("GET", "<!--ROOTDIR-->data/colin180.img", true);
+		oReq.responseType = "arraybuffer";
+		oReq.onload = function(oEvent)
+		{
+			template=new Uint8Array(this.response);
+			console.log("template finished loading");
+			drawImages();
+		};
+		oReq.send();
+		console.log("template started loading");
+	}	
+	function loadLocations()
+	{
+		// init query volume
+		for(i=0;i<LR*PA*IS;i++)
+			sum[i]=0;
+
+		// configure roi
+		var	R=3;
+		var	roi=new Array();
+		var	nroi=0;
+		for(x=-R;x<=R;x++)
+		for(y=-R;y<=R;y++)
+		for(z=-R;z<=R;z++)
+		if(x*x+y*y+z*z<=R*R)
+		{
+			roi[nroi*3+0]=x;
+			roi[nroi*3+1]=y;
+			roi[nroi*3+2]=z;
+			nroi++;
+		}
+
+		var refs=[],nrefs=0;
+		nLocationsLoaded=0;
+		flagLocationsLoaded=0;
+		$(".paper-stuff [href]").each(function(){var arr=$(this).attr('href').split("/");refs.push(arr[arr.length-1])});
+		console.log("Locations started loading");
+		for(ii=0;ii<refs.length;ii++)
+		{
+			$.ajax({
+				type: "GET",
+				url: "<!--ROOTDIR-->php/brainspell.php",
+				data: {
+					action:"get_article",
+					command:"experiments",
+					argument:refs[ii]
+				}
+			}).done(function( msg ){
+				var xml=$.parseXML(msg);
+				exp=$.parseJSON($(xml).find("experiments").text());
+
+				// update the sum[] volume
+				var coord=new Array();
+				for(i=0;i<exp.length;i++)
+				{
+					if(exp[i].locations.length==0)
+						continue;
+						
+					for(j=0;j<exp[i].locations.length;j++)
+					{
+						coord=exp[i].locations[j].split(",");
+						coord[0]=Math.floor(coord[0]/4+22);
+						coord[1]=Math.floor(coord[1]/4+31);
+						coord[2]=Math.floor(coord[2]/4+17.5);
+						for(k=0;k<nroi;k++)
+						{
+							x=Math.floor(roi[k*3+0]+coord[0]);
+							y=Math.floor(roi[k*3+1]+coord[1]);
+							z=Math.floor(roi[k*3+2]+coord[2]);
+							if(x>=0&&x<LR && y>=0&&y<PA && z>=0&&z<IS)
+							{
+								sum[z*PA*LR+y*LR+x]+=1;
+								if(sum[z*PA*LR+y*LR+x]>max)
+									max=sum[z*PA*LR+y*LR+x];
+							}
+						}
+					}
+				}
+				
+				// refresh the image
+				drawImages();
+
+				// display progress
+				nrefs++;
+				if(nrefs==refs.length)
+					flagLocationsLoaded=1;
+				else
+					nLocationsLoaded=Math.round(100*nrefs/refs.length);
+			});
+		}
+	}
+	function colourmap(val)
+	{
+		n=191;
+		i=Math.floor(val*(n-1));
+		var c=[];
+	
+		c[0]=255*(negpos[    i]+(val-i/(n-1))*(negpos[    i+1]-negpos[    i]));
+		c[1]=255*(negpos[  n+i]+(val-i/(n-1))*(negpos[  n+i+1]-negpos[  n+i]));
+		c[2]=255*(negpos[2*n+i]+(val-i/(n-1))*(negpos[2*n+i+1]-negpos[2*n+i]));
+		
+		return c;
+	}
+</script>
+

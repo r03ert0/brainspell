@@ -1,0 +1,91 @@
+<html manifest="/cache.appcache">
+<!--[if IE]><![endif]-->
+<!--[if lt IE 7 ]> <html class="msie6" lang="en"> <![endif]-->
+<!--[if IE 7 ]>    <html class="msie7" lang="en"> <![endif]-->
+<!--[if IE 8 ]>    <html class="msie8" lang="en"> <![endif]-->
+<!--[if IE 9 ]>    <html class="msie9" lang="en"> <![endif]-->
+<!--[if (gt IE 9)|!(IE)]><!--><html lang="en"><!--<![endif]-->
+<head>
+    <meta charset="utf-8">
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><!-- Always force latest IE rendering engine (even in intranet) & Chrome Frame. -->
+    <title>brainspell</title>
+    <link rel="shortcut icon" type="image/x-icon" href="<!--ROOTDIR-->img/favicon.ico">
+    <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
+    <script type="text/javascript">
+        // Is JS enabled? Is it a touch device?
+        var init = function(){
+            var htmlTag = document.getElementsByTagName('html')[0];
+            htmlTag.className = (htmlTag.className + ' ' || '') + 'hasJS';
+            if ('ontouchstart' in document.documentElement)
+                htmlTag.className = (htmlTag.className + ' ' || '') + 'isTouch';
+        }();
+    </script>
+    <link rel="stylesheet" type="text/css" href="<!--ROOTDIR-->css/base.css">
+    <script language="JavaScript" type="text/javascript" src="<!--ROOTDIR-->js/jquery-1.10.2.min.js"></script>
+</head>
+
+<body>
+
+<div class="wrap">
+    <div id="header">
+        <div class="content">
+            <table style="width:100%">
+            <tr>
+                <td>
+                    <a href="<!--ROOTDIR-->" class="ninja fl">
+                        <h1><img src="<!--ROOTDIR-->img/brainspell.svg" alt="brainSpell"/></h1>
+                    </a>
+                </td>
+                <td>
+                    <ul class="fr">
+                        <li class="login">
+                        </li>
+                        <li><a href="<!--ROOTDIR-->news" class="ninja">NEWS</a></li>
+                        <li><a href="<!--ROOTDIR-->about" class="ninja">ABOUT</a></li>
+                        <li><a href="<!--ROOTDIR-->download" class="ninja">DOWNLOAD</a></li>
+                        <li><a href="<!--ROOTDIR-->feed.xml" class="ninja"><img src="<!--ROOTDIR-->img/feed-icon.svg" width="14px" height="14px" style="margin-left:4px;vertical-align:middle"/></a></li>
+                    </ul>
+                </td>
+            </tr>
+            </table>
+        </div><!-- content clearfix-->
+        <script>
+			var username="<!--Username-->";
+			var loggedin="<!--LoggedIn-->";
+			if(loggedin)
+				$('.login').html('<a href="<!--ROOTDIR-->php/update.php" style="display:inline">'+username+'</a> (<a href="<!--ROOTDIR-->php/logout.php" style="display:inline">LOG OUT</a>)');
+			else
+				$('.login').html('<a href="<!--ROOTDIR-->php/login.php">LOG IN</a>');
+		</script>
+    </div><!-- /header -->
+
+	<div class="core content">
+	<!--Core-->
+	</div>
+</div>
+
+<div class="footer">
+<div style="padding:10px 10px">
+<table>
+<tr>
+<td>
+<a  style="display:inline" rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/deed.en_US">
+<img align="left" alt="Creative Commons License" style="border:1px solid white" src="http://i.creativecommons.org/l/by-sa/3.0/88x31.png" />
+</a>
+</td>
+<td style="vertical-align:top;font-size:0.8rem;color:#fff;font-family:sans-serif">
+<span  style="display:inline" xmlns:dct="http://purl.org/dc/terms/" property="dct:title">brainspell</span> by
+<a style="display:inline" xmlns:cc="http://creativecommons.org/ns#" href="brainspell.org" property="cc:attributionName" rel="cc:attributionURL">Roberto Toro</a>
+is licensed under a <a style="display:inline" rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/deed.en_US">Creative Commons Attribution-ShareAlike 3.0 Unported License</a>.
+</td>
+</tr>
+</table>
+</div>
+</div>
+
+</body>
+
+</html>

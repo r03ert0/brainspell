@@ -1,0 +1,495 @@
+<div class="infos">
+		<h2 class="paper-title"><!--Title--></h2>
+		<strong><!--Reference--></strong>
+		<br/>
+		<a href="http://www.ncbi.nlm.nih.gov/pubmed/<!--PMID-->" target="_blank">[PubMed]</a>
+		<a href="http://neurosynth.org/studies/<!--NeuroSynthID-->" target="_blank">[Neurosynth]</a>
+		<a href="http://dx.doi.org/<!--DOI-->" target="_blank">[Full Text]</a>
+</div><!-- infos clearfix-->
+
+<div class="abstract section">
+<!--Abstract-->
+</div>
+
+<div class="infos section">
+	<b style="font-family:sans-serif">MeSH descriptors</b>
+	<ul class="tag-list">
+	</ul>
+</div>
+
+<!-- Experiments -->
+<div class="experiments">
+</div>
+
+<script type="text/javascript">
+	
+	var	meta;
+	var	exp;
+	var	tasks;
+	var	cognitive;
+	var	behavioural;
+	var	concept;
+	var username="<!--Username-->";
+	var loggedin="<!--LoggedIn-->";
+	var	rootdir="<!--ROOTDIR-->";
+	
+	init();
+
+	function init()
+	{
+		// Is JS enabled? Is it a touch device?
+		var htmlTag = document.getElementsByTagName('html')[0];
+		htmlTag.className = (htmlTag.className + ' ' || '') + 'hasJS';
+		if ('ontouchstart' in document.documentElement)
+			htmlTag.className = (htmlTag.className + ' ' || '') + 'isTouch';
+		
+		//configureDOI();
+		configureMetadata();
+		configureExperiments();
+		$.get(rootdir+"templates/cogatlas-tasks.html",function(data){tasks=data;console.log("Tasks loaded");});
+		$.get(rootdir+"templates/cogatlas-cognitive.html",function(data){cognitive=data;console.log("Cognitive domains loaded");});
+		$.get(rootdir+"templates/brainmap-behavioural.html",function(data){behavioural=data;console.log("Behavioural domains loaded");});
+		$.get(rootdir+"templates/concept.html",function(data){concept=data;console.log("Concept loaded");});
+	}
+	
+	/*
+	---------------------------------------------------------
+			  Configuration of the article page
+	---------------------------------------------------------
+	*/
+	/*
+	function configureDOI()
+	{
+		console.log("Configuring DOI link for full text: http://www.pmid2doi.org/rest/json/doi/<!--PMID-->");
+
+		$.ajax({
+			type: "GET",
+			url: "http://www.pmid2doi.org/rest/json/doi/<!--PMID-->",
+			async: false,
+			error: function(jqXHR, textStatus, errorThrown){ console.log("DOI ERROR: ",textStatus,errorThrown,jqXHR);},
+			success:function(data, textStatus, jqXHR){console.log("DOI SUCCESS: "+textStatus);}
+		}).done(function( msg )
+		{
+			console.log("doi",msg);
+			var json=$.parseJSON(msg);
+			var doi=json["doi"];
+			$("a.DOI").href("http://dx.doi.org/"+doi);
+		});
+	}
+	*/
+	function configureMetadata()
+	{
+		$.ajax({
+			type: "GET",
+			url: rootdir+"php/brainspell.php",
+			data: {
+				action:"get_article",
+				command:"metadata",
+				argument:"<!--PMID-->"
+			},
+			async: false,
+			error: function(jqXHR, textStatus, errorThrown){ console.log("ERROR: "+textStatus);},
+			success:function(data, textStatus, jqXHR){console.log("SUCCESS: "+textStatus);}
+		}).done(function( msg )
+		{
+			var xml=$.parseXML(msg);
+			var	metadata="";
+			meta=$.parseJSON($(xml).find("metadata").text());
+			for(i=0;i<meta.meshHeadings.length;i++)
+			{
+				meta.meshHeadings[i].ontology="mesh";
+
+				meta.meshHeadings[i].agree=(meta.meshHeadings[i].agree)?parseInt(meta.meshHeadings[i].agree):0;
+				meta.meshHeadings[i].disagree=(meta.meshHeadings[i].disagree)?parseInt(meta.meshHeadings[i].disagree):0;
+				var	rtag=meta.meshHeadings[i];
+				var tag=$("<li>",{class:"tag"});
+				if(meta.meshHeadings[i].majorTopic=="Y")
+					tag.html('<b>'+rtag.name+'</b>');
+				else
+					tag.html(rtag.name);
+				updateTagColor(tag,rtag);
+				tag.click({rtag:rtag},function(e){box(-1,e.data.rtag)});
+				$(".tag-list").append(tag);
+			}
+		});
+	}
+	function configureExperiments()
+	{
+		console.log("Get article experiments");
+		$.ajax({
+			type: "GET",
+			url: rootdir+"php/brainspell.php",
+			data: {
+				action:"get_article",
+				command:"experiments",
+				argument:"<!--PMID-->"
+			},
+			async: false,
+			error: function(jqXHR, textStatus, errorThrown){ console.log("ERROR: "+textStatus);},
+			success:function(data, textStatus, jqXHR){console.log("SUCCESS: "+textStatus);}
+		}).done(function( msg ){
+			var xml=$.parseXML(msg);
+			exp=$.parseJSON($(xml).find("experiments").text());
+			for(i=0;i<exp.length;i++)
+			{
+				if(exp[i].locations.length==0)
+
+					continue;
+				$(".experiments").append($('<div class="experiment" id="'+i+'">').load(rootdir+"templates/experiment.html",addExperiment(i)));
+			}
+		});
+	}
+	function addExperiment(iExp)
+	{
+		return function(responseText, textStatus, XMLHttpRequest){
+			var title=(exp[iExp].title)?exp[iExp].title:"(Empty)";
+			var caption=(exp[iExp].caption)?exp[iExp].caption:"(Empty)";
+			
+			// Experiment legend
+			$(".experiment#"+iExp+" .experiment-title").append(title);
+			$(".experiment#"+iExp+" .experiment-caption").append(caption);
+
+			// Locations
+			var locations="";
+			for(j=0;j<exp[iExp].locations.length;j++)
+			{
+				var coords=exp[iExp].locations[j].split(",");
+				locations+="    <tr><td>"+coords[0]+"</td><td>"+coords[1]+"</td><td>"+coords[2]+"</td></tr>\n";
+			}
+			$(".experiment#"+iExp+" .experiment-locations .xyztable table").append(locations);
+			
+			// Tags
+			$(".experiment#"+iExp+" .ontologies").append(addOntology(iExp,"tasks"));
+			$(".experiment#"+iExp+" .ontologies").append(addOntology(iExp,"cognitive"));
+			$(".experiment#"+iExp+" .ontologies").append(addOntology(iExp,"behavioural"));
+			if(exp[iExp].tags)
+				for(j=0;j<exp[iExp].tags.length;j++)
+				{
+					var rtag=exp[iExp].tags[j];
+					rtag.agree=(rtag.agree)?parseInt(rtag.agree):0;
+					rtag.disagree=(rtag.disagree)?parseInt(rtag.disagree):0;
+					addTag(iExp,rtag);
+				}
+			
+			// Adjust locations table height
+			var padd,legendheight,xyzhdrheight,ontheight;
+			padd=parseInt($('.experiment#'+iExp).css('padding-top'));
+			legendheight=$('.experiment#'+iExp+' .experiment-title').innerHeight();
+			legendheight+=$('.experiment#'+iExp+' .experiment-caption').innerHeight();
+			xyzhdrheight=$('.experiment#'+iExp+' .xyzheader').innerHeight();
+			ontheight=$('.experiment#'+iExp+' .ontologies').innerHeight();
+			$('.experiment#'+iExp+' .xyztable').css({"max-height":Math.max(250-legendheight-padd,ontheight-xyzhdrheight)+"px"});
+		}
+	}
+	function addOntology(iExp,ontology)
+	{
+		var	str="";
+		var ct="",cts=new Array({ontology:"tasks",title:"Cognitive Atlas Tasks"},{ontology:"cognitive",title:"Cognitive Atlas Cognitive Domains"},{ontology:"behavioural",title:"BrainMap Behavioural Domains"});
+		var	cl;
+		
+		for(i=0;i<cts.length;i++)
+			if(cts[i].ontology==ontology)
+				ct=cts[i];
+
+		str+='<div class="ontology" id="'+ontology+'" style="padding-left:5px;padding-bottom:5px">\n';
+		str+='<div class="ontology-name"><span class="tag" style="top:-0.2em"><a onclick="light('+iExp+',\''+ontology+'\',\'+\');">+</a></span><b style="padding-left:4px;font-family:sans-serif">'+ct.title+'</b></div>\n';
+		str+='<ul class="ontology-tags">\n';
+		str+='</ul>\n';
+		str+='</div>\n';
+
+		return str;
+	}
+	function addTag(iExp,rtag)
+	{
+		var tag=$("<li>",{class:'tag'});
+		tag.html(rtag.name);
+		tag.click({rtag:rtag},function(e){box(iExp,e.data.rtag)});
+		updateTagColor(tag,rtag);
+		$("div.experiment#"+iExp+" div.ontology#"+rtag.ontology+" ul").append(tag);
+		return tag;
+	}
+	function updateTagColor(tag,rtag)
+	{
+		if(tag.hasClass('green')) tag.removeClass('green');
+		if(tag.hasClass('orange')) tag.removeClass('orange');
+		if(tag.hasClass('red')) tag.removeClass('red');
+
+		if(rtag.agree==0&&rtag.disagree==0)
+			return;
+
+		if(rtag.agree-rtag.disagree>0)
+			tag.addClass('green');
+		else
+		if(rtag.agree-rtag.disagree<0)
+			tag.addClass('red');
+		else
+			tag.addClass('orange');
+	}
+	function findTag(tags,name,ontology)
+	{
+		var	j,found=0;
+		var	ob;
+		
+		if(tags)
+		for(j=0;j<tags.length;j++)
+		{
+			ob=tags[j];
+			if((ob.name==name)&&(ob.ontology==ontology))
+			{
+				found=1;
+				break;
+			}
+		}
+		if(found==0)
+			return 0;
+		return ob;
+	}
+	function findPreviousVoteByUser(iExp,rtag)
+	{
+		var found=0,vote=0;
+
+		if(loggedin)
+		{
+			result=$.ajax({
+				type: "GET",
+				url: rootdir+"php/brainspell.php",
+				data: {
+					action:"get_log",
+					command:"user-action",
+					UserName:username,
+					TagName:rtag.name,
+					TagOntology:rtag.ontology,
+					Experiment:iExp,
+					PMID:"<!--PMID-->"
+				},
+				async: false,
+				error: function(jqXHR, textStatus, errorThrown){ console.log("ERROR: "+textStatus);},
+				success:function(data, textStatus, jqXHR){console.log("SUCCESS: "+textStatus);}
+			}).done(function( msg ){
+				var xml=$.parseXML(msg);
+				var	tagVote=0,tmp=$(xml).find("TagVote").text();
+				if(tmp)
+					tagVote=parseInt($.parseJSON(tmp));
+				if(tagVote)
+					vote=tagVote;
+			});
+		}
+		return vote;
+	}
+
+	/*
+	---------------------------------------------------------
+			  Selection of ontologies and tags
+	---------------------------------------------------------
+	*/
+	function light(iExp,ontology)
+	{
+		if(ontology=="tasks")
+			$('body').append(tasks);
+		else if(ontology=="cognitive")
+			$('body').append(cognitive);
+		else if(ontology=="behavioural")
+			$('body').append(behavioural);
+		$('#light').show();
+		$('#fade').show();
+		$('#light #iExp').html(parseInt(iExp));
+		$('#light #ontology').html(ontology);
+		
+		configureLightbox();
+		lightResize();
+	}
+	function lightClose(isOk)
+	{
+		$('#light').css('display','none');
+		$('#fade').css('display','none');
+		$('.lightbox').remove();
+	}
+	function lightResize()
+	{
+		if($('#light'))
+		{
+			var	hall,htitle,padd;
+			hall=$('#light .allThing').height();
+			htitle=$('#light .titleThing').height();
+			padd=parseInt($('#light .allThing').css('padding-top'));
+			val=2*padd;
+			$('#light .myThing').css('height',(hall-htitle-val)+'px');
+		}
+	}
+	function box(iExp,rtag)
+	{
+		var	obj=0;
+		
+		if(iExp>-1)
+			obj=findTag(exp[iExp].tags,rtag.name,rtag.ontology);
+		else
+			obj=findTag(meta.meshHeadings,rtag.name,rtag.ontology);
+		if(obj)
+			rtag=obj;
+		$('body').append(concept);
+		$('#box').show();
+		$('#boxfade').show();
+		$('#box #iExp').html(iExp);
+		$('#box #ontology').html(rtag.ontology);
+		
+		configureBox(rtag);
+		boxResize();
+	}
+	function boxClose(vote)
+	{
+		var	iExp=parseInt($('#box div#iExp').text());
+		var	agree=parseInt($('#box span.agree').text());
+		var disagree=parseInt($('#box span.disagree').text());
+		var	name=$('#box h2.name').text();
+		var ontology=$('#box #ontology').text();
+		var	tag;
+		
+		if(vote!=0)
+		{
+			if(iExp>-1)
+			{
+				// check whether the tag is already present
+				if(!(exp[iExp].tags))
+					exp[iExp].tags=new Array;
+				obj=findTag(exp[iExp].tags,name,ontology);
+				if(obj)
+				{
+					rtag=obj;
+					agree=rtag.agree;
+					disagree=rtag.disagree;
+				}
+				else
+				{
+					var	rtag=new Object({name:name,ontology:ontology,agree:0,disagree:0,voters:new Array});
+					exp[iExp].tags.push(rtag);
+					addTag(iExp,rtag);
+				}
+			}
+			else
+				rtag=findTag(meta.meshHeadings,name,ontology);
+
+			// update tag vote
+			var prevVote=findPreviousVoteByUser(iExp,rtag);
+
+			logVote(iExp,rtag,vote);
+
+			if(prevVote!=0)
+			{
+				if(vote!=prevVote)
+				{
+					rtag.agree+=vote;
+					rtag.disagree-=vote;
+				}
+			}
+			else
+			{
+				if(vote>0)
+					rtag.agree=agree+1;
+				else
+					rtag.disagree=disagree+1;
+			}
+				
+			// update tag display and agree/disagree stats
+			if(iExp>-1)
+			{
+				tag=$("div.experiment#"+iExp+" div.ontology#"+rtag.ontology+" li").filter(function(){return $(this).text()==rtag.name});
+				updateTagColor(tag,rtag);
+				tag=$(".classList span.tag").filter(function(){return $(this).text()==rtag.name});
+				updateTagColor(tag,rtag);
+				saveExperiments();
+			}
+			else
+			{
+				tag=$(".tag-list li").filter(function(){return $(this).text()==rtag.name});
+				updateTagColor(tag,rtag);
+				saveMetadata();
+			}
+		}
+		$('#box').css('display','none');
+		$('#boxfade').css('display','none');
+		$('.box').remove();
+	}
+	function boxResize()
+	{
+		if($('#box'))
+		{
+			var	hall,htitle,padd;
+			hall=$('#box .allThing').height();
+			htitle=$('#box .titleThing').height();
+			hbuttons=$('#box .buttonsThing').height();
+			padd=parseInt($('#box .allThing').css('padding-top'));
+			val=2*padd;
+			$('#box .myThing').css('height',(hall-htitle-hbuttons-val)+'px');
+		}
+	}
+	$(window).resize(function() {
+		lightResize();
+	});
+
+	/*
+	---------------------------------------------------------
+							 Save
+	---------------------------------------------------------
+	*/
+	function saveExperiments()
+	{
+		console.log("Getting experiment updates to PMID <!--PMID-->");
+		$.ajax({
+			type: "GET",
+			url: rootdir+"php/brainspell.php",
+			data: {
+				action:"add_article",
+				command:"experiments",
+				PMID:"<!--PMID-->",
+				Experiments:JSON.stringify(exp)
+			},
+			async: true,
+			error: function(jqXHR, textStatus, errorThrown){ alert("ERROR: "+textStatus);},
+			success:function(data, textStatus, jqXHR){console.log("SUCCESS: "+textStatus);}
+		}).done(function( msg ){
+			console.log("MESSAGE: ["+msg+"]");
+		});
+	}
+	function saveMetadata()
+	{
+		console.log("Getting metadata updates to PMID <!--PMID-->");
+		$.ajax({
+			type: "GET",
+			url: rootdir+"php/brainspell.php",
+			data: {
+				action:"add_article",
+				command:"metadata",
+				PMID:"<!--PMID-->",
+				Metadata:JSON.stringify(meta)
+			},
+			async: true,
+			error: function(jqXHR, textStatus, errorThrown){ alert("ERROR: "+textStatus);},
+			success:function(data, textStatus, jqXHR){console.log("SUCCESS: "+textStatus);}
+		}).done(function( msg ){
+			console.log("MESSAGE: ["+msg+"]");
+		});
+	}
+	function logVote(iExp,rtag,vote)
+	{
+		console.log("Log vote of user "+username);
+		$.ajax({
+			type: "GET",
+			url: rootdir+"php/brainspell.php",
+			data: {
+				action:"add_log",
+				command:"user-action",
+				PMID:"<!--PMID-->",
+				UserName:username,
+				TagName:rtag.name,
+				TagOntology:rtag.ontology,
+				TagVote:vote,
+				Experiment:iExp
+			},
+			async: true,
+			error: function(jqXHR, textStatus, errorThrown){ alert("ERROR: "+textStatus);},
+			success:function(data, textStatus, jqXHR){console.log("SUCCESS: "+textStatus);}
+		}).done(function( msg ){
+			console.log("MESSAGE: ["+msg+"]");
+		});
+	}
+</script>
