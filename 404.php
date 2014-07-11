@@ -13,13 +13,13 @@
 	else
 	if($parts[1]=="search")
 	{
-			$parts=explode("=",$parts[2]);
-			$q=urldecode($parts[1]);
-			$getdata = http_build_query(array("query" => $q,'action' => 'search_lucene'));
-			$opts = array('http' =>array('method'=>'POST','header'=>'Content-type: application/x-www-form-urlencoded'));
-			$context  = stream_context_create($opts);
-			$result = file_get_contents('http://brainspell.org/php/brainspell.php?'.$getdata, false, $context);	
-			echo $result;	
+		$parts=explode("=",$parts[2]);
+		$q=urldecode($parts[1]);
+		$getdata = http_build_query(array("query" => $q,'action' => 'search_lucene'));
+		$opts = array('http' =>array('method'=>'POST','header'=>'Content-type: application/x-www-form-urlencoded'));
+		$context  = stream_context_create($opts);
+		$result = file_get_contents('http://'.$_SERVER['HTTP_HOST'].'/php/brainspell.php?'.$getdata, false, $context);	
+		echo $result;	
 	}
 	else
 	if($parts[1]=="about")
@@ -27,14 +27,19 @@
 		about();
 	}
 	else
-	if($parts[1]=="news")
+	if($parts[1]=="blog")
 	{
-		news();
+		blog();
 	}
 	else
 	if($parts[1]=="download")
 	{
 		download();
+	}
+	else
+	if($parts[1]=="user")
+	{
+		user_update($parts[2]);
 	}
 	else
 	{

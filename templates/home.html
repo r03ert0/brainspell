@@ -1,22 +1,24 @@
-<div class="content-section">
+<div class="subsection">
 	<table style="width:100%;margin-left:auto;margin-right:auto">
 	<tr><td>
-		<h3 style="padding-left:4rem;padding-right:4rem;padding-bottom:3rem;line-height:150%;color:grey"><b>Welcome to brainspell!</b> Help us create the first open, human-curated, classification of the neuroimaging literature. You can search for articles to classify or just pick among the randomly selected ones bellow.</h3>
+		<h3 style="padding-left:4rem;padding-right:4rem;padding-bottom:3rem;line-height:150%;color:#555"><b>Welcome to brainspell!</b> Help us create the first open, human-curated, classification of the neuroimaging literature. You can search for articles to classify or just pick among the randomly selected ones bellow.</h3>
 	</td></tr>
 	<tr><td>
-	<form method="get" action="<!--ROOTDIR-->search"">
-		<fieldset class="section" id="home-search">
+</div>
+
+<div class="subsection">
+	<form method="get" action="search">
+		<fieldset id="home-search">
 			<input type="text" id="search" name="query" placeholder="Search articles by title, author, keyword…"/>
-			<button style="border:0;top:5px;width:25px;height:25px;background-color:white">
-				<img src="<!--ROOTDIR-->img/bt_search.svg" alt="Search" width=25px height=25px/>
-			</button>
+			<button style="border:0;top:5px;width:25px;height:25px"><img src="<!--ROOTDIR-->img/search.svg" alt="Search" class="rollMe" width=25px height=25px/></button>
 		</fieldset>
 	</form>
+	<div style="text-align:right">9179 articles indexed</div>
 	</td></tr>
 	</table>
 </div>
 
-<div class="content-section">
+<div class="subsection">
 	<table style="width:100%;margin-left:auto;margin-right:auto;">
 	<tr><td style="padding:0.5rem">
 	<ul class="paper-list">
@@ -26,33 +28,25 @@
 </div>
 
 <script type="text/javascript">
-	init();
-	function init(){
-		console.log("init()");
-		// Is JS enabled? Is it a touch device?
-		var htmlTag = document.getElementsByTagName('html')[0];
-		htmlTag.className = (htmlTag.className + ' ' || '') + 'hasJS';
-		if ('ontouchstart' in document.documentElement)
-			htmlTag.className = (htmlTag.className + ' ' || '') + 'isTouch';
-		
-		getarticle();
-	}
-	function getarticle()
-	{
-		console.log("Get random article");
-		$.ajax({
-			type: "GET",
-			url: "<!--ROOTDIR-->php/brainspell.php",
-			data: {
-				action:"get_article",
-				command:"random",
-				argument:"5",
-			},
-			async: false,
-			error: function(jqXHR, textStatus, errorThrown){ console.log("ERROR: "+textStatus);},
-			success:function(data, textStatus, jqXHR){console.log("SUCCESS: "+textStatus);}
-		}).done(function( msg )
-		{
+init();
+function init(){
+	console.log("[init] init()");
+	// Is JS enabled? Is it a touch device?
+	var htmlTag = document.getElementsByTagName('html')[0];
+	htmlTag.className = (htmlTag.className + ' ' || '') + 'hasJS';
+	if ('ontouchstart' in document.documentElement)
+		htmlTag.className = (htmlTag.className + ' ' || '') + 'isTouch';
+	
+	getarticle();
+}
+function getarticle()
+{
+	console.log("[getarticle] Get random article");
+	$.get("<!--ROOTDIR-->php/brainspell.php",
+		  {	action:"get_article",
+			command:"random",
+			argument:"5"},
+		  function( msg ) {
 			var xml=$.parseXML(msg);
 			$(xml).find("record").each(function(){
 				var newArticle="";
@@ -63,6 +57,6 @@
 				newArticle+="</div></li>\n";
 				$(".paper-list").append(newArticle);
 			});
-		});
-	}
+		  });
+}
 </script>

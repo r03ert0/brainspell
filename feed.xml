@@ -7,6 +7,29 @@
 <atom:link href="http://brainspell.org/feed.xml" rel="self" type="application/rss+xml" />
 
 <item>
+  <title>Brain viewer, more data fields, and discussion section</title>
+  <link>http://brainspell.org/news</link>
+  <guid isPermaLink="false">1</guid>
+  <pubDate>Tue, 31 Dec 2013 14:29:11 GMT</pubDate>
+  <dc:creator>rbrto</dc:creator>
+  <description>
+  	  <![CDATA[
+	  <h1>Brain viewer, more data fields, and discussion section</h1>
+		<p>I have just uploaded a new update of brainspell. There are several new things:</p>
+		<p>1. Now when you search for a term, a simple stereotaxic brain viewer shows the locations corresponging to your search. The first time you use it the viewer may take some time to load the brain anatomy used for reference (<a href="http://www.bic.mni.mcgill.ca/ServicesAtlases/Colin27">Colin27</a>), but afterwards it will be stored locally in your browser's cache and be much faster.</p>
+		<p>2. I added more fields for gathering data about the articles in the database. There's one field for entering the stereotaxic space (either MNI or Talairach), and another one to enter the total number of subjects used in the article (this information is quite hard to get using automatic text-mining alone...). There is also a field bellow each table to flag incorrectly parsed data. This may be a table with repeated coordinates, or displaying numbers which are actually not stereotaxic coordinates.</p>
+		<p>3. Finally, at the end of each paper there is a new Discussion section, where you can better explain your choices, our discuss someone else's tags.</p>
+		<br/>
+		<p>I recently discovered how to make screencasts, and made these 2 youtube videos, one showing the brainspell's GUI (a previous version... I'll have to record a new one), and the other showing the <a href="https://github.com/r03ert0/CoactivationMap.app">Brain Coactivation Map Viewer</a>. If you like brainspell, you may want to check the CoactivationMap.app. It uses all the same data of brainspell (kindly provided by Tal Yarkoni's excellent <a href="http://neurosynth.org">neurosynth</a> web app) to create an interactive coactivation map of the human brain. As you browse through the different brain regions, you will see the corresponding coactivation networks, and a list of the <a href="https://en.wikipedia.org/wiki/Medical_Subject_Headings">MeSH</a> tags whose associated network most closely match the current one. Clicking on those tags will launch a query in brainspell showing the corresponding articles. Here are the links. Hope you like them!:</p>
+		<br/>
+		<p>Quick intro to brainspell: <a href="http://www.youtube.com/watch?v=ZZTI6ArG4AU">http://www.youtube.com/watch?v=ZZTI6ArG4AU</a></p>
+		<p>Quick intro to the CoactivationMap.app: <a href="http://www.youtube.com/watch?v=jtZMkvyf8iQ">http://www.youtube.com/watch?v=jtZMkvyf8iQ</a></p>
+	  ]]>
+  </description>
+  <category><![CDATA[brainspell]]></category>
+</item>
+
+<item>
   <title>Full text</title>
   <link>http://brainspell.org/news</link>
   <guid isPermaLink="false">1</guid>
