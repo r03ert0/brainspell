@@ -1,0 +1,98 @@
+<div class="subsection">
+	<table style="width:100%;margin-left:auto;margin-right:auto">
+	<tr><td>
+	<form method="get" action="search">
+		<fieldset id="home-search">
+			<input type="text" id="search" name="query" placeholder="Search articles by title, author, keyword…" value="<!--%SearchString%-->"/>
+			<button style="border:0;top:5px;width:25px;height:25px;background-color:white">
+				<img src="<!--ROOTDIR-->img/search.svg" alt="Search" width=25px height=25px/>
+			</button>
+		</fieldset>
+	</form>
+	<div style="text-align:right">9179 articles indexed</div>
+	</td></tr>
+	</table>
+</div>
+
+<div class="subsection">
+
+	<table style="width:100%;margin-left:auto;margin-right:auto">
+	<tr>
+		<td>
+		<div id="mylog">
+		</div>
+		<!-- StereotaxicViewer -->
+		<span style="display:inline-block">
+			<table style="border:1px solid lightGrey;padding:5px">
+				<tr>
+				<td>
+					<canvas id="brainCanvas" width=320 height=384 style="background-color:black"></canvas>
+				</td>
+				</tr>
+				<tr>
+				<td>
+					<button style="width:40px;height:28px" onclick="javascript:changeView('sagittal')">Sag</button>
+					<button style="width:40px;height:28px" onclick="javascript:changeView('coronal')">Cor</button>
+					<button style="width:40px;height:28px" onclick="javascript:changeView('axial')">Axi</button>
+					<a style="display:none;float:right" class="download_nii">Download</a>
+					<input type="range" name="slice" oninput="javascript:changeSlice(this.value)"style="width:100%;vertical-align:middle"/>
+				</td>
+				</tr>
+			</table>
+		</span>
+		<!-- /StereotaxicViewer -->
+		
+		&nbsp;
+		
+		<!-- MeshViewer -->
+		<span style="display:inline-block">
+			<table style="height:200px;border:1px solid lightGrey;padding:5px">
+				<tr>
+				<td>
+					<div style="width:384;height:384" id="meshCanvas"></div>
+				</td>
+				</tr>
+				<tr>
+				<td>
+					<button style="width:80px;height:28px" onclick="javascript:changeView('sagittal')">Screenshot</button>
+					<button style="width:80px;height:28px" onclick="javascript:fullscreen()">Fullscreen</button>
+					<input type="range" name="level" oninput="javascript:changeLevel(this.value)"style="width:100%;vertical-align:middle"/>
+				</td>
+				</tr>
+			</table>
+		</span>
+		<!-- /MeshViewer -->
+		</td>
+	</tr>
+	<tr><td>
+		<br/>
+		<h2><b><!--%SearchResultsNumber%--> article<!--%SearchResultsMultiplicity%--> corresponding to the search "<!--%SearchString%-->"</b></h2>
+		<br/>
+		<!--%SearchResults%-->
+	</td></tr>
+	</table>
+</div>
+
+
+<!-- Translucent Viewer -->
+<script src="js/three.min.js"></script>
+<script src="js/Detector.js"></script>
+<script src="js/threex/THREEx.screenshot.js"></script>
+<script src="js/threex/THREEx.FullScreen.js"></script>
+<script src="js/threex/THREEx.WindowResize.js"></script>
+<script src='js/SubdivisionModifier.js'></script>
+<script src="js/PLYLoader.js"></script>
+<script src="js/TrackballControls.js"></script>
+<script src="js/jquery-1.10.2.min.js"></script>
+
+<!-- BrainSpell Search and Search Results-->
+<script src="js/brainspell-search.js"></script>
+<script>
+	// BrainSpell search and search results page initialisation
+	setSearchString("<!--%SearchString%-->");
+	configureTemplateImage();
+	configureLocationsImage();
+	loadTemplate();
+	initTranslucent();
+	loadLocations();
+</script>
