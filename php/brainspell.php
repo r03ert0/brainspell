@@ -753,6 +753,11 @@ function add_article($query)
 		}
 	}
 }
+function make_seed()
+{
+  list($usec, $sec) = explode(' ', microtime());
+  return (float) $sec + ((float) $usec * 100000);
+}
 function get_article($query)
 {
 	global $dbname;
@@ -765,13 +770,14 @@ function get_article($query)
     {
 		case "random":
 		{
+			srand(make_seed());
 			$result=mysqli_query($connection,"SELECT UniqueID FROM ".$dbname.".Articles");
 			$nrows=mysqli_num_rows($result);
 			echo "<records>";
 			for($i=0;$i<=$arg;$i++)
 			{
 				$irow=rand(1,$nrows);
-				$err=mysqli_data_seek($connection,$result,$irow);
+				$err=mysqli_data_seek($result,$irow);
 				$uniqueID=mysqli_fetch_row($result);
 				$result2=mysqli_query($connection,"SELECT Title,Reference,PMID FROM ".$dbname.".Articles WHERE UniqueID = ".$uniqueID[0]);
 				$record=mysqli_fetch_assoc($result2);
