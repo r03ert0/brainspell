@@ -1,3 +1,4 @@
+$contentWidth:  800px;
 $tagGreen:      #8c8;
 $tagOrange:     #fb8;
 $tagRed:        #e77;
@@ -5,8 +6,7 @@ $tagRed:        #e77;
 $xyzBackground: #fbf9f6;
 $xyzHeader:     #ebe1d3;
 
-//$orange:        #ed8000;
-$orange:        #F86655;
+$orange:        #ed8000;
 //$green:         #889780;
 $green: #000;
 
@@ -72,7 +72,8 @@ h3 {
     font-family:$headingSans;
     font-size:$fontTitle;
     font-weight:400;
-    line-height:1
+    line-height:1;
+    color:$darkGrey;
 }
 h3 span{
     text-transform:none
@@ -94,15 +95,22 @@ table {
 
 /* Reference list */
 .paper-list li{
+    list-style-type:none;
     position:relative;
-    padding:10px 0px 0px 10px
+    padding-bottom:10px;
 }
 .paper-list h3 {
     margin:0
 }
 .info {
     font-size:$fontSubtitle;
+    color:$grey;
     margin:0
+}
+
+/* New article warning */
+#new-article-warning {
+    display:none;
 }
 
 /* Article */
@@ -123,6 +131,7 @@ table {
 }
 .experiment-locations {
   background-color: #fafafa;
+  padding:0px;
 }
 .experiment-locations table{
     width:150px;
@@ -132,6 +141,18 @@ table {
 .experiment-locations table thead th{
     background-color:$xyzHeader
 }
+
+.experiment-locations th,td input[type=image] {
+	width:10px;
+	outline:none;
+}
+.experiment-locations th.coordinate, td.coordinate {
+	width:30px;
+}
+.experiment-locations th.input, td.input {
+	width:14px;
+}
+
 
 /* Ontology modal */
 .light_overlay{
@@ -251,11 +272,12 @@ html{-webkit-font-smoothing:antialiased}
 
 a{
     cursor:pointer;
-    color:$green;
+    color:$darkGrey;
     text-decoration:none
 }
 a:hover,a:focus{
-    text-decoration:underline
+    text-decoration:underline;
+    color:$orange;
 }
 
 /* Style of navigation tab links */
@@ -274,7 +296,7 @@ a.nav:hover{
     overflow:auto;
     padding-bottom: 100px;  /* must be same height as the footer */
 
-    width:850px;
+    max-width:$contentWidth;
     margin:0 auto
 }
 .footer {position: relative;
@@ -286,20 +308,25 @@ a.nav:hover{
 
 /* content section, subsection */
 .section{
-    width:100%;
+    margin-left:0px;
+    margin-right:0px;
     margin-top:50px;
     margin-bottom:50px;
 }
 .subsection{
-    width:100%;
+    margin-left:0px;
+    margin-right:0px;
     margin-top:20px;
     margin-bottom:20px;
 }
-
+.subsection.home{
+    padding-left:3rem;
+    padding-right:3rem;
+}
 /* Header */
 .header {
     position:relative;
-    width:850px;
+    width:$contentWidth;
     margin:0 auto;
     font-family:$headingSans
 }

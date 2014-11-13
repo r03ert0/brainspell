@@ -92,6 +92,7 @@ function checkLogin()
 		{
 			username=$("#username").val();
 			loggedin=1;
+			console.log("[checkLogin] calling update_login");
 			update_login();
 			$("div.login").remove();
 		}
@@ -133,6 +134,7 @@ function register()
 			username=reg_username;
 			loggedin=1;
 			$("div.login").remove();
+			console.log("[register] calling update_login");
 			update_login();
 		}
 		else
@@ -158,6 +160,7 @@ function remind()
 		{
 			username=reg_username;
 			loggedin=1;
+			console.log("[remind] calling update_login");
 			update_login();
 			$("div.login").remove();
 		}

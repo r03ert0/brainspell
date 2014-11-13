@@ -40,8 +40,7 @@
 			</td>
 			<td>
 				<ul class="fr">
-					<li class="login">
-					</li>
+					<li class="login"></li>
 					<li><a href="<!--ROOTDIR-->blog" class="nav">BLOG</a></li>
 					<li><a href="<!--ROOTDIR-->about" class="nav">ABOUT</a></li>
 					<li><a href="<!--ROOTDIR-->download" class="nav">DOWNLOAD</a></li>
@@ -57,6 +56,7 @@
 		var loggedin=<!--LoggedIn-->;
 		var	loginUpdateSubscribers=new Array();
 
+		console.log("[ROOT] calling update_login");
 		update_login();
 
 		function subscribeToLoginUpdates(f)
@@ -71,15 +71,13 @@
 		}
 		function update_login()
 		{
-			for(i=0;i<loginUpdateSubscribers.length;i++)
-				loginUpdateSubscribers[i]();
-
 			if(loggedin)
 				$('.login').html('<a href="<!--ROOTDIR-->user/'+username+'" style="display:inline">'+username+'</a> (<a onclick="logout()" style="display:inline">LOG OUT</a>)');
 			else
 				$('.login').html('<a onclick="login()">LOG IN</a>');
 
 			// call login update subscribers
+			console.log("[update_login] informing login update subscribers");
 			for(i=0;i<loginUpdateSubscribers.length;i++)
 				loginUpdateSubscribers[i]();
 		}
@@ -93,6 +91,7 @@
 			$.get(rootdir+"php/brainspell.php",{"action":"logout"},function(data){console.log("[logout] Logout:",data)});
 			username="";
 			loggedin=0;
+			console.log("[logout] calling update_login");
 			update_login();
 		}
 		</script>

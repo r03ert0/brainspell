@@ -1,11 +1,10 @@
 <?php
 
 $dbhost = "localhost"; // this will ususally be 'localhost', but can sometimes differ
-$dbname = "brainspell"; // the name of the database that you are going to use for this project
 $dbuser = "root"; // the username that you created, or were given, to access your database
 $dbpass = "beo8hkii"; // the password that you created, or were given, to access your database
-mysql_connect($dbhost, $dbuser, $dbpass) or die("MySQL Error 1: " . mysql_error());
-mysql_select_db($dbname) or die("MySQL Error 2: " . mysql_error());
+$dbname = "brainspell"; // the name of the database that you are going to use for this project
+$connection=mysqli_connect($dbhost, $dbuser, $dbpass,$dbname) or die("MySQL Error 1: " . mysql_error());
 
 $rootdir = $_SERVER['DOCUMENT_ROOT'];
 $papers = simplexml_load_file('../data/full_database_revised_updated-20Mar2014.xml');
@@ -174,8 +173,8 @@ for($k=0;$k<count($papers);$k++)
 	/------------------------------*/
 	if($addToMySQL)
 	{
-		$result = mysql_query("SELECT * FROM ".$dbname.".Articles WHERE PMID = '".$pmid."'");
-		if(mysql_num_rows($result)>=1)
+		$result = mysqli_query($connection,"SELECT * FROM ".$dbname.".Articles WHERE PMID = '".$pmid."'");
+		if(mysqli_num_rows($result)>=1)
 		{
 			echo "The article with PMID [".$pmid."] is already in the database\n";
 		}
@@ -185,18 +184,18 @@ for($k=0;$k<count($papers);$k++)
 		
 			// Build query
 			$q="INSERT INTO ".$dbname.".Articles (Title, Authors, Abstract, Reference, PMID, DOI, NeuroSynthID, Experiments, Metadata) VALUES(";
-			$q.= "'".mysql_real_escape_string($title)."'";
-			$q.=",'".mysql_real_escape_string($authors)."'";	//mysql_real_escape_string($article['Authors']);
-			$q.=",'".mysql_real_escape_string($abstract)."'";	//mysql_real_escape_string($article['Abstract']);
-			$q.=",'".mysql_real_escape_string($reference)."'";	//mysql_real_escape_string($article['Reference']);
+			$q.= "'".mysqli_real_escape_string($connection,$title)."'";
+			$q.=",'".mysqli_real_escape_string($connection,$authors)."'";	//mysql_real_escape_string($article['Authors']);
+			$q.=",'".mysqli_real_escape_string($connection,$abstract)."'";	//mysql_real_escape_string($article['Abstract']);
+			$q.=",'".mysqli_real_escape_string($connection,$reference)."'";	//mysql_real_escape_string($article['Reference']);
 			$q.=",'".$pmid."'";	//mysql_real_escape_string($article['PMID']);
 			$q.=",'".$doi."'";	//mysql_real_escape_string($article['PMID']);
 			$q.=",'".$neurosynthid."'";	//mysql_real_escape_string($article['PMID']);
-			$q.=",'".mysql_real_escape_string(json_encode($experiments))."'";	//mysql_real_escape_string($article['Experiments']);
-			$q.=",'".mysql_real_escape_string(json_encode($metadata))."')";	//mysql_real_escape_string($article['Metadata'])."')";
+			$q.=",'".mysqli_real_escape_string($connection,json_encode($experiments))."'";	//mysql_real_escape_string($article['Experiments']);
+			$q.=",'".mysqli_real_escape_string($connection,json_encode($metadata))."')";	//mysql_real_escape_string($article['Metadata'])."')";
 		
 			// Add article to database
-			$result2 = mysql_query($q);
+			$result2 = mysqli_query($connection,$q);
 			if($result2)
 			{
 				echo "SUCCESS";
@@ -206,7 +205,7 @@ for($k=0;$k<count($papers);$k++)
 				echo "ERROR: Unable to process query: ".$q;
 			echo ".\n";
 		}
-		mysql_free_result($result);
+		mysqli_free_result($result);
 	}
 	
 

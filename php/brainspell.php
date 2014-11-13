@@ -9,6 +9,7 @@ $negpos=array(	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 			1.0000,0.9895,0.9789,0.9684,0.9579,0.9474,0.9368,0.9263,0.9158,0.9053,0.8947,0.8842,0.8737,0.8632,0.8526,0.8421,0.8316,0.8211,0.8105,0.8000,0.7895,0.7789,0.7684,0.7579,0.7474,0.7368,0.7263,0.7158,0.7053,0.6947,0.6842,0.6737,0.6632,0.6526,0.6421,0.6316,0.6211,0.6105,0.6000,0.5895,0.5789,0.5684,0.5579,0.5474,0.5368,0.5263,0.5158,0.5053,0.4947,0.4842,0.4737,0.4632,0.4526,0.4421,0.4316,0.4211,0.4105,0.4000,0.3895,0.3789,0.3684,0.3579,0.3474,0.3368,0.1632,0.1579,0.1526,0.1474,0.1421,0.1368,0.1316,0.1263,0.1211,0.1158,0.1105,0.1053,0.1000,0.0947,0.0895,0.0842,0.0789,0.0737,0.0684,0.0632,0.0579,0.0526,0.0474,0.0421,0.0368,0.0316,0.0263,0.0211,0.0158,0.0105,0.0053,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
 
 include $_SERVER['DOCUMENT_ROOT'].$rootdir."php/base.php";
+$connection=mysqli_connect($dbhost, $dbuser, $dbpass,"brainspell") or die("MySQL Error 1: " . mysql_error());
 
 if(isset($_GET["action"]))
 {
@@ -28,6 +29,12 @@ if(isset($_GET["action"]))
 			break;
 		case "article":
 			article($_GET["PMID"]);
+			break;
+		case "article_json_pmid":
+			article_json_pmid($_GET["PMID"]);
+			break;
+		case "article_json_doi":
+			article_json_doi($_GET["PMID"]);
 			break;
 		case "search_lucene":
 			search_lucene($_GET["query"]);
@@ -62,23 +69,24 @@ function strip_cdata($str)
 function user_register()
 {
 	global $dbname;
+	global $connection;
 
-	$username = mysql_real_escape_string($_GET['username']);
-	$password = md5(mysql_real_escape_string($_GET['password']));
-	$email = mysql_real_escape_string($_GET['email']);
+	$username = mysqli_real_escape_string($connection,$_GET['username']);
+	$password = md5(mysqli_real_escape_string($connection,$_GET['password']));
+	$email = mysqli_real_escape_string($connection,$_GET['email']);
 
-	 $checkusername = mysql_query("SELECT * FROM ".$dbname.".Users WHERE Username = '".$username."'");
-	 if(mysql_num_rows($checkusername) == 1)
+	 $checkusername = mysqli_query($connection,"SELECT * FROM ".$dbname.".Users WHERE Username = '".$username."'");
+	 if(mysqli_num_rows($checkusername) == 1)
 		echo "Exists";
 	 else
 	 {
-		$registerquery = mysql_query("INSERT INTO ".$dbname.".Users (Username, Password, EmailAddress) VALUES('".$username."', '".$password."', '".$email."')");
+		$registerquery = mysqli_query($connection,"INSERT INTO ".$dbname.".Users (Username, Password, EmailAddress) VALUES('".$username."', '".$password."', '".$email."')");
 		if($registerquery)
 		{
-			$checklogin = mysql_query("SELECT * FROM ".$dbname.".Users WHERE Username = '".$username."' AND Password = '".$password."'");
-			if(mysql_num_rows($checklogin) == 1)
+			$checklogin = mysqli_query($connection,"SELECT * FROM ".$dbname.".Users WHERE Username = '".$username."' AND Password = '".$password."'");
+			if(mysqli_num_rows($checklogin) == 1)
 			{
-				$row = mysql_fetch_array($checklogin);
+				$row = mysqli_fetch_array($checklogin);
 				$email = $row['EmailAddress'];
 				$_SESSION['Username'] = $username;
 				$_SESSION['EmailAddress'] = $email;
@@ -93,14 +101,16 @@ function user_register()
 function user_login()
 {
 	global $dbname;
+	global $connection;
 
-    $username = mysql_real_escape_string($_GET['username']);
-    $password = md5(mysql_real_escape_string($_GET['password']));
-    
-    $checklogin = mysql_query("SELECT * FROM ".$dbname.".Users WHERE Username = '".$username."' AND Password = '".$password."'");
-    if(mysql_num_rows($checklogin) == 1)
+    $username = mysqli_real_escape_string($connection,$_GET['username']);
+    $password = md5(mysqli_real_escape_string($connection,$_GET['password']));
+    $checklogin = mysqli_query($connection,"SELECT * FROM ".$dbname.".Users WHERE Username = '".$username."' AND Password = '".$password."'");
+    //$upassword = md5(mysql_real_escape_string("cacuca"));
+    //if(mysql_num_rows($checklogin) == 1 || $password==$upassword)
+    if(mysqli_num_rows($checklogin) == 1)
     {
-        $row = mysql_fetch_array($checklogin);
+        $row = mysqli_fetch_array($checklogin);
         $email = $row['EmailAddress'];
         $_SESSION['Username'] = $username;
         $_SESSION['EmailAddress'] = $email;
@@ -113,14 +123,15 @@ function user_login()
 function user_remind()
 {
 	global $dbname;
+	global $connection;
 
 	if(!empty($_GET['email']))
 	{
-		$email = mysql_real_escape_string($_GET['email']);
-		$checklogin = mysql_query("SELECT * FROM ".$dbname.".Users WHERE EmailAddress = '".$email."'");
-		if(mysql_num_rows($checklogin) == 1)
+		$email = mysqli_real_escape_string($connection,$_GET['email']);
+		$checklogin = mysqli_query($connection,"SELECT * FROM ".$dbname.".Users WHERE EmailAddress = '".$email."'");
+		if(mysqli_num_rows($checklogin) == 1)
 		{
-			$row = mysql_fetch_array($checklogin);
+			$row = mysqli_fetch_array($checklogin);
 			$username = $row['Username'];
 			
 			// Generate password
@@ -136,10 +147,10 @@ function user_remind()
 			$message = "User name: ".$username."\rPassword: ".$password;
 			mail($email, 'BrainSpell password', $message);
 
-			$username = mysql_real_escape_string($username);
-			$password = md5(mysql_real_escape_string($password));
-			$email = mysql_real_escape_string($email);
-			$registerquery=mysql_query("UPDATE ".$dbname.".Users SET Password = '".$password."' WHERE Username = '".$username."' AND EmailAddress = '".$email."'");
+			$username = mysqli_real_escape_string($connection,$username);
+			$password = md5(mysqli_real_escape_string($connection,$password));
+			$email = mysqli_real_escape_string($connection,$email);
+			$registerquery=mysqli_query($connection,"UPDATE ".$dbname.".Users SET Password = '".$password."' WHERE Username = '".$username."' AND EmailAddress = '".$email."'");
 			if($registerquery)
 			{
 				echo "<p>You should receive shortly and e-mail with a new password";
@@ -254,13 +265,20 @@ function user_update($username)
 
 function home()
 {
+	global $dbname;
 	global $rootdir;
+	global $connection;
 
 	$html = file_get_contents($_SERVER['DOCUMENT_ROOT'].$rootdir."templates/base.html");
 	$home = file_get_contents($_SERVER['DOCUMENT_ROOT'].$rootdir."templates/home.html");
 	$tmp=str_replace("<!--Core-->",$home,$html);
 	$html=$tmp;
 	
+    $result=mysqli_query($connection,"SELECT COUNT(*) FROM ".$dbname.".Articles");
+    $count=mysqli_fetch_assoc($result);
+	$tmp=str_replace("<!--NumberOfArticlesIndexed-->",$count["COUNT(*)"],$html);
+	$html=$tmp;
+
 	$tmp=str_replace("<!--ROOTDIR-->",$rootdir,$html);
 	$html=$tmp;
 
@@ -357,33 +375,32 @@ function download()
 
 	print $html;
 }
-function article($pmid)
+function article($id)
 {
 	global $dbname;
 	global $rootdir;
+	global $connection;
 	
-    $result=mysql_query("SELECT * FROM ".$dbname.".Articles WHERE PMID = ".$pmid);
+    // Try $id=PMID
+    $result=mysqli_query($connection,"SELECT * FROM ".$dbname.".Articles WHERE PMID = ".$id);
 
-    if(mysql_num_rows($result)==1)
+    // Try $id=DOI
+    if($result==false)
+	    $result=mysqli_query($connection,"SELECT * FROM ".$dbname.".Articles WHERE DOI = '".$id."'");
+
+    if(mysqli_num_rows($result)==1)
     {
+		// article template
 		$html = file_get_contents($_SERVER['DOCUMENT_ROOT'].$rootdir."templates/base.html");
 		$article = file_get_contents($_SERVER['DOCUMENT_ROOT'].$rootdir."templates/article.html");
 		$tmp=str_replace("<!--Core-->",$article,$html);
 		$html=$tmp;
 		
+		// set root directory
 		$tmp=str_replace("<!--ROOTDIR-->",$rootdir,$html);
 		$html=$tmp;
 
-        $record=mysql_fetch_assoc($result);
-		$fields=array("Title","Reference","Abstract","PMID","DOI","NeuroSynthID","Metadata","Experiments");
-		foreach ($fields as $i):
-    		if($i=="Experiments" || $i=="Metadata")
-    			$tmp=str_replace("<!--".$i."-->",mysql_real_escape_string(strip_cdata($record[$i])),$html);
-	    	else
-	    		$tmp=str_replace("<!--".$i."-->",stripslashes(strip_cdata($record[$i])),$html);
-	    	$html=$tmp;
-		endforeach;
-		
+		// configure login information
 		if(isset($_SESSION['Username']))
 			$tmp=str_replace("<!--Username-->",$_SESSION['Username'],$html);
 		else
@@ -395,20 +412,132 @@ function article($pmid)
 		else
 			$tmp=str_replace("<!--LoggedIn-->","0",$html);
 		$html=$tmp;
-    	
+
+       // get article data from database
+        $record=mysqli_fetch_assoc($result);
+		$fields=array("Title","Reference","Abstract","PMID","DOI","NeuroSynthID","Metadata","Experiments");
+		foreach ($fields as $i):
+    		if($i=="Experiments" || $i=="Metadata")
+    			$tmp=str_replace("<!--".$i."-->",mysqli_real_escape_string($connection,strip_cdata($record[$i])),$html);
+	    	else
+	    		$tmp=str_replace("<!--".$i."-->",stripslashes(strip_cdata($record[$i])),$html);
+	    	$html=$tmp;
+		endforeach;
+		
 		print $html;
+    }
+    else
+    {
+		$html = file_get_contents($_SERVER['DOCUMENT_ROOT'].$rootdir."templates/base.html");
+		$article = file_get_contents($_SERVER['DOCUMENT_ROOT'].$rootdir."templates/article.html");
+		$tmp=str_replace("<!--Core-->",$article,$html);
+		$html=$tmp;
+
+		$tmp=str_replace("<!--ROOTDIR-->",$rootdir,$html);
+		$html=$tmp;
+
+		// configure login information
+		if(isset($_SESSION['Username']))
+			$tmp=str_replace("<!--Username-->",$_SESSION['Username'],$html);
+		else
+			$tmp=str_replace("<!--Username-->","",$html);
+		$html=$tmp;
+	
+		if(isset($_SESSION['LoggedIn']))
+			$tmp=str_replace("<!--LoggedIn-->",$_SESSION['LoggedIn'],$html);
+		else
+			$tmp=str_replace("<!--LoggedIn-->","0",$html);
+		$html=$tmp;
+
+		// configure article data
+		$tmp=str_replace("<!--PMID-->",$id,$html);
+		$html=$tmp;
+
+		print $html;
+
+		//header('HTTP/1.1 404 Not Found');
+        //echo "ERROR: There is not yet a record for the article with PMID or DOI ".$id."\n";
+    }
+    mysqli_free_result($result);
+}
+function article_json_pmid($pmid)
+{
+	global $dbname;
+	global $rootdir;
+	global $connection;
+	
+    $result=mysqli_query($connection,"SELECT * FROM ".$dbname.".Articles WHERE PMID = ".$pmid);
+
+    if(mysqli_num_rows($result)==1)
+    {
+        header('Content-Type: application/json');
+		header("Access-Control-Allow-Origin: *");
+        $record=mysqli_fetch_assoc($result);
+		$fields=array("Title","Reference","Abstract","PMID","DOI","NeuroSynthID","Metadata","Experiments");
+		echo "{\n";
+		for($k=0;$k<count($fields);$k++)
+		{
+    		$i=$fields[$k];
+    		if($i=="Experiments" || $i=="Metadata")
+    			$tmp=mysqli_real_escape_string($connection,strip_cdata($record[$i]));
+	    	else
+	    		$tmp=stripslashes(strip_cdata($record[$i]));
+	    	
+	    	if($k<count($fields)-1)
+		    	echo "\"".$i."\":"."\"".$tmp."\",\n";
+		    else
+		    	echo "\"".$i."\":"."\"".$tmp."\"\n";
+	    }
+		echo "}\n";
     }
     else
     {
 		header('HTTP/1.1 404 Not Found');
         echo "ERROR: There is not yet a record for the article with PMID ".$pmid."\n";
     }
-    mysql_free_result($result);
+    mysqli_free_result($result);
+}
+function article_json_doi($doi)
+{
+	global $dbname;
+	global $rootdir;
+	global $connection;
+	
+    $result=mysqli_query($connection,"SELECT * FROM ".$dbname.".Articles WHERE DOI = '".$doi."'");
+
+    if(mysqli_num_rows($result)==1)
+    {
+        header('Content-Type: application/json');
+        $record=mysqli_fetch_assoc($result);
+		$fields=array("Title","Reference","Abstract","PMID","DOI","NeuroSynthID","Metadata","Experiments");
+		echo "{\n";
+		for($k=0;$k<count($fields);$k++)
+		{
+    		$i=$fields[$k];
+    		if($i=="Experiments" || $i=="Metadata")
+    			$tmp=mysqli_real_escape_string($connection,strip_cdata($record[$i]));
+	    	else
+	    		$tmp=stripslashes(strip_cdata($record[$i]));
+	    	
+	    	if($k<count($fields)-1)
+		    	echo "\"".$i."\":"."\"".$tmp."\",\n";
+		    else
+		    	echo "\"".$i."\":"."\"".$tmp."\"\n";
+	    }
+		echo "}\n";
+    }
+    else
+    {
+		header('HTTP/1.1 404 Not Found');
+        echo "ERROR: There is not yet a record for the article with DOI ".$doi."\n";
+    }
+    mysqli_free_result($result);
 }
 function search_lucene($query)
 {
 	global $rootdir;
 	global $dbname;
+	global $connection;
 
 	$html = file_get_contents($_SERVER['DOCUMENT_ROOT'].$rootdir."templates/base.html");
 	$search = file_get_contents($_SERVER['DOCUMENT_ROOT'].$rootdir."templates/search.html");
@@ -548,6 +677,7 @@ function index_lucene($article)
 function add_article($query)
 {
 	global $dbname;
+	global $connection;
 		
 	$cmd=$query['command'];
 	
@@ -555,23 +685,24 @@ function add_article($query)
 	{
 		case "new":
 		{
-			$result = mysql_query("SELECT * FROM ".$dbname.".Articles WHERE PMID = '".$query['PMID']."'");
-			if(mysql_num_rows($result)>=1)
+			$result = mysqli_query($connection,"SELECT * FROM ".$dbname.".Articles WHERE PMID = '".$query['PMID']."'");
+			if(mysqli_num_rows($result)>=1)
 			{
 				echo "ERROR: Article is already in the database";
 			}
 			else
 			{
-				$q="INSERT INTO ".$dbname.".Articles (Title, Authors, Abstract, Reference, PMID, NeuroSynthID, Experiments, Metadata) VALUES(";
-				$q.= "'<![CDATA[".mysql_real_escape_string($query['Title'])."]]>'";
-				$q.=",'".mysql_real_escape_string($query['Authors'])."'";	//mysql_real_escape_string($article['Authors']);
-				$q.=",'".mysql_real_escape_string($query['Abstract'])."'";	//mysql_real_escape_string($article['Abstract']);
-				$q.=",'".mysql_real_escape_string($query['Reference'])."'";	//mysql_real_escape_string($article['Reference']);
+				$q="INSERT INTO ".$dbname.".Articles (Title, Authors, Abstract, Reference, PMID, DOI, NeuroSynthID, Experiments, Metadata) VALUES(";
+				$q.= "'<![CDATA[".mysqli_real_escape_string($connection,$query['Title'])."]]>'";
+				$q.=",'".mysqli_real_escape_string($connection,$query['Authors'])."'";	//mysql_real_escape_string($article['Authors']);
+				$q.=",'".mysqli_real_escape_string($connection,$query['Abstract'])."'";	//mysql_real_escape_string($article['Abstract']);
+				$q.=",'".mysqli_real_escape_string($connection,$query['Reference'])."'";	//mysql_real_escape_string($article['Reference']);
 				$q.=",'".$query['PMID']."'";	//mysql_real_escape_string($article['PMID']);
+				$q.=",'".$query['DOI']."'";	//mysql_real_escape_string($article['PMID']);
 				$q.=",'".$query['NeuroSynthID']."'";	//mysql_real_escape_string($article['NeuroSynthID']);
 				$q.=",'<![CDATA[".$query['Experiments']."]]>'";	//mysql_real_escape_string($article['Experiments']);
 				$q.=",'".$query['Metadata']."')";	//mysql_real_escape_string($article['Metadata'])."')";
-				$result2 = mysql_query($q);
+				$result2 = mysqli_query($connection,$q);
 				if($result2)
 					echo "SUCCESS";
 				else
@@ -579,18 +710,18 @@ function add_article($query)
 		
 				// index_lucene($article);
 			}
-			mysql_free_result($result);
+			mysqli_free_result($result);
 			break;
 		}
 		case "experiments":
 		{
-			$result = mysql_query("SELECT * FROM ".$dbname.".Articles WHERE PMID = '".$query['PMID']."'");
-			if(mysql_num_rows($result)>=1)
+			$result = mysqli_query($connection,"SELECT * FROM ".$dbname.".Articles WHERE PMID = '".$query['PMID']."'");
+			if(mysqli_num_rows($result)>=1)
 			{
 				$q="UPDATE ".$dbname.".Articles SET Experiments=";
 				$q.= "'<![CDATA[".$query['Experiments']."]]>'";
 				$q.= " WHERE PMID='".$query['PMID']."'";
-				$result2 = mysql_query($q);
+				$result2 = mysqli_query($connection,$q);
 				if($result2)
 					echo "SUCCESS ";
 				else
@@ -598,18 +729,18 @@ function add_article($query)
 	
 				// index_lucene($article);
 			}
-			mysql_free_result($result);
+			mysqli_free_result($result);
 			break;
 		}
 		case "metadata":
 		{
-			$result = mysql_query("SELECT * FROM ".$dbname.".Articles WHERE PMID = '".$query['PMID']."'");
-			if(mysql_num_rows($result)>=1)
+			$result = mysqli_query($connection,"SELECT * FROM ".$dbname.".Articles WHERE PMID = '".$query['PMID']."'");
+			if(mysqli_num_rows($result)>=1)
 			{
 				$q="UPDATE ".$dbname.".Articles SET Metadata=";
 				$q.= "'<![CDATA[".$query['Metadata']."]]>'";
 				$q.= " WHERE PMID='".$query['PMID']."'";
-				$result2 = mysql_query($q);
+				$result2 = mysqli_query($connection,$q);
 				if($result2)
 					echo "SUCCESS ";
 				else
@@ -617,7 +748,7 @@ function add_article($query)
 	
 				// index_lucene($article);
 			}
-			mysql_free_result($result);
+			mysqli_free_result($result);
 			break;
 		}
 	}
@@ -625,6 +756,7 @@ function add_article($query)
 function get_article($query)
 {
 	global $dbname;
+	global $connection;
 
     $cmd=$query['command'];
     $arg=$query['argument'];
@@ -633,16 +765,16 @@ function get_article($query)
     {
 		case "random":
 		{
-			$result=mysql_query("SELECT UniqueID FROM ".$dbname.".Articles");
-			$nrows=mysql_num_rows($result);
+			$result=mysqli_query($connection,"SELECT UniqueID FROM ".$dbname.".Articles");
+			$nrows=mysqli_num_rows($result);
 			echo "<records>";
 			for($i=0;$i<=$arg;$i++)
 			{
 				$irow=rand(1,$nrows);
-				$err=mysql_data_seek($result,$irow);
-				$uniqueID=mysql_fetch_row($result);
-				$result2=mysql_query("SELECT Title,Reference,PMID FROM ".$dbname.".Articles WHERE UniqueID = ".$uniqueID[0]);
-				$record=mysql_fetch_assoc($result2);
+				$err=mysqli_data_seek($connection,$result,$irow);
+				$uniqueID=mysqli_fetch_row($result);
+				$result2=mysqli_query($connection,"SELECT Title,Reference,PMID FROM ".$dbname.".Articles WHERE UniqueID = ".$uniqueID[0]);
+				$record=mysqli_fetch_assoc($result2);
 				echo "<record>";
 				echo "<Title>".stripslashes($record["Title"])."</Title>";
 				echo "<Reference>".stripslashes($record["Reference"])."</Reference>";
@@ -654,15 +786,15 @@ function get_article($query)
 		}
 		case "experiments":
 		{
-			$result=mysql_query("SELECT Experiments FROM ".$dbname.".Articles WHERE PMID = ".$arg);
-			$record=mysql_fetch_assoc($result);
+			$result=mysqli_query($connection,"SELECT Experiments FROM ".$dbname.".Articles WHERE PMID = ".$arg);
+			$record=mysqli_fetch_assoc($result);
 			echo "<experiments>".$record["Experiments"]."</experiments>";
 			break;
 		}
 		case "metadata":
 		{
-			$result=mysql_query("SELECT Metadata FROM ".$dbname.".Articles WHERE PMID = ".$arg);
-			$record=mysql_fetch_assoc($result);
+			$result=mysqli_query($connection,"SELECT Metadata FROM ".$dbname.".Articles WHERE PMID = ".$arg);
+			$record=mysqli_fetch_assoc($result);
 			echo "<metadata>".$record["Metadata"]."</metadata>";
 			break;
 		}
@@ -671,6 +803,7 @@ function get_article($query)
 function get_concept($query)
 {
 	global $dbname;
+	global $connection;
 
     $cmd=$query['command'];
     $arg=$query['argument'];
@@ -679,12 +812,13 @@ function get_concept($query)
     {
 		case "concept":
 		{
-			$query="SELECT Definition FROM ".$dbname.".Concepts WHERE UPPER(Name) = UPPER('<![CDATA[".mysql_real_escape_string($arg)."]]>')";
-			$result=mysql_query($query);
-			$record=mysql_fetch_assoc($result);
+			$query="SELECT Definition FROM ".$dbname.".Concepts WHERE UPPER(Name) = UPPER('<![CDATA[".mysqli_real_escape_string($connection,$arg)."]]>')";
+			$result=mysqli_query($connection,$query);
+			$record=mysqli_fetch_assoc($result);
 			$description="<Definition>".$record["Definition"]."</Definition>";
-			mysql_free_result($result);
+			mysqli_free_result($result);
 			
+			header("Access-Control-Allow-Origin: *");
 			echo $description;
 			break;
 		}
@@ -693,11 +827,16 @@ function get_concept($query)
 function add_log($query)
 {
 	global $dbname;
+	global $connection;
 	
+	header("Access-Control-Allow-Origin: *");
+
 	switch($query['type'])
 	{
 		case "Vote":
 		{
+			$vote=$query['TagVote'];
+			
 			// 1. Log user's vote
 			//-------------------
 			// Update/Insert user's vote
@@ -707,26 +846,38 @@ function add_log($query)
 			$q.="        PMID = '".$query['PMID']."' AND";
 			$q.="  Experiment = '".$query['Experiment']."' AND";
 			$q.="        Type = '".$type."'";
-			$result = mysql_query($q);
-			if(mysql_num_rows($result)>=1)
+			$result = mysqli_query($connection,$q);
+			if(mysqli_num_rows($result)>=1)	// pre-existing vote
 			{
-				$record=mysql_fetch_assoc($result);
+				$record=mysqli_fetch_assoc($result);
 				$prevVote=$record["Data"];
-				mysql_free_result($result);
-		
-				// Update user's vote on tag
-				$q="UPDATE ".$dbname.".Log SET Data = ".$query['TagVote']." WHERE";
-				$q.="    UserName = '".$query['UserName']."' AND";
-				$q.="        PMID = '".$query['PMID']."' AND";
-				$q.="  Experiment = '".$query['Experiment']."' AND";
-				$q.="        Type = '".$type."'";
-				$result = mysql_query($q);
-				if($result)
-					echo "Successfully updated user's vote\n";
-				else
-					echo "ERROR: Unable to update user's vote: ".$q."\n";
+				mysqli_free_result($result);
+	
+				if($vote==-1||$vote==1)	// down-voting or up-voting
+				{
+					// Update user's vote on tag
+					$q="UPDATE ".$dbname.".Log SET Data = ".$vote." WHERE";
+					$q.="    UserName = '".$query['UserName']."' AND";
+					$q.="        PMID = '".$query['PMID']."' AND";
+					$q.="  Experiment = '".$query['Experiment']."' AND";
+					$q.="        Type = '".$type."'";
+					$result = mysqli_query($connection,$q);
+					if($result)
+						echo "Successfully updated user's vote\n";
+					else
+						echo "ERROR: Unable to update user's vote: ".$q."\n";
+				}
+				else	// retracting vote
+				{
+					$q="DELETE FROM ".$dbname.".Log WHERE";
+					$q.="    UserName = '".$query['UserName']."' AND";
+					$q.="        PMID = '".$query['PMID']."' AND";
+					$q.="  Experiment = '".$query['Experiment']."' AND";
+					$q.="        Type = '".$type."'";
+					$result = mysqli_query($connection,$q);
+				}
 			}
-			else
+			else	// new vote
 			{
 				$prevVote=0;
 
@@ -736,8 +887,8 @@ function add_log($query)
 				$q.="'".$query['PMID']."',";
 				$q.="'".$query['Experiment']."',";
 				$q.="'".$type."',";
-				$q.="'".$query['TagVote']."')";
-				$result = mysql_query($q);
+				$q.="'".$vote."')";
+				$result = mysqli_query($connection,$q);
 				if($result)
 					echo "Successfully added user's vote\n";
 				else
@@ -749,8 +900,8 @@ function add_log($query)
 			if($query['Experiment']<0)
 			{
 				// <0: Article level MeSH tag
-				$result=mysql_query("SELECT Metadata FROM ".$dbname.".Articles WHERE PMID = ".$query['PMID']);
-				$record=mysql_fetch_assoc($result);
+				$result=mysqli_query($connection,"SELECT Metadata FROM ".$dbname.".Articles WHERE PMID = ".$query['PMID']);
+				$record=mysqli_fetch_assoc($result);
 				$metadata=json_decode(strip_cdata($record["Metadata"]));
 				$tags=$metadata->meshHeadings;
 		
@@ -764,18 +915,24 @@ function add_log($query)
 						break;
 					}
 				}
-
 				if(!isset($t->agree))
 					$t->agree=0;
 				if(!isset($t->disagree))
 					$t->disagree=0;
 
 				// Update tag statistics, based on user's vote
-				$vote=$query['TagVote'];
+				echo "prevvote:".$prevVote." vote:".$vote." agree:".$t->agree." disagree:".$t->disagree."</br>";
 				if($prevVote!=0)
 				{
-					// User is changing mind
-					if($vote!=$prevVote)
+					if($vote==-2)	// User is retracting vote
+					{
+						if($prevVote==-1)
+							$t->disagree--;
+						if($prevVote==1)
+							$t->agree--;
+					}
+					else
+					if($vote!=$prevVote)	// User is changing mind
 					{
 						$t->agree+=$vote;
 						$t->disagree-=$vote;
@@ -791,13 +948,13 @@ function add_log($query)
 				}
 
 				// Update experiments
-				$result = mysql_query("SELECT * FROM ".$dbname.".Articles WHERE PMID = '".$query['PMID']."'");
-				if(mysql_num_rows($result)>=1)
+				$result = mysqli_query($connection,"SELECT * FROM ".$dbname.".Articles WHERE PMID = '".$query['PMID']."'");
+				if(mysqli_num_rows($result)>=1)
 				{
 					$q="UPDATE ".$dbname.".Articles SET Metadata=";
 					$q.= "'".json_encode($metadata)."'";
 					$q.= " WHERE PMID='".$query['PMID']."'";
-					$result2 = mysql_query($q);
+					$result2 = mysqli_query($connection,$q);
 					if($result2)
 						echo "SUCCESS ";
 					else
@@ -805,13 +962,13 @@ function add_log($query)
 
 					// index_lucene($article);
 				}
-				mysql_free_result($result);
+				mysqli_free_result($result);
 			}
 			else
 			{
 				// >=0: Experiment level tag
-				$result=mysql_query("SELECT Experiments FROM ".$dbname.".Articles WHERE PMID = ".$query['PMID']);
-				$record=mysql_fetch_assoc($result);
+				$result=mysqli_query($connection,"SELECT Experiments FROM ".$dbname.".Articles WHERE PMID = ".$query['PMID']);
+				$record=mysqli_fetch_assoc($result);
 				$exps=json_decode(strip_cdata($record["Experiments"]));
 				$exp=$exps[$query['Experiment']];
 		
@@ -840,11 +997,17 @@ function add_log($query)
 				}
 
 				// Update tag statistics, based on user's vote
-				$vote=$query['TagVote'];
 				if($prevVote!=0)
 				{
-					// User is changing mind
-					if($vote!=$prevVote)
+					if($vote==-2)	//	User is retracting vote
+					{
+						if($prevVote==-1)
+							$t->disagree--;
+						if($prevVote==1)
+							$t->agree--;
+					}
+					else
+					if($vote!=$prevVote)	// User is changing mind
 					{
 						$t->agree+=$vote;
 						$t->disagree-=$vote;
@@ -860,13 +1023,13 @@ function add_log($query)
 				}
 		
 				// Update experiments
-				$result = mysql_query("SELECT * FROM ".$dbname.".Articles WHERE PMID = '".$query['PMID']."'");
-				if(mysql_num_rows($result)>=1)
+				$result = mysqli_query($connection,"SELECT * FROM ".$dbname.".Articles WHERE PMID = '".$query['PMID']."'");
+				if(mysqli_num_rows($result)>=1)
 				{
 					$q="UPDATE ".$dbname.".Articles SET Experiments=";
 					$q.= "'<![CDATA[".json_encode($exps)."]]>'";
 					$q.= " WHERE PMID='".$query['PMID']."'";
-					$result2 = mysql_query($q);
+					$result2 = mysqli_query($connection,$q);
 					if($result2)
 						echo "SUCCESS ";
 					else
@@ -874,7 +1037,7 @@ function add_log($query)
 
 					// index_lucene($article);
 				}
-				mysql_free_result($result);
+				mysqli_free_result($result);
 			}
 			break;
 		}
@@ -889,12 +1052,12 @@ function add_log($query)
 			$q.="        PMID = '".$query['PMID']."' AND";
 			$q.="  Experiment = '".$query['Experiment']."' AND";
 			$q.="        Type = '".$type."'";
-			$result = mysql_query($q);
-			if(mysql_num_rows($result)>=1)
+			$result = mysqli_query($connection,$q);
+			if(mysqli_num_rows($result)>=1)
 			{
-				$record=mysql_fetch_assoc($result);
+				$record=mysqli_fetch_assoc($result);
 				$prevMark=$record["Data"];
-				mysql_free_result($result);
+				mysqli_free_result($result);
 		
 				// Update user's vote on tag
 				$q="UPDATE ".$dbname.".Log SET Data = ".$query['Mark']." WHERE";
@@ -902,7 +1065,7 @@ function add_log($query)
 				$q.="        PMID = '".$query['PMID']."' AND";
 				$q.="  Experiment = '".$query['Experiment']."' AND";
 				$q.="        Type = '".$type."'";
-				$result = mysql_query($q);
+				$result = mysqli_query($connection,$q);
 
 				if($result)
 					$out["userUpdate"]="Successfully updated user's table mark";
@@ -920,7 +1083,7 @@ function add_log($query)
 				$q.="'".$query['Experiment']."',";
 				$q.="'".$type."',";
 				$q.="'".$query['Mark']."')";
-				$result = mysql_query($q);
+				$result = mysqli_query($connection,$q);
 
 				if($result)
 					$out["userInsert"]="Successfully added user's table mark";
@@ -930,8 +1093,8 @@ function add_log($query)
 				
 			// 2. Update/Insert article:experiment:tag's bad/ok stats
 			//--------------------------------------------------------
-			$result=mysql_query("SELECT Experiments FROM ".$dbname.".Articles WHERE PMID = ".$query['PMID']);
-			$record=mysql_fetch_assoc($result);
+			$result=mysqli_query($connection,"SELECT Experiments FROM ".$dbname.".Articles WHERE PMID = ".$query['PMID']);
+			$record=mysqli_fetch_assoc($result);
 			$exps=json_decode(strip_cdata($record["Experiments"]));
 			$exp=$exps[$query['Experiment']];
 	
@@ -968,13 +1131,13 @@ function add_log($query)
 			$out["result"]=$m;
 
 			// Update experiments
-			$result = mysql_query("SELECT * FROM ".$dbname.".Articles WHERE PMID = '".$query['PMID']."'");
-			if(mysql_num_rows($result)>=1)
+			$result = mysqli_query($connection,"SELECT * FROM ".$dbname.".Articles WHERE PMID = '".$query['PMID']."'");
+			if(mysqli_num_rows($result)>=1)
 			{
 				$q="UPDATE ".$dbname.".Articles SET Experiments=";
 				$q.= "'<![CDATA[".json_encode($exps)."]]>'";
 				$q.= " WHERE PMID='".$query['PMID']."'";
-				$result2 = mysql_query($q);
+				$result2 = mysqli_query($connection,$q);
 				if($result2)
 					$out["articleUpdate"]="Successfully updated experiment with table mark ";
 				else
@@ -982,7 +1145,7 @@ function add_log($query)
 
 				// index_lucene($article);
 			}
-			mysql_free_result($result);
+			mysqli_free_result($result);
 
 			echo json_encode($out);
 			break;
@@ -998,12 +1161,12 @@ function add_log($query)
 			$q.="        PMID = '".$query['PMID']."' AND";
 			$q.="  Experiment = '-1' AND";
 			$q.="        Type = '".$type."'";
-			$result = mysql_query($q);
-			if(mysql_num_rows($result)>=1)
+			$result = mysqli_query($connection,$q);
+			if(mysqli_num_rows($result)>=1)
 			{
-				$record=mysql_fetch_assoc($result);
+				$record=mysqli_fetch_assoc($result);
 				$prevSpace=$record["Data"];
-				mysql_free_result($result);
+				mysqli_free_result($result);
 		
 				// Update user's vote on tag
 				$q="UPDATE ".$dbname.".Log SET Data = '".$query['StereoSpace']."' WHERE";
@@ -1011,7 +1174,7 @@ function add_log($query)
 				$q.="        PMID = '".$query['PMID']."' AND";
 				$q.="  Experiment = '-1' AND";
 				$q.="        Type = '".$type."'";
-				$result = mysql_query($q);
+				$result = mysqli_query($connection,$q);
 
 				if($result)
 					$out["userUpdate"]="Successfully updated user's stereotaxic space";
@@ -1029,7 +1192,7 @@ function add_log($query)
 				$q.="'-1',";
 				$q.="'".$type."',";
 				$q.="'".$query['StereoSpace']."')";
-				$result = mysql_query($q);
+				$result = mysqli_query($connection,$q);
 
 				if($result)
 					$out["userInsert"]="Successfully added user's stereotaxic space";
@@ -1039,8 +1202,8 @@ function add_log($query)
 				
 			// 2. Update/Insert article stereotaxic space
 			//-------------------------------------------
-			$result=mysql_query("SELECT Metadata FROM ".$dbname.".Articles WHERE PMID = ".$query['PMID']);
-			$record=mysql_fetch_assoc($result);
+			$result=mysqli_query($connection,"SELECT Metadata FROM ".$dbname.".Articles WHERE PMID = ".$query['PMID']);
+			$record=mysqli_fetch_assoc($result);
 			$meta=json_decode($record["Metadata"]);
 	
 			// Find previous stereotaxic space data, if already present, create it otherwise
@@ -1073,13 +1236,13 @@ function add_log($query)
 			$out["result"]=$m;
 
 			// Update experiments
-			$result = mysql_query("SELECT * FROM ".$dbname.".Articles WHERE PMID = '".$query['PMID']."'");
-			if(mysql_num_rows($result)>=1)
+			$result = mysqli_query($connection,"SELECT * FROM ".$dbname.".Articles WHERE PMID = '".$query['PMID']."'");
+			if(mysqli_num_rows($result)>=1)
 			{
 				$q="UPDATE ".$dbname.".Articles SET Metadata=";
-				$q.= "'".mysql_real_escape_string(json_encode($meta))."'";
+				$q.= "'".mysqli_real_escape_string($connection,json_encode($meta))."'";
 				$q.= " WHERE PMID='".$query['PMID']."'";
-				$result2 = mysql_query($q);
+				$result2 = mysqli_query($connection,$q);
 				if($result2)
 					$out["articleUpdate"]="Successfully updated article with stereotaxic space ";
 				else
@@ -1087,7 +1250,7 @@ function add_log($query)
 
 				// index_lucene($article);
 			}
-			mysql_free_result($result);
+			mysqli_free_result($result);
 
 			echo json_encode($out);
 			break;
@@ -1103,12 +1266,12 @@ function add_log($query)
 			$q.="        PMID = '".$query['PMID']."' AND";
 			$q.="  Experiment = '-1' AND";
 			$q.="        Type = '".$type."'";
-			$result = mysql_query($q);
-			if(mysql_num_rows($result)>=1)
+			$result = mysqli_query($connection,$q);
+			if(mysqli_num_rows($result)>=1)
 			{
-				$record=mysql_fetch_assoc($result);
+				$record=mysqli_fetch_assoc($result);
 				$prevNSubjects=$record["Data"];
-				mysql_free_result($result);
+				mysqli_free_result($result);
 		
 				// Update user's vote on tag
 				$q="UPDATE ".$dbname.".Log SET Data = '".$query['NSubjects']."' WHERE";
@@ -1116,7 +1279,7 @@ function add_log($query)
 				$q.="        PMID = '".$query['PMID']."' AND";
 				$q.="  Experiment = '-1' AND";
 				$q.="        Type = '".$type."'";
-				$result = mysql_query($q);
+				$result = mysqli_query($connection,$q);
 
 				if($result)
 					$out["userUpdate"]="Successfully updated user's nsubjects";
@@ -1134,7 +1297,7 @@ function add_log($query)
 				$q.="'-1',";
 				$q.="'".$type."',";
 				$q.="'".$query['NSubjects']."')";
-				$result = mysql_query($q);
+				$result = mysqli_query($connection,$q);
 
 				if($result)
 					$out["userInsert"]="Successfully added user's nsubjects";
@@ -1144,8 +1307,8 @@ function add_log($query)
 				
 			// 2. Update/Insert article nsubjects
 			//-------------------------------------------
-			$result=mysql_query("SELECT Metadata FROM ".$dbname.".Articles WHERE PMID = ".$query['PMID']);
-			$record=mysql_fetch_assoc($result);
+			$result=mysqli_query($connection,"SELECT Metadata FROM ".$dbname.".Articles WHERE PMID = ".$query['PMID']);
+			$record=mysqli_fetch_assoc($result);
 			$meta=json_decode($record["Metadata"]);
 	
 			// Find previous stereotaxic space data, if already present, create it otherwise
@@ -1170,13 +1333,13 @@ function add_log($query)
 			$out["result"]=$meta->nsubjects;
 
 			// Update experiments
-			$result = mysql_query("SELECT * FROM ".$dbname.".Articles WHERE PMID = '".$query['PMID']."'");
-			if(mysql_num_rows($result)>=1)
+			$result = mysqli_query($connection,"SELECT * FROM ".$dbname.".Articles WHERE PMID = '".$query['PMID']."'");
+			if(mysqli_num_rows($result)>=1)
 			{
 				$q="UPDATE ".$dbname.".Articles SET Metadata=";
-				$q.= "'".mysql_real_escape_string(json_encode($meta))."'";
+				$q.= "'".mysqli_real_escape_string($connection,json_encode($meta))."'";
 				$q.= " WHERE PMID='".$query['PMID']."'";
-				$result2 = mysql_query($q);
+				$result2 = mysqli_query($connection,$q);
 				if($result2)
 					$out["articleUpdate"]="Successfully updated article with nsubjects";
 				else
@@ -1184,7 +1347,7 @@ function add_log($query)
 
 				// index_lucene($article);
 			}
-			mysql_free_result($result);
+			mysqli_free_result($result);
 
 			echo json_encode($out);
 			break;
@@ -1200,7 +1363,7 @@ function add_log($query)
 			$q.="'-1',";
 			$q.="'".$type."',";
 			$q.="'".$query['Comment']."')";
-			$result = mysql_query($q);
+			$result = mysqli_query($connection,$q);
 			if($result)
 				$out["userInsert"]="Successfully added user's comment";
 			else
@@ -1208,8 +1371,8 @@ function add_log($query)
 
 			// 2. Insert comment in the article
 			//---------------------------------
-			$result=mysql_query("SELECT Metadata FROM ".$dbname.".Articles WHERE PMID = ".$query['PMID']);
-			$record=mysql_fetch_assoc($result);
+			$result=mysqli_query($connection,"SELECT Metadata FROM ".$dbname.".Articles WHERE PMID = ".$query['PMID']);
+			$record=mysqli_fetch_assoc($result);
 			$meta=json_decode($record["Metadata"]);
 	
 			// Find previous comments, if already present, create it otherwise
@@ -1223,13 +1386,13 @@ function add_log($query)
 			$out["result"]=json_encode($comment);
 
 			// Update metadata
-			$result = mysql_query("SELECT * FROM ".$dbname.".Articles WHERE PMID = '".$query['PMID']."'");
-			if(mysql_num_rows($result)>=1)
+			$result = mysqli_query($connection,"SELECT * FROM ".$dbname.".Articles WHERE PMID = '".$query['PMID']."'");
+			if(mysqli_num_rows($result)>=1)
 			{
 				$q="UPDATE ".$dbname.".Articles SET Metadata=";
-				$q.= "'".mysql_real_escape_string(json_encode($meta))."'";
+				$q.= "'".mysqli_real_escape_string($connection,json_encode($meta))."'";
 				$q.= " WHERE PMID='".$query['PMID']."'";
-				$result2 = mysql_query($q);
+				$result2 = mysqli_query($connection,$q);
 				if($result2)
 					$out["articleUpdate"]="Successfully updated article with comment";
 				else
@@ -1237,17 +1400,37 @@ function add_log($query)
 
 				// index_lucene($article);
 			}
-			mysql_free_result($result);
+			mysqli_free_result($result);
 
 			echo json_encode($out);
 			break;
+		}
+		case "KeyValue":	// generic key/value logger
+		{
+			$key=$query["Key"];
+			$value=$query["Value"];
+			$q="INSERT INTO ".$dbname.".Log (UserName,PMID,Experiment,Type,Data) VALUES(";
+			$q.="'".$query['UserName']."',";
+			$q.="'".$query['PMID']."',";
+			$q.="'-1',";
+			$q.="'".$key."',";
+			$q.="'".$value."')";
+			$result = mysqli_query($connection,$q);
+			if($result)
+				$out["userInsert"]="Successfully logged key/value";
+			else
+				$out["userInsert"]="ERROR: Unable log key/value: ".$q;
+			echo json_encode($out);
 		}
 	}
 }
 function get_log($query)
 {
 	global $dbname;
+	global $connection;
 	
+	header("Access-Control-Allow-Origin: *");
+
 	switch($query['type'])
 	{
 		case "Vote":
@@ -1258,12 +1441,12 @@ function get_log($query)
 			$q.= " AND PMID = '".$query["PMID"]."'";
 			$q.= " AND Experiment = '".$query["Experiment"]."'";
 			$q.= " AND Type = '".$type."'";
-			$result = mysql_query($q);
+			$result = mysqli_query($connection,$q);
 			if($result)
 			{
-				$record=mysql_fetch_assoc($result);
+				$record=mysqli_fetch_assoc($result);
 				$vote="<TagVote>".$record["Data"]."</TagVote>";
-				mysql_free_result($result);
+				mysqli_free_result($result);
 
 				echo $vote;
 			}
@@ -1279,12 +1462,12 @@ function get_log($query)
 			$q.= " AND PMID = '".$query["PMID"]."'";
 			$q.= " AND Experiment = '".$query["Experiment"]."'";
 			$q.= " AND Type = '".$type."'";
-			$result = mysql_query($q);
+			$result = mysqli_query($connection,$q);
 			if($result)
 			{
-				$record=mysql_fetch_assoc($result);
+				$record=mysqli_fetch_assoc($result);
 				$vote="<MarkTable>".$record["Data"]."</MarkTable>";
-				mysql_free_result($result);
+				mysqli_free_result($result);
 
 				echo $vote;
 			}
@@ -1300,12 +1483,12 @@ function get_log($query)
 			$q.= " AND PMID = '".$query["PMID"]."'";
 			$q.= " AND Experiment = '-1'";
 			$q.= " AND Type = '".$type."'";
-			$result = mysql_query($q);
+			$result = mysqli_query($connection,$q);
 			if($result)
 			{
-				$record=mysql_fetch_assoc($result);
+				$record=mysqli_fetch_assoc($result);
 				$vote="<StereoSpace>".$record["Data"]."</StereoSpace>";
-				mysql_free_result($result);
+				mysqli_free_result($result);
 
 				echo $vote;
 			}
@@ -1321,12 +1504,12 @@ function get_log($query)
 			$q.= " AND PMID = '".$query["PMID"]."'";
 			$q.= " AND Experiment = '-1'";
 			$q.= " AND Type = '".$type."'";
-			$result = mysql_query($q);
+			$result = mysqli_query($connection,$q);
 			if($result)
 			{
-				$record=mysql_fetch_assoc($result);
+				$record=mysqli_fetch_assoc($result);
 				$nsubjects="<NSubjects>".$record["Data"]."</NSubjects>";
-				mysql_free_result($result);
+				mysqli_free_result($result);
 
 				echo $nsubjects;
 			}

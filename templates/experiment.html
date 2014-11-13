@@ -1,5 +1,5 @@
-<div class="experiment-title"><b style='font-family:sans-serif'>Title:</b></div>
-<div class="experiment-caption"><b style='font-family:sans-serif'>Caption:</b></div>
+<div class="experiment-title"><b><span class="stored title" contentEditable></span></b></div>
+<div class="experiment-caption"><span class="stored caption" contentEditable></span></div>
 <table>
 	<tr>
 	<td>
@@ -9,7 +9,13 @@
 	<td style="vertical-align: top;">
 		<div class="experiment-locations" style="height:300px;border:1px solid lightGrey">
 			<table class="xyzheader">
-				<thead><tr><th scope=\"col\">X</th><th scope=\"col\">Y</th><th scope=\"col\">Z</th></tr></thead>
+				<thead><tr>
+					<th class="coordinate">X</th>
+					<th class="coordinate">Y</th>
+					<th class="coordinate">Z</th>
+					<th class="input"></th>
+					<th class="input"><input type='image' class='addhead' src='/img/plus-circle.svg' onclick='addRow(this)'/></th>
+				</tr></thead>
 			</table>
 			<div class="xyztable" style="overflow-y:auto">
 				<table>
@@ -24,10 +30,10 @@
 	</tr>
 </table>
 
-<div id="tableMark">
+<div class="tableMark">
 	<input onclick="logMarkTable(this)" type="radio" value="Yes" /> Table is correct <span id="Yes"></span>&nbsp;
 	<input onclick="logMarkTable(this)" type="radio" value="No" /> No <span id="No"></span>
 </div>
 
-<div id="tableAlert">
+<div class="tableAlert">
 </div>

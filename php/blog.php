@@ -1,26 +1,35 @@
-<?php 
-define('WP_USE_THEMES', false);
-require_once('/srv/data/web/vhosts/siphonophore.org/htdocs/blog/wp-blog-header.php');
+<?php
+$json=file_get_contents("http://siphonophore.org/blog/wp-json/posts?filter[category_name]=brainspell");
+$posts=json_decode($json);
+?>
 
-$args=array(
-	'category'		=>2,
-	'numberposts'	=>10,
-	'order'			=>'DESC',
-	'orderby'		=>'post_date');
+<style>
+.wp-caption-text {
+	font-family: Sans-Serif;
+}
+.aligncenter {
+	margin-left:auto;
+	margin-right:auto;
+}
+p a {
+	color: #ed8000;
+}
+</style>
 
-$posts = get_posts($args);
+<?php
 foreach($posts as $post)
 {
-	setup_postdata($post);
-	//$post=apply_filters('the_content' ,$post);
 ?>
+
 <div style="width:600px;margin-left:auto;margin-right:auto;margin-top:2rem">
-	<large><strong><?php the_date(); ?></strong></large>
-    <h2><a href="<?php the_permalink() ?>" rel="bookmark" title="Permanent Link to <?php the_title_attribute(); ?>"><?php the_title(); ?></a></h2>
+	<large><strong><?php echo $post->date_gmt; ?></strong></large>
+
+    <h2 class="blog"><a href="<?php echo $post->link; ?>" rel="bookmark" title="Permanent Link to <?php echo $post->title; ?>"><?php echo $post->title; ?></a></h2>
 	<div style="background-color:#f8f8f8;padding:1rem">
-		<?php the_content(); ?> 
+		<?php echo $post->content; ?> 
 	</div>
 </div>
+
 <?php
 }
 ?>

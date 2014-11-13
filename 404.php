@@ -1,14 +1,39 @@
 <?php
 	include $_SERVER['DOCUMENT_ROOT']."/php/brainspell.php";
 	
-	header("Status: 200 OK");
+	header($_SERVER['SERVER_PROTOCOL'] . " 200 OK");
 	
 	$uri=$_SERVER['REQUEST_URI'];
 	$parts=preg_split("/[\/?]/",$uri);
 	
 	if($parts[1]=="article")
 	{
-		article($parts[2]);
+		$id="";
+		for($i=2;$i<count($parts);$i++)
+		{
+			$id.=$parts[$i];
+			if($i<count($parts)-1)
+				$id.="/";
+		}
+		article($id);
+	}
+	else
+	if($parts[1]=="json")
+	{
+		if($parts[2]=="pmid")
+			article_json_pmid($parts[3]);
+		else
+		if($parts[2]=="doi")
+		{
+			$doi="";
+			for($i=3;$i<count($parts);$i++)
+			{
+				$doi.=$parts[$i];
+				if($i<count($parts)-1)
+					$doi.="/";
+			}
+			article_json_doi($doi);
+		}
 	}
 	else
 	if($parts[1]=="search")
