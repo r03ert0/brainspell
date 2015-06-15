@@ -698,6 +698,8 @@ function store(obj)
 	var	iExp=$(obj).closest(".experiment").attr("id");
 	var	name=$(obj).attr('class').split(" ")[1];
 	var	value=$(obj).text();
+	var value2=value.replace(/[^a-zA-Z0-9\(\)\[\]]/g, ""); // Filter out
+	$(obj).text(value2);
 	save(iExp,name,value);
 }
 function save(iExp,name,value)
