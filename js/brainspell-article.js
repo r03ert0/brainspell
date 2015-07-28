@@ -612,9 +612,10 @@ function delRow(row)
     
     $(".experiment#"+iExp+" .xyztable table")[0].deleteRow(i);
 
-    exp[iExp].render.scene.remove(exp[iExp].render.locations[i].sph);
+    exp[iExp].render.scene.remove(exp[iExp].locations[i].sph);
     exp[iExp].render.spheres.remove(exp[iExp].locations[i].sph);
     exp[iExp].locations.splice(i,1);
+	save(iExp,"locations",JSON.stringify(exp[iExp].locations,["x","y","z"]));
 	selectRow(row,iExp); // this will erase any existing selection
 }
 function addRow(row)
@@ -668,7 +669,7 @@ function parseTable(row,iExp)
 			exp[iExp].locations[i].x=x;
 			exp[iExp].locations[i].y=y;
 			exp[iExp].locations[i].z=z;
-		
+			
 			save(iExp,"locations",JSON.stringify(exp[iExp].locations,["x","y","z"]));
 		}
 	}
