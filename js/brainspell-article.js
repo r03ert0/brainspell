@@ -470,7 +470,8 @@ function configureExperiments()
 	console.log("[configureExperiments]");
 	for(i=0;i<exp.length;i++)
 	{
-		//if(exp[i].locations.length==0) continue;
+		if(exp[i].locations.length==0)
+			continue;
 		$(".experiments").append($('<div class="experiment" id="'+i+'">').load(rootdir+"templates/experiment.html",addExperiment(i)));
 	}
 	console.log("[configureExperiments] experiments configured");
@@ -1397,8 +1398,9 @@ function animate()
 {
 	requestAnimationFrame( animate );
 	for(iExp in exp)
-		if(exp[iExp].render.renderer)
-			render(iExp);
+		if(exp[iExp].render)
+			if(exp[iExp].render.renderer)
+				render(iExp);
 }
 // render the scene
 function render(iExp) {
