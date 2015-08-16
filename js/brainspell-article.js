@@ -275,9 +275,49 @@ function initBrainSpellArticle()
 			updateArticle();
 		}
 	}
+	
+	$("#download").click(function(){
+		downloadArticle();
+	});
+}
+function downloadArticle() {
+	/*
+		Download article in CSV format to local hard disk
+	*/
+	var i,j;
+	var str=[
+		$(".paper-title").text(),
+		$("#reference").text(),
+		$("#pmid").text(),
+		$("#doi").text(),
+		"Abstract: "+$(".abstract").text(),
+		""
+	].join("\n");
+	
+	for(i=0;i<exp.length;i++) {
+		var str1=[
+			"Title: "+exp[i].title,
+			"Caption: "+exp[i].caption,
+			""
+		].join("\n");
+		for(j=0;j<exp[i].locations.length;j++)
+			str1+=exp[i].locations[j].x+"\t"+exp[i].locations[j].y+"\t"+exp[i].locations[j].z+"\n";
+		str+=str1+"\n";
+	}
+	var exportData = 'data:text/plain;charset=utf-8,' + encodeURIComponent(str);
+	var a = document.createElement('a');
+	a.href = exportData;
+	a.download = ArticlePMID+'.txt';
+	a.style.display='none';
+	document.body.appendChild(a);
+	a.click();
+	document.body.removeChild(a);
 }
 function downloadArticleXML(callback)
 {
+	/*
+		Download article metadata from PubMed
+	*/
 	console.log("[downloadArticleXML]");
 	$.get("http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi",
 		{"db":"pubmed","id":ArticlePMID,"report":"xml"},
