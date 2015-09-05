@@ -8,7 +8,7 @@
 				<a href="http://cognitiveatlas.org" target="_blank">[Cognitive atlas]</a>
 				<br/>
 				<br/>
-				<div id="iExp" style="display:none"></div>
+				<div id="eid" style="display:none"></div>
 			</div>
 			<div class="myThing" style="overflow-y:scroll;border-style:solid;border-width:1px;background-color:#f5f5f5;border-color:#ddd">
 				<div class="classList" style="padding:20px;height:100%">
@@ -30,15 +30,16 @@
 		var	initial="",name;
 		var	tag;
 		var	prevVote=new Array();
-		var	iExp=parseInt($(".lightbox #iExp").text());
+		var	eid/*iExp*/=parseInt($(".lightbox #eid").text());
+		var ex=findExperimentByEID(eid);
 
-		if(exp[iExp].tags)
-			for(j=0;j<exp[iExp].tags.length;j++)
+		if(ex.tags)
+			for(j=0;j<ex.tags.length;j++)
 			{
-				var rtag=exp[iExp].tags[j];
+				var rtag=ex.tags[j];
 				rtag.agree=(rtag.agree)?parseInt(rtag.agree):0;
 				rtag.disagree=(rtag.disagree)?parseInt(rtag.disagree):0;
-				prevVote[j]=new Object({"vote":findPreviousVoteByUser(iExp,rtag),"name":rtag.name,"ontology":rtag.ontology});
+				prevVote[j]=new Object({"vote":findPreviousVoteByUser(eid/*iExp*/,rtag),"name":rtag.name,"ontology":rtag.ontology});
 			}
 
 		for(i=0;i<classes.length;i++)
@@ -51,7 +52,7 @@
 				$('.classList').append("<h2 style='display:inline;padding-left:1rem;position:relative;top:0.2rem'>"+initial+"</h2>");
 			}
 		
-			var obj=findTag(exp[iExp].tags,name,"tasks");
+			var obj=findTag(ex.tags,name,"tasks");
 			if(obj)
 				rtag=obj;
 			else
@@ -59,7 +60,7 @@
 
 			tag=$("<span>",{class:"tag",id:"c"+parseInt(classes[i].value)});
 			tag.html(rtag.name);
-			tag.click({rtag:rtag},function(e){openTagModal(iExp,e.data.rtag)});
+			tag.click({rtag:rtag},function(e){openTagModal(eid/*iExp*/,e.data.rtag)});
 		
 			var	pv=0;
 			for(j=0;j<prevVote.length;j++)

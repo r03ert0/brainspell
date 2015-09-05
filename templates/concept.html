@@ -15,7 +15,7 @@
 				<span class="disagree"></span>
 				<br/>
 				<br/>
-				<div id="iExp" style="display:none"></div>
+				<div id="eid" style="display:none"></div>
 				<div id="ontology" style="display:none"></div>
 			</div>
 			
@@ -52,8 +52,8 @@
 		$("img.thumbs_down").attr("src",rootdir+"img/thumbs_down.svg");
 		
 		// find if user has already voted
-		var	iExp=parseInt($('#box #iExp').text());
-		var	prevVote=findPreviousVoteByUser(iExp,rtag);
+		var	eid=parseInt($('#box #eid').text());
+		var	prevVote=findPreviousVoteByUser(eid/*iExp*/,rtag);
 		
 		$("span.agree").html(rtag.agree+(prevVote==1?" (including you)":""));
 		$("span.disagree").html(rtag.disagree+(prevVote==-1?" (including you)":""));

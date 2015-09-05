@@ -693,14 +693,14 @@ function add_article($query)
 			else
 			{
 				$q="INSERT INTO ".$dbname.".Articles (Title, Authors, Abstract, Reference, PMID, DOI, NeuroSynthID, Experiments, Metadata) VALUES(";
-				$q.= "'<![CDATA[".mysqli_real_escape_string($connection,$query['Title'])."]]>'";
+				$q.= "'".mysqli_real_escape_string($connection,$query['Title'])."'"; // CDATA removed, escape_string added
 				$q.=",'".mysqli_real_escape_string($connection,$query['Authors'])."'";	//mysql_real_escape_string($article['Authors']);
 				$q.=",'".mysqli_real_escape_string($connection,$query['Abstract'])."'";	//mysql_real_escape_string($article['Abstract']);
 				$q.=",'".mysqli_real_escape_string($connection,$query['Reference'])."'";	//mysql_real_escape_string($article['Reference']);
 				$q.=",'".$query['PMID']."'";	//mysql_real_escape_string($article['PMID']);
 				$q.=",'".$query['DOI']."'";	//mysql_real_escape_string($article['PMID']);
 				$q.=",'".$query['NeuroSynthID']."'";	//mysql_real_escape_string($article['NeuroSynthID']);
-				$q.=",'<![CDATA[".$query['Experiments']."]]>'";	//mysql_real_escape_string($article['Experiments']);
+				$q.=",'".mysqli_real_escape_string($connection,$query['Experiments'])."'";	//mysql_real_escape_string($article['Experiments']); // CDATA removed, escape_string added
 				$q.=",'".$query['Metadata']."')";	//mysql_real_escape_string($article['Metadata'])."')";
 				$result2 = mysqli_query($connection,$q);
 				if($result2)
@@ -719,7 +719,7 @@ function add_article($query)
 			if(mysqli_num_rows($result)>=1)
 			{
 				$q="UPDATE ".$dbname.".Articles SET Experiments=";
-				$q.= "'<![CDATA[".$query['Experiments']."]]>'";
+				$q.= "'".mysqli_real_escape_string($connection,$query['Experiments'])."'"; // CDATA removed, escape_string added
 				$q.= " WHERE PMID='".$query['PMID']."'";
 				$result2 = mysqli_query($connection,$q);
 				if($result2)
@@ -738,7 +738,7 @@ function add_article($query)
 			if(mysqli_num_rows($result)>=1)
 			{
 				$q="UPDATE ".$dbname.".Articles SET Metadata=";
-				$q.= "'<![CDATA[".$query['Metadata']."]]>'";
+				$q.= "'".mysqli_real_escape_string($connection,$query['Metadata'])."'"; // CDATA removed, escape_string added
 				$q.= " WHERE PMID='".$query['PMID']."'";
 				$result2 = mysqli_query($connection,$q);
 				if($result2)
@@ -976,14 +976,25 @@ function add_log($query)
 				$result=mysqli_query($connection,"SELECT Experiments FROM ".$dbname.".Articles WHERE PMID = ".$query['PMID']);
 				$record=mysqli_fetch_assoc($result);
 				$exps=json_decode(strip_cdata($record["Experiments"]));
-				$exp=$exps[$query['Experiment']];
+				
+				// HISTORY: This used to be $exp=$exps[$query['Experiment']], when Log indexed experiments by array position
+				for($i=0;$i<count($exps);$i++)
+					if($exps[$i]->id==$query['Experiment'])
+						break;
+				if($i==count($exps))
+				{
+					echo "ERROR: Experiment ID ".$query['Experiment']." not found";
+					continue;
+				}
+				$exp=$exps[$i];
 		
 				// Find tag, if already present
 				$flagFound=0;
 				if(isset($exp->tags))
 				{
-					foreach($exp->tags as $t)
+					for($j=0;$j<count($exp->tags);$j++)
 					{
+						$t=$exp->tags[$j];
 						if(	$t->ontology==$query['TagOntology'] &&
 							$t->name==$query['TagName'])
 						{						
@@ -1011,6 +1022,9 @@ function add_log($query)
 							$t->disagree--;
 						if($prevVote==1)
 							$t->agree--;
+						// if user retracted the only vote, remove the tag
+						if($flagFound && $t->disagree==0 && $t->agree==0)
+							array_splice($exp->tags,$j,1);
 					}
 					else
 					if($vote!=$prevVote)	// User is changing mind
@@ -1033,7 +1047,7 @@ function add_log($query)
 				if(mysqli_num_rows($result)>=1)
 				{
 					$q="UPDATE ".$dbname.".Articles SET Experiments=";
-					$q.= "'<![CDATA[".json_encode($exps)."]]>'";
+					$q.= "'".mysqli_real_escape_string($connection,json_encode($exps))."'"; // CDATA removed, escape_string added
 					$q.= " WHERE PMID='".$query['PMID']."'";
 					$result2 = mysqli_query($connection,$q);
 					if($result2)
@@ -1102,8 +1116,19 @@ function add_log($query)
 			$result=mysqli_query($connection,"SELECT Experiments FROM ".$dbname.".Articles WHERE PMID = ".$query['PMID']);
 			$record=mysqli_fetch_assoc($result);
 			$exps=json_decode(strip_cdata($record["Experiments"]));
-			$exp=$exps[$query['Experiment']];
-	
+			
+			
+			// HISTORY: This used to be $exp=$exps[$query['Experiment']];
+			for($i=0;$i<count($exps);$i++)
+				if($exps[$i]->id==$query['Experiment'])
+					break;
+			if($i==count($exps))
+			{
+				echo "ERROR: Experiment ID ".$query['Experiment']." not found";
+				continue;
+			}
+			$exp=$exps[$i];
+
 			// Find previous table mark, if already present, create it otherwise
 			if(isset($exp->markBadTable))
 				$m=$exp->markBadTable;
@@ -1141,7 +1166,7 @@ function add_log($query)
 			if(mysqli_num_rows($result)>=1)
 			{
 				$q="UPDATE ".$dbname.".Articles SET Experiments=";
-				$q.= "'<![CDATA[".json_encode($exps)."]]>'";
+				$q.= "'".mysqli_real_escape_string($connection,json_encode($exps))."'"; // cdata removed, escape_string added
 				$q.= " WHERE PMID='".$query['PMID']."'";
 				$result2 = mysqli_query($connection,$q);
 				if($result2)
@@ -1415,10 +1440,11 @@ function add_log($query)
 		{
 			$key=$query["Key"];
 			$value=$query["Value"];
+			$eid=$query["Experiment"];
 			$q="INSERT INTO ".$dbname.".Log (UserName,PMID,Experiment,Type,Data) VALUES(";
 			$q.="'".$query['UserName']."',";
 			$q.="'".$query['PMID']."',";
-			$q.="'-1',";
+			$q.="'".$query['Experiment']."',";
 			$q.="'".$key."',";
 			$q.="'".$value."')";
 			$result = mysqli_query($connection,$q);

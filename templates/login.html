@@ -100,6 +100,7 @@ function checkLogin()
 		{
 			loggedin=0;
 			$("div#sign-in div#warning").html("Incorrect user name or password");
+			setTimeout(function(){$("div#sign-in div#warning").html("")},1000);
 		}
 
 	});

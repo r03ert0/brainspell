@@ -122,6 +122,22 @@ table {
 .experiment-locations th.input, td.input {
   width: 14px; }
 
+.xyztable {
+  overflow-y: auto;
+  border-bottom: thin solid #dddddd; }
+
+.tableActions {
+  display: none;
+  padding: 8px 3px; }
+
+.button {
+  background-color: white;
+  border: thin solid #dddddd;
+  padding: 2px;
+  font-family: sans-serif;
+  text-align: center;
+  cursor: pointer; }
+
 /* Ontology modal */
 .light_overlay {
   display: none;

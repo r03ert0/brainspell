@@ -39,8 +39,10 @@ $fontTitle:     1rem;
 }
 
 /* START RT */
-html{height:100%}
-body{
+html {
+    height:100%
+}
+body {
     margin:0;
     height:100%;
     text-align:left;
@@ -152,10 +154,24 @@ table {
 .experiment-locations th.input, td.input {
 	width:14px;
 }
-
-
+.xyztable {
+    overflow-y:auto;
+    border-bottom:thin solid $lightGrey;
+}
+.tableActions {
+    display:none;
+    padding:8px 3px;
+}
+.button {
+    background-color:white;
+    border:thin solid $lightGrey;
+    padding:2px;
+    font-family: $tagSans;
+    text-align:center;
+    cursor:pointer;
+}
 /* Ontology modal */
-.light_overlay{
+.light_overlay {
     display:none;
     position:fixed;
     top:0;
@@ -180,7 +196,7 @@ table {
 }
 
 /* Concept modal */
-.box_overlay{
+.box_overlay {
     display:none;
     position:fixed;
     top:0;

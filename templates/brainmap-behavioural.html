@@ -8,7 +8,7 @@
 				<a href="http://brainmap.org" target="_blank">[Brainmap]</a>
 				<br/>
 				<br/>
-				<div id="iExp" style="display:none"></div>
+				<div id="eid" style="display:none"></div>
 			</div>
 			<div class="myThing" style="overflow-y:auto;border-style:solid;border-width:1px;background-color:#f5f5f5;border-color:#ddd">
 				<div class="classList" style="padding:20px;">
@@ -35,8 +35,9 @@
 			name=classes[i].name;
 			classes[i].value=i;
 		
-			var	iExp=parseInt($(".lightbox #iExp").text());
-			var obj=findTag(exp[iExp].tags,name,"behavioural");
+			var	eid/*iExp*/=parseInt($(".lightbox #eid").text());
+			var ex=findExperimentByEID(eid);
+			var obj=findTag(ex.tags,name,"behavioural");
 			if(obj)
 				rtag=obj;
 			else
@@ -61,7 +62,7 @@
 				rtag.name=sup+":"+mid;
 			}
 			tag.html(rtag.name);
-			tag.click({rtag:rtag},function(e){openTagModal(iExp,e.data.rtag)});
+			tag.click({rtag:rtag},function(e){openTagModal(eid/*iExp*/,e.data.rtag)});
 			if(obj)
 				updateTagColor(tag,rtag);
 			$('.classList').append(tag);
