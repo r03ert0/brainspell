@@ -478,7 +478,7 @@ function article_json_pmid($pmid)
 		for($k=0;$k<count($fields);$k++)
 		{
     		$i=$fields[$k];
-    		if($i=="Experiments" || $i=="Metadata")
+    		if($i=="Experiments" || $i=="Metadata" || $i=="Abstract")
     			$tmp=mysqli_real_escape_string($connection,strip_cdata($record[$i]));
 	    	else
 	    		$tmp=stripslashes(strip_cdata($record[$i]));
