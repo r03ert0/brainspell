@@ -819,9 +819,12 @@ function store(obj)
 	var	eid/*iExp*/=$(obj).closest(".experiment").attr("id");
 	var	name=$(obj).attr('class').split(" ")[1];
 	var	value=$(obj).text();
-	var value2=value.replace(/[^ a-zA-Z0-9\(\)\[\]]/g, ""); // Filter out
-	$(obj).text(value2);
-	save(eid/*iExp*/,name,value);
+	$(obj).html(value);
+	var value1=$(obj).html();
+	var value2=value1.replace(/[^ a-zA-Z0-9<>=,.%&{}!@#$^*-_+"?':;~\/\|`\(\)\[\]]/g, ""); // Filter out
+	var	value3=html_sanitize(value2);
+	$(obj).html(value3);
+	save(eid,name,value3);
 }
 function save(eid/*iExp*/,name,value)
 {
