@@ -1,0 +1,67 @@
+<html>
+<head>
+<style>
+table {
+	border-width:0;
+	border-collapse:collapse;
+	border-spacing:0;
+}
+td {
+	border-width:1px;
+	border-color:#ddd;
+	border-style:solid;
+}
+</style>
+<script src="/js/jquery-1.10.2.min.js"></script>
+</head>
+<body>
+
+<table width="100%" height="90%">
+<tr height='20px'>
+<td>
+Paste the comma-separated table text here and click <a href=# onclick="parse()">Parse</a>
+</td>
+<td>
+Result
+</td>
+</tr>
+<tr>
+<td>
+	<div id="text" style="width:100%;height:100%" contentEditable=true></div>
+</td>
+<td>
+	<div id="table" style="width:100%;height:100%"></div>
+</td>
+</tr>
+</table>
+
+<script>
+function parse() {
+	var arr=$("#text").html().split("<br>");
+	console.log(arr);
+	var i,j,k;
+	var val,num;
+	$("#table").html("");
+	$("#table").append("<table width='100%' height='100%'>\n");
+	$("#table").append("<tr><td>X</td><td>Y</td><td>Z</td></tr>\n");
+	for(i=0;i<arr.length;i++) {
+		var xyz=[];
+		val=arr[i].split(",");
+		k=0;
+		for(j=0;j<val.length;j++) {
+			var num1=val[j].replace(/["a-zA-Z]/g, "").replace(/\u2212/g, "-"); // minus sign
+			var num=parseFloat(num1);
+			if(!isNaN(num)) {
+				xyz[k++]=num;
+				if(k==3)
+					break;
+			}
+		}
+		if(k==3)
+			$("#table").append("<tr><td>"+xyz[0]+"</td><td>"+xyz[1]+"</td><td>"+xyz[2]+"</td></tr>\n");
+	}
+	$("#table").append("</table>\n");
+}
+</script>
+</body>
+</html>
