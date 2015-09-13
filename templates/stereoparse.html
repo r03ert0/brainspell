@@ -37,7 +37,7 @@ Result
 
 <script>
 function parse() {
-	var arr=$("#text").html().split("<br>");
+	var arr=$("#text").html().split(/<br>|<\/p>/);
 	console.log(arr);
 	var i,j,k;
 	var val,num;
