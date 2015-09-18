@@ -1,3 +1,5 @@
+var debug=0;
+
 var	tasks;
 var	cognitive;
 var	behavioural;
@@ -10,7 +12,7 @@ var EmptyArticle;
 
 function updateArticle()
 {
-	console.log("[updateArticle] Login update at article level (Login: "+(loggedin?"Yes":"No")+")");
+	if(debug) console.log("[updateArticle] Login update at article level (Login: "+(loggedin?"Yes":"No")+")");
 	
 	/*
 		Article-level display
@@ -176,7 +178,7 @@ function findIndexOfExperimentByEID(eid) {
 }
 function updateExperiment(eid/*iExp*/)
 {
-	console.log("[updateExperiment] Login update at experiment "+eid/*iExp*/+" (Login: "+(loggedin?"Yes":"No")+")");
+	if(debug) console.log("[updateExperiment] Login update at experiment "+eid/*iExp*/+" (Login: "+(loggedin?"Yes":"No")+")");
 	
 	/*
 		Experiment-level display
@@ -197,7 +199,7 @@ function updateExperiment(eid/*iExp*/)
 		var markBadTable=ex.markBadTable;
 		if(markBadTable && (markBadTable.bad+markBadTable.ok>=minVotes))
 		{
-			console.log("[updateExperiment] eid:",eid/*iExp*/,"markbad:",markBadTable);
+			if(debug) console.log("[updateExperiment] eid:",eid/*iExp*/,"markbad:",markBadTable);
 			$(".experiment#"+eid/*iExp*/+":first span#Yes").html('('+markBadTable.ok+')');
 			$(".experiment#"+eid/*iExp*/+":first span#No").html('('+markBadTable.bad+')');
 		
@@ -272,10 +274,10 @@ function initBrainSpellArticle()
 	if ('ontouchstart' in document.documentElement)
 		htmlTag.className = (htmlTag.className + ' ' || '') + 'isTouch';
 	
-	$.get(rootdir+"templates/cogatlas-tasks.html",function(data){tasks=data;console.log("[init] Tasks loaded");});
-	$.get(rootdir+"templates/cogatlas-cognitive.html",function(data){cognitive=data;console.log("[init] Cognitive domains loaded");});
-	$.get(rootdir+"templates/brainmap-behavioural.html",function(data){behavioural=data;console.log("[init] Behavioural domains loaded");});
-	$.get(rootdir+"templates/concept.html",function(data){concept=data;console.log("[init] Concept loaded");});
+	$.get(rootdir+"templates/cogatlas-tasks.html",function(data){tasks=data;if(debug) console.log("[init] Tasks loaded");});
+	$.get(rootdir+"templates/cogatlas-cognitive.html",function(data){cognitive=data;if(debug) console.log("[init] Cognitive domains loaded");});
+	$.get(rootdir+"templates/brainmap-behavioural.html",function(data){behavioural=data;if(debug) console.log("[init] Behavioural domains loaded");});
+	$.get(rootdir+"templates/concept.html",function(data){concept=data;if(debug) console.log("[init] Concept loaded");});
 
 	subscribeToLoginUpdates(updateArticle);
 
@@ -287,11 +289,11 @@ function initBrainSpellArticle()
 	$("#download").click(function(){downloadArticle()});
 	
 	ArticlePMID=$("#pmid").attr("href").split("/")[4];
-	console.log("Article's PMID",ArticlePMID);
+	if(debug) console.log("Article's PMID",ArticlePMID);
 
 	if(exp_string=="<!--Experiments-->")
 	{
-		console.log("[initBrainSpellArticle] Article not in DB, search pubmed");
+		if(debug) console.log("[initBrainSpellArticle] Article not in DB, search pubmed");
 		$("#new-article-warning").show();			
 		downloadArticleXML();
 	}
@@ -306,7 +308,7 @@ function initBrainSpellArticle()
 			meta={};
 		if(meta.meshHeadings==undefined || meta.meshHeadings.length==0)
 		{
-			console.log("[initBrainSpellArticle] Article without MeSH tags, search pubmed");
+			if(debug) console.log("[initBrainSpellArticle] Article without MeSH tags, search pubmed");
 			downloadArticleXML(function(){
 				saveMetadata();
 				logKeyValue(-1,"UserTriggeredAction",JSON.stringify({"action":"Update","element":"MeSH"}));
@@ -357,7 +359,7 @@ function downloadArticleXML(callback)
 	/*
 		Download article metadata from PubMed
 	*/
-	console.log("[downloadArticleXML]");
+	if(debug) console.log("[downloadArticleXML]");
 	$.get("http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi",
 		{"db":"pubmed","id":ArticlePMID,"report":"xml"},
 		function(xml) {
@@ -479,7 +481,7 @@ function addEmptyExperiments(obj)
 			},
 			async: false
 		}).done(function( msg ){
-			console.log(msg);
+			if(debug) console.log(msg);
 		});
 		
 		configureExperiments();
@@ -522,7 +524,7 @@ function configureMetadata()
 		$("div.comments").append("</p><br \>");
 	}
 	
-	console.log("[configureMetadata] metadata configured");
+	if(debug) console.log("[configureMetadata] metadata configured");
 }
 function configureMeSHDescriptors()
 {
@@ -546,7 +548,7 @@ function configureMeSHDescriptors()
 }
 function configureExperiments()
 {
-	console.log("[configureExperiments]");
+	if(debug) console.log("[configureExperiments]");
 	$(".experiments").html("");
 	for(i=0;i<exp.length;i++)
 	{
@@ -554,11 +556,11 @@ function configureExperiments()
 			continue;
 		$(".experiments").append($('<div class="experiment" id="'+exp[i].id+'">').load(rootdir+"templates/experiment.html",addExperiment(exp[i].id)));
 	}
-	console.log("[configureExperiments] experiments configured");
+	if(debug) console.log("[configureExperiments] experiments configured");
 }
 function addExperiment(eid/*iExp*/)
 {
-	console.log("[addExperiment]");
+	if(debug) console.log("[addExperiment]");
 	return function(responseText, textStatus, XMLHttpRequest){
 
 		// Configure legend (title and caption)
@@ -672,7 +674,7 @@ function clickOnTable(target)
 }
 function keydownOnTable(target)
 {
-	console.log("keydown:",target);
+	if(debug) console.log("keydown:",target);
 }
 function selectRow(row,eid/*iExp*/) {
 	var ex=findExperimentByEID(eid);
@@ -748,7 +750,11 @@ function addRow(row)
 function splitTable(eid/*iExp*/,irow) {
 	var ex=findExperimentByEID(eid);
 	var iExp=findIndexOfExperimentByEID(eid);
-	console.log("Split the table in experiment "+eid/*iExp*/+" at row: "+ex.selectedRow);
+	if(debug) console.log("Split the table in experiment "+eid/*iExp*/+" at row: "+ex.selectedRow);
+
+	// clear sphere selection in 3d view
+	ex.render.spheres.children.forEach(function( sph ) { sph.material.color.setRGB( 1,0,0 );});
+
 	var	newLocations=ex.locations.splice(irow,ex.locations.length-irow);
 	var i,new_eid;
 	new_eid=exp[0].id;
@@ -760,9 +766,11 @@ function splitTable(eid/*iExp*/,irow) {
 		id: new_eid,
 		title: "",
 		caption: "",
+		tags:JSON.parse(JSON.stringify(ex.tags)),
 		locations: newLocations
 	};
 	exp.splice(iExp+1, 0, newExp);
+	
 	configureExperiments();
 	saveExperiments();
 
@@ -869,7 +877,7 @@ function saveExperiments()
 		},
 		async: false
 	}).done(function( msg ){
-		console.log("[saveExperiments]",msg);
+		if(debug) console.log("[saveExperiments]",msg);
 	});
 }
 function saveMetadata()
@@ -889,7 +897,7 @@ function saveMetadata()
 		},
 		async: false
 	}).done(function( msg ){
-		console.log("[saveMetadata]",msg);
+		if(debug) console.log("[saveMetadata]",msg);
 	});
 }
 function addOntology(eid/*iExp*/,ontology)
@@ -1010,7 +1018,7 @@ function findPreviousTableMarkByUser(eid/*iExp*/)
 			},
 			async: false
 		}).done(function( msg ){
-			console.log("[findPreviousTableMarkByUser] ",msg);
+			if(debug) console.log("[findPreviousTableMarkByUser] ",msg);
 			var xml=$.parseXML(msg);
 			var	markTable=$(xml).find("MarkTable").text();
 			if(markTable)
@@ -1036,7 +1044,7 @@ function findPreviousStereoSpaceByUser()
 			},
 			async: false
 		}).done(function( msg ){
-			console.log("[findPreviousStereoSpaceByUser] ",msg);
+			if(debug) console.log("[findPreviousStereoSpaceByUser] ",msg);
 			var xml=$.parseXML(msg);
 			var	space=$(xml).find("StereoSpace").text();
 			if(space)
@@ -1062,7 +1070,7 @@ function findPreviousNSubjectsByUser()
 			},
 			async: false
 		}).done(function( msg ){
-			console.log("[findPreviousNSubjectsByUser] ",msg);
+			if(debug) console.log("[findPreviousNSubjectsByUser] ",msg);
 			var xml=$.parseXML(msg);
 			var	n=$(xml).find("NSubjects").text();
 			if(n)
@@ -1113,7 +1121,7 @@ function resizeOntologyModal()
 }
 function openTagModal(eid/*iExp*/,rtag)
 {
-	console.log("[openTagModal]");
+	if(debug) console.log("[openTagModal]");
 	var	obj=0;
 	
 	if(eid/*iExp*/>-1) {
@@ -1250,7 +1258,7 @@ $(window).resize(function()
 */
 function logVote(eid/*iExp*/,rtag,vote)
 {
-	console.log("[logVote] Log vote "+vote+" of user "+username);
+	if(debug) console.log("[logVote] Log vote "+vote+" of user "+username);
 
 	var	obj={
 		action:"add_log",
@@ -1263,7 +1271,7 @@ function logVote(eid/*iExp*/,rtag,vote)
 		Experiment:eid // (iExp<0)?iExp:exp[iExp].id // HAD TO CHANGE THIS FROM iExp
 	};
 	$.get(rootdir+"php/brainspell.php",obj,function(data){
-		console.log("[logVote]",data);
+		if(debug) console.log("[logVote]",data);
 	});
 }
 function logMarkTable(sender)
@@ -1292,7 +1300,7 @@ function logMarkTable(sender)
 function logStereoSpace(sender)
 {
 	var	space=$(sender).val();
-	console.log("[logStereoSpace] space",space);
+	if(debug) console.log("[logStereoSpace] space",space);
 	var	obj={	action:"add_log",
 				type:"StereoSpace",
 				PMID:ArticlePMID,
@@ -1300,7 +1308,7 @@ function logStereoSpace(sender)
 				StereoSpace:space};
 	$.get(rootdir+"php/brainspell.php",obj,function(data){
 		var out=$.parseJSON(data);
-		console.log("[logStereoSpace] out",out.result);
+		if(debug) console.log("[logStereoSpace] out",out.result);
 		meta.stereo=out.result;
 		if(meta.stereo.Talairach+meta.stereo.MNI>=minVotes)
 		{
@@ -1312,7 +1320,7 @@ function logStereoSpace(sender)
 function logNSubjects(sender)
 {
 	var	nsubjects=$(sender).val();
-	console.log("[logNSubjects] nsubjects",nsubjects);
+	if(debug) console.log("[logNSubjects] nsubjects",nsubjects);
 	var	obj={	action:"add_log",
 				type:"NSubjects",
 				PMID:ArticlePMID,
@@ -1320,7 +1328,7 @@ function logNSubjects(sender)
 				NSubjects:nsubjects};
 	$.get(rootdir+"php/brainspell.php",obj,function(data){
 		var out=$.parseJSON(data);
-		console.log("[logNSubjects] out",out.result);
+		if(debug) console.log("[logNSubjects] out",out.result);
 
 		meta.nsubjects=out.result;
 
@@ -1343,17 +1351,17 @@ function logComment()
 {
 	var	content=html_sanitize($("textarea#comment").val());
 	var	txt=JSON.stringify(content);
-	console.log("[logComment]",content,txt);
+	if(debug) console.log("[logComment]",content,txt);
 	var	time=new Date().getTime();
 	var	comment='{"comment":'+txt+',"user":"'+username+'","time":"'+time+'"}';
-	console.log("[logComment] comment",comment);
+	if(debug) console.log("[logComment] comment",comment);
 	var	obj={	action:"add_log",
 				type:"Comment",
 				PMID:ArticlePMID,
 				UserName:username,
 				Comment:comment};
 	$.get(rootdir+"php/brainspell.php",obj,function(data){
-		console.log("[logComment]",data);
+		if(debug) console.log("[logComment]",data);
 		var out=$.parseJSON(data);
 		var	comment=$.parseJSON(out.result);
 		var	time=new Date();
@@ -1369,7 +1377,7 @@ function logKeyValue(eid,key,value)
 	// eid: Experiment's unique id
 	// key: a key. Will go to the 'Type' column in table Log of the DB
 	// value: a value. Will go to the 'Data' column in table Log of the DB
-	console.log("[logKeyValue]",eid,key,value);
+	if(debug) console.log("[logKeyValue]",eid,key,value);
 	var	obj={	action:"add_log",
 				type:"KeyValue",
 				PMID:ArticlePMID,
@@ -1378,7 +1386,7 @@ function logKeyValue(eid,key,value)
 				Key:key,
 				Value:value};
 	$.get(rootdir+"php/brainspell.php",obj,function(data){
-		console.log("[logKeyValue]",data);
+		if(debug) console.log("[logKeyValue]",data);
 	});
 }
 
@@ -1386,7 +1394,7 @@ function logKeyValue(eid,key,value)
 function initTranslucentBrain(eid/*iExp*/)
 {
 	var ex=findExperimentByEID(eid);
-	console.log("ex:"+ex+" eid:"+eid);
+	if(debug) console.log("ex:"+ex+" eid:"+eid);
 	ex.render={};
 	ex.render.container=$(".experiment#"+eid/*iExp*/+" div.metaCoords");
 

@@ -145,7 +145,7 @@ function user_remind()
 			}
 		
 			$message = "User name: ".$username."\rPassword: ".$password;
-			mail($email, 'BrainSpell password', $message);
+			mail($email, 'BrainSpell password', $message,'From: brainspell.org <no-reply@brainspell.org>');
 
 			$username = mysqli_real_escape_string($connection,$username);
 			$password = md5(mysqli_real_escape_string($connection,$password));
