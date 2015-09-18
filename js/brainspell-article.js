@@ -764,8 +764,8 @@ function splitTable(eid/*iExp*/,irow) {
 	new_eid=(new_eid<100000)?100000:(new_eid+1); // Using 100000 to distinguish from automatic ids (neurosynth/fix)
 	var newExp={
 		id: new_eid,
-		title: "",
-		caption: "",
+		title: ex.title,
+		caption: ex.caption,
 		tags:JSON.parse(JSON.stringify(ex.tags)),
 		locations: newLocations
 	};
