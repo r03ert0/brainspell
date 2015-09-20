@@ -657,7 +657,7 @@ function addExperiment(eid/*iExp*/)
 		});
 		// Import table
 		$(".experiment#"+eid/*iExp*/+" .button.import").click(function() {
-			importTable(eid/*iExp*/);
+			importTable(eid);
 		});
 
 		// Parse locations: add locations to
@@ -797,24 +797,88 @@ function splitTable(eid/*iExp*/,irow) {
 	// log user action
 	logKeyValue(ex.id,"SplitTable",JSON.stringify({"newExperiment":new_eid}));
 }
-function importTable(eid,irow) {
+function importTable(eid) {
 	var ex=findExperimentByEID(eid);
 	var iExp=findIndexOfExperimentByEID(eid);
 	if(debug) console.log("Import table from text in experiment "+eid);
-
-	// clear sphere selection in 3d view
 	ex.render.spheres.children.forEach(function( sph ) { sph.material.color.setRGB( 1,0,0 );});
-	
-	var overlay=$("<div>");
+	var container=$("<div id='import-table'>");
 	var lightbox=$("<div>");
-	overlay.css({'position':'fixed','top':'0','left':'0','width':'100%','height':'100%','background-color':'rgba(0,0,0,0.5)','z-index':'100'});
-	lightbox.css({'position':'absolute','top':'20px','left':'20px','bottom':'20px','right':'20px','background-color':'white'});
-	overlay.append(lightbox);
-	overlay.click(function(){$(this).remove()});
+	lightbox.addClass('light_content');
 	$.get(rootdir+"templates/stereoparse.html",function(data) {
+		var i;
+		var newLocations=[];
+
+		// load html template
 		lightbox.html(data);
+
+		// init text with current table data
+		for(i=0;i<ex.locations.length;i++)
+			$("#text").append(ex.locations[i].x+","+ex.locations[i].y+","+ex.locations[i].z+"<br />\n");
+		
+		var parse_button=$("#parse_button");
+		var import_button=$("#import_button");
+		var	cancel_button=$("#cancel_button");
+		import_button.css({margin:"10px",display:"none"});
+		cancel_button.css({margin:"10px",display:"none"});
+		parse_button.click(function() {
+			var arr=$("#text").html().split(/<br>|<\/p>|<div>/);
+			var i,j,k;
+			var val,num;
+	
+			// (lines are easier to split from html(),
+			// but values are easier to parse from text())
+			for(i=0;i<arr.length;i++) {
+				var tmp=$("<div>");
+				tmp.html(arr[i]);
+				arr[i]=tmp.text();
+			}
+
+			var table=$("<table style='width:100%;text-align:center'>");
+			table.append("<tr><td><b>X</b></td><td><b>Y</b></td><td><b>Z</b></td></tr>\n");
+			for(i=0;i<arr.length;i++) {
+				val=arr[i].split(",");
+				k=0;
+				var xyz=[];		
+				for(j=0;j<val.length;j++) {
+					var num1=val[j].replace(/["a-zA-Z]/g, "").replace(/\u2212/g, "-"); // minus sign
+					var num=parseFloat(num1);
+					if(!isNaN(num)) {
+						xyz[k++]=num;
+						if(k==3) {
+							newLocations.push({x:xyz[0],y:xyz[1],z:xyz[2]});
+							break;
+						}
+					}
+				}
+				if(k==3)
+					table.append("<tr><td align:center'>"+xyz[0]+"</td><td>"+xyz[1]+"</td><td>"+xyz[2]+"</td></tr>\n");
+			}
+			$("#table").html(table);
+			$("#import_button").show();
+			$("#cancel_button").show();
+		});
+		import_button.click(function() {
+			var i;
+			ex.locations=[];
+			for(i=0;i<newLocations.length;i++)
+				ex.locations.push({x:newLocations[i].x,y:newLocations[i].y,z:newLocations[i].z});
+			configureExperiments();
+			saveExperiments();
+			logKeyValue(ex.id,"ImportTable",JSON.stringify({"Experiment":eid}));
+			$("#import-table").remove();
+		});
+		cancel_button.click(function() {
+			$("#import-table").remove();
+		});
 	});
-	$("body").append(overlay);
+	lightbox.show();
+	var overlay=$("<div>");
+	overlay.addClass('light_overlay');
+	overlay.show();
+	container.append(overlay);
+	container.append(lightbox);
+	$("body").append(container);
 }
 //============
 // 3D Viewer and Table
