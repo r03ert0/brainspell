@@ -186,12 +186,32 @@ function updateExperiment(eid/*iExp*/)
 	*/
 	if(loggedin)
 	{
+		$(".experiment#"+eid/*iExp*/+" .title").addClass('stored');
+		$(".experiment#"+eid/*iExp*/+" .caption").addClass('stored');
 		$(".experiment#"+eid/*iExp*/+" div.tableAlert").hide();
 		$(".experiment#"+eid/*iExp*/+" div.tableMark").show();
 		$(".experiment#"+eid/*iExp*/+" td.coordinate").attr("contentEditable","true");
 		$(".experiment#"+eid/*iExp*/+" th.input").show();
 		$(".experiment#"+eid/*iExp*/+" td.input").show();
 		$(".experiment#"+eid/*iExp*/+" .tableActions").show();
+
+		// Stored text fields (title, caption)
+		$(".stored").click(function() {
+			$("div.stored").removeAttr('contentEditable');
+			if(loggedin)$(this).attr('contentEditable','true');
+		});
+		$(".stored").focusout(function() {
+			store(this);
+			$(this).removeAttr('contentEditable');
+		});
+		$('.stored').on('keydown',function(e) {	// Intercept enter on 'stored' fields
+			if(e.which==13&&e.shiftKey==false) {	// enter (without shift)
+				store(this);
+				$(this).removeAttr('contentEditable');
+				$(this).blur();
+				return false;
+			}
+		});
 
 		// Experiment table mark
 		var ex=findExperimentByEID(eid);
@@ -243,6 +263,9 @@ function updateExperiment(eid/*iExp*/)
 	}
 	else
 	{
+		$(".stored").removeAttr('contentEditable');
+		$(".experiment#"+eid/*iExp*/+" .stored").removeClass('stored');
+
 		// Experiment table mark (global)
 		$(".experiment#"+eid/*iExp*/+" div.tableAlert").show();
 		$(".experiment#"+eid/*iExp*/+" div.tableMark").hide();
@@ -568,25 +591,8 @@ function addExperiment(eid/*iExp*/)
 		var ex=findExperimentByEID(eid);
 		var title=(ex.title)?ex.title:"(Empty)";
 		var caption=(ex.caption)?ex.caption:"(Empty)";
-		$(".experiment#"+eid/*iExp*/+" .stored.title").append(title);
-		$(".experiment#"+eid/*iExp*/+" .stored.caption").append(caption);
-
-		$(".stored").click(function() {
-			$("div.stored").removeAttr('contentEditable');
-			if(loggedin)$(this).attr('contentEditable','true');
-		});
-		$(".stored").focusout(function() {
-			store(this);
-			$(this).removeAttr('contentEditable');
-		});
-		$('.stored').on('keydown',function(e) {	// Intercept enter on 'stored' fields
-			if(e.which==13&&e.shiftKey==false) {	// enter (without shift)
-				store(this);
-				$(this).removeAttr('contentEditable');
-				$(this).blur();
-				return false;
-			}
-		});
+		$(".experiment#"+eid/*iExp*/+" .title").append(title);
+		$(".experiment#"+eid/*iExp*/+" .caption").append(caption);
 
 		// Configure locations to 3D view
 		//-------------------------------
@@ -643,9 +649,15 @@ function addExperiment(eid/*iExp*/)
 			}
 		});
 		
-		// Table actions: Split table
+		// Table actions
+		//--------------
+		// Split table
 		$(".experiment#"+eid/*iExp*/+" .button.split").click(function() {
 			splitTable(eid/*iExp*/,ex.selectedRow);
+		});
+		// Import table
+		$(".experiment#"+eid/*iExp*/+" .button.import").click(function() {
+			importTable(eid/*iExp*/);
 		});
 
 		// Parse locations: add locations to
@@ -785,6 +797,25 @@ function splitTable(eid/*iExp*/,irow) {
 	// log user action
 	logKeyValue(ex.id,"SplitTable",JSON.stringify({"newExperiment":new_eid}));
 }
+function importTable(eid,irow) {
+	var ex=findExperimentByEID(eid);
+	var iExp=findIndexOfExperimentByEID(eid);
+	if(debug) console.log("Import table from text in experiment "+eid);
+
+	// clear sphere selection in 3d view
+	ex.render.spheres.children.forEach(function( sph ) { sph.material.color.setRGB( 1,0,0 );});
+	
+	var overlay=$("<div>");
+	var lightbox=$("<div>");
+	overlay.css({'position':'fixed','top':'0','left':'0','width':'100%','height':'100%','background-color':'rgba(0,0,0,0.5)','z-index':'100'});
+	lightbox.css({'position':'absolute','top':'20px','left':'20px','bottom':'20px','right':'20px','background-color':'white'});
+	overlay.append(lightbox);
+	overlay.click(function(){$(this).remove()});
+	$.get(rootdir+"templates/stereoparse.html",function(data) {
+		lightbox.html(data);
+	});
+	$("body").append(overlay);
+}
 //============
 // 3D Viewer and Table
 //=============
@@ -833,7 +864,7 @@ function parseTable(row,eid/*iExp*/)
 function store(obj)
 {
 	var	eid/*iExp*/=$(obj).closest(".experiment").attr("id");
-	var	name=$(obj).attr('class').split(" ")[1];
+	var	name=$(obj).attr('class').split(" ")[0];
 	var	value=$(obj).text();
 	$(obj).html(value);
 	var value1=$(obj).html();
@@ -1394,7 +1425,8 @@ function logKeyValue(eid,key,value)
 				Key:key,
 				Value:value};
 	$.get(rootdir+"php/brainspell.php",obj,function(data){
-		if(debug) console.log("[logKeyValue]",data);
+		//if(debug)
+			console.log("[logKeyValue]",data);
 	});
 }
 

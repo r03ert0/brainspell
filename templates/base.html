@@ -62,12 +62,12 @@
 		function subscribeToLoginUpdates(f)
 		{
 			loginUpdateSubscribers.push(f);
-			console.log("[subscribeToLoginUpdates] subscribe",loginUpdateSubscribers);
+			//console.log("[subscribeToLoginUpdates] subscribe",loginUpdateSubscribers);
 		}
 		function unsubscribeToLoginUpdates(f)
 		{
 			loginUpdateSubscribers.splice(loginUpdateSubscribers.indexOf(f),1);
-			console.log("[unsubscribeToLoginUpdates] unsubscribe",loginUpdateSubscribers);
+			//console.log("[unsubscribeToLoginUpdates] unsubscribe",loginUpdateSubscribers);
 		}
 		function update_login()
 		{
