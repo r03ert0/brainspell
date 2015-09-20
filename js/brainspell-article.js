@@ -571,7 +571,10 @@ function addExperiment(eid/*iExp*/)
 		$(".experiment#"+eid/*iExp*/+" .stored.title").append(title);
 		$(".experiment#"+eid/*iExp*/+" .stored.caption").append(caption);
 
-		$(".stored").click(function(){$(this).attr('contentEditable','true');});
+		$(".stored").click(function() {
+			$("div.stored").removeAttr('contentEditable');
+			if(loggedin)$(this).attr('contentEditable','true');
+		});
 		$(".stored").focusout(function() {
 			store(this);
 			$(this).removeAttr('contentEditable');

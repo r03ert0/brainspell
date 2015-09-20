@@ -140,7 +140,10 @@ table {
 div[contenteditable] {
 	background-color:#f7f7f7;
 }
-
+div.stored {
+	border:thin solid lightGrey;
+	margin: 1px;
+}
 .experiment-locations {
   background-color: #fafafa;
   padding:0px;
