@@ -570,13 +570,18 @@ function addExperiment(eid/*iExp*/)
 		var caption=(ex.caption)?ex.caption:"(Empty)";
 		$(".experiment#"+eid/*iExp*/+" .stored.title").append(title);
 		$(".experiment#"+eid/*iExp*/+" .stored.caption").append(caption);
-		$('.stored').on( 'keydown',function(e) {	// Intercept enter on 'stored' fields
+
+		$(".stored").click(function(){$(this).attr('contentEditable','true');});
+		$(".stored").focusout(function() {
+			store(this);
+			$(this).removeAttr('contentEditable');
+		});
+		$('.stored').on('keydown',function(e) {	// Intercept enter on 'stored' fields
 			if(e.which==13&&e.shiftKey==false) {	// enter (without shift)
 				store(this);
+				$(this).removeAttr('contentEditable');
+				$(this).blur();
 				return false;
-			}
-			if(e.which==9) {						// tab
-				store(this);
 			}
 		});
 

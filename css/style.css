@@ -100,6 +100,14 @@ table {
 .experiment {
   padding: 10px; }
 
+[contenteditable]:active,
+[contenteditable]:focus {
+  border: none;
+  outline: none; }
+
+div[contenteditable] {
+  background-color: #f7f7f7; }
+
 .experiment-locations {
   background-color: #fafafa;
   padding: 0px; }
