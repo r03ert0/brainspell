@@ -3,6 +3,12 @@ Install MySQL
 --------------------
 libmysql / MySQL: 5.5.38
 
+Set up the root password:
+
+    mysql -u root -p
+
+Enter: "beo8hkii"
+
 Install phpmyadmin
 --------------------
 version: > 3.5.8.2
@@ -41,7 +47,7 @@ At that stage, check that brainspell.dev is working in browser
 To make the search work locally: change permission for Lucene
 -----------------------------------------------------------------
 
-$ cd /var/www/html/brainspell/php
-$ su chmod -R a+rwx LuceneIndex
+$ cd <project location>/brainspell/site/php
+$ sudo chmod -R a+rwx LuceneIndex
 
 
