@@ -33,6 +33,8 @@ In phpmyadmin:
 create database brainspell (go to database) 
 choose Collation: `latin1_swedish_ci`
 
+Click on the brainspell database in the sidebar.
+
 go to SQL tab, then 
 `USE brainspell`
 
