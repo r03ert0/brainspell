@@ -15,6 +15,9 @@ If the password is already set, run this command:
 
 Install phpmyadmin
 --------------------
+
+    sudo apt-get install phpmyadmin
+
 version: > 3.5.8.2
 Web server: apache 2.4.9 PHP/5.4.3 (but 2.4.7 is working for me)
 libmysql / MySQL: 5.5.38
