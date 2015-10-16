@@ -9,6 +9,10 @@ Set up the root password:
 
 Enter: "beo8hkii"
 
+If the password is already set, run this command:
+
+    sudo dpkg-reconfigure mysql-server-5.6
+
 Install phpmyadmin
 --------------------
 version: > 3.5.8.2
