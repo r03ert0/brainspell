@@ -56,9 +56,19 @@ set the char set to: `utf-8`
 
 Generally, logic is handled by 404.php file. This redirects to other PHP functions.
 
+## Clone the repo in VM home directory
+For some reason, the brainspell in Shared folder doesn't work, so we decided to checkout it again in the home directory
+
+```
+$ cd
+$ git clone https://github.com/BIDS-collaborative/brainspell.git
+```
+
+Now the brainspell folder should be at (`/home/oski/brainspell`)
+
 ## Current setup
 
-Add to /etc/hosts:
+Add to /etc/hosts (`$ subl /etc/hosts`):
 
 ```
 127.0.0.1    brainspell.dev
@@ -77,19 +87,19 @@ $ sudo ln -s ../mods-available/headers.load .
 From `/etc/apache2/sites-enabled`:
 
 ```
-$ sudo ln -s <brainspell_git_dir>/conf/apache-site-brainspell.conf .
+$ sudo ln -s /home/oski/brainspell/conf/apache-site-brainspell.conf .
 ```
 
 From `/etc/apache2/conf-enabled`:
 
 ```
-$ sudo ln -s <brainspell_git_dir>/conf/base-apache-brainspell.conf .
+$ sudo ln -s /home/oski/brainspell/conf/base-apache-brainspell.conf .
 ```
 
 To make the search work locally: change permission for Lucene
 
 ```
-$ cd <project location>/brainspell/site/php
+$ cd /home/oski/brainspell/site/php
 ```
 
 ```
