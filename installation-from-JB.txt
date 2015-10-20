@@ -99,3 +99,7 @@ From `/etc/apache2/conf-enabled`:
 ```
 $ sudo ln -s <brainspell_git_dir>/conf/base-apache-brainspell.conf .
 ```
+restart apache 
+```
+$ sudo service apache2 restart
+```
