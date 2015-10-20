@@ -52,20 +52,6 @@ Select brainspell.sql
 set the char set to: `utf-8`
 
 
-At that stage, check that brainspell.dev is working in browser
----------------------------------------------------------------
-
-To make the search work locally: change permission for Lucene
------------------------------------------------------------------
-
-$ cd <project location>/brainspell/site/php
-$ sudo chmod -R a+rwx LuceneIndex
-
-Welcome to the brainspell wiki!
-
-Hi Aman!
-Hi Roberto!
-
 # Getting oriented
 
 Generally, logic is handled by 404.php file. This redirects to other PHP functions.
@@ -99,7 +85,27 @@ From `/etc/apache2/conf-enabled`:
 ```
 $ sudo ln -s <brainspell_git_dir>/conf/base-apache-brainspell.conf .
 ```
+
+To make the search work locally: change permission for Lucene
+
+```
+$ cd <project location>/brainspell/site/php
+```
+
+```
+$ sudo chmod -R a+rwx LuceneIndex
+```
+
 restart apache 
+
 ```
 $ sudo service apache2 restart
 ```
+
+At that stage, check that brainspell.dev is working in browser
+---------------------------------------------------------------
+
+Welcome to the brainspell wiki!
+
+Hi Aman!
+Hi Roberto!
