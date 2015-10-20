@@ -61,4 +61,45 @@ To make the search work locally: change permission for Lucene
 $ cd <project location>/brainspell/site/php
 $ sudo chmod -R a+rwx LuceneIndex
 
+Welcome to the brainspell wiki!
 
+Hi Aman!
+Hi Roberto!
+
+# Getting oriented
+
+Generally, logic is handled by 404.php file. This redirects to other PHP functions.
+
+## Current setup
+
+Add to /etc/hosts:
+
+```
+127.0.0.1    brainspell.dev
+```
+
+### Set up apache config
+
+This assumes you have checked out brainspell to your home directory (`/home/oski/brainspell`).
+
+From `/etc/apache2/mods-enabled`:
+
+```
+$ sudo ln -s ../mods-available/headers.load .
+```
+
+From `/etc/apache2/sites-enabled`:
+
+```
+$ sudo ln -s <brainspell_git_dir>/conf/apache-site-brainspell.conf .
+```
+
+From `/etc/apache2/conf-enabled`:
+
+```
+$ sudo ln -s <brainspell_git_dir>/conf/base-apache-brainspell.conf .
+```
+restart apache 
+```
+$ sudo service apache2 restart
+```
