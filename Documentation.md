@@ -6,7 +6,7 @@
 
 ###1. Replaced Variable vs. Comment
 
-The ```<!-- comments here -->``` format in the HTML file represents regular comments, but the code with the ```<!--% something %-->``` represents the variable that will be replaced by the corresponding variable from the PHP file. 
+The ```<!-- Comments Here -->``` format in the HTML file represents regular comments, but the code with the % symbol ```<!--% SomeVariableWillBeReplaced %-->``` represents the variable that will be replaced by the corresponding variable from the PHP file. 
 
 _**Example**_
 
