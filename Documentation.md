@@ -1,7 +1,7 @@
 
 #Documentation
 
-*This documentation clarify the code in brainspell repositary.*
+*This documentation clarify the code in brainspell repository.*
 
 
 ###1. Replaced Variable vs. Comment
