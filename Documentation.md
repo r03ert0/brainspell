@@ -1,14 +1,14 @@
 
 #Documentation
---------------------
-*This documentation records the clarification of the code in brainspell repositary.*
+
+*This documentation clarify the code in brainspell repositary.*
 
 
-###1. Replaced Varialbe vs. Comment
+###1. Replaced Variable vs. Comment
 
 The ```<!-- comments here -->``` format in the HTML file represents regular comments, but the code with the ```<!--% something %-->``` represents the variable that will be replaced by the corresponding variable from the PHP file. 
 
-**Example**
+_**Example**_
 
 In **site/templates/search.html** file:
 ```
