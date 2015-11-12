@@ -1660,3 +1660,12 @@ function render(iExp) {
 	// actually render the scene
 	exp[iExp].render.renderer.render(exp[iExp].render.scene,exp[iExp].render.camera );
 }
+
+function addAColumn() {
+	$("table.xyzheader tr").append('<th class="coordinated">Q</th>');
+	$("div.xyztable tr").each(
+			function () {
+				$(this).append('<td class="coordinate">123</td>');
+			}
+			);
+}
