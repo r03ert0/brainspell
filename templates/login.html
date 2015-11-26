@@ -87,7 +87,7 @@ div.login-overlay {
 
 function checkLogin()
 {
-	$.get(rootdir+"php/brainspell.php",{"action":"login","username":$("#username").val(),"password":$("#password").val()},function(data){
+	$.get("/php/brainspell.php",{"action":"login","username":$("#username").val(),"password":$("#password").val()},function(data){
 		if(data=="Yes")
 		{
 			username=$("#username").val();
@@ -129,7 +129,7 @@ function register()
 		return;
 	}
 	
-	$.get(rootdir+"php/brainspell.php",{"action":"register","username":reg_username,"email":reg_email,"password":reg_password},function(data){
+	$.get("/php/brainspell.php",{"action":"register","username":reg_username,"email":reg_email,"password":reg_password},function(data){
 		if(data=="Yes")
 		{
 			username=reg_username;
@@ -156,7 +156,7 @@ function remindBox()
 }
 function remind()
 {
-	$.get(rootdir+"php/brainspell.php",{"action":"remind","username":username},function(data){
+	$.get("/php/brainspell.php",{"action":"remind","username":username},function(data){
 		if(data=="Yes")
 		{
 			username=reg_username;

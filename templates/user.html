@@ -1,6 +1,18 @@
 <div style="width:600px;margin-left:auto;margin-right:auto;margin-top:2rem">
 	<h2>HOME PAGE OF <span id="HomeUsername"></span></h2>
-	<!--AccountSettings-->
+	
+			<h2>Account Settings</h2>".
+			<div style=\"background-color:#f8f8f8;padding:1rem\">".
+				<table style=\"width:100%;\">".
+					<tr><td><label for="username">User Name   </label></td><td><input value="".$username."\" type=\"text\" name=\"username\" id=\"username\" style=\"width:100%\"/></td></tr>
+					<tr><td><label for="password">E-Mail      </label></td><td><input value="".$_SESSION['EmailAddress']."\" type=\"text\" name=\"email\" id=\"email\" style=\"width:100%\"/></td></tr>
+					<tr><td><label for="password">New Password</label></td><td><input type="password" name="password" id=\"password\" style=\"width:100%\"/></td></tr>
+				<tr><td><label for="password">Old Password</label></td><td><input type=\"password\" name=\"password\" id=\"password\" style=\"width:100%\"/></td></tr>
+					<tr><td></td><td><input type=\"button\" name=\"login\" id=\"login\" value=\"Change\" onclick=\"checkLogin()\"/></td></tr>
+					<tr><td></td><td><input type=\"button\" name=\"delete\" id=\"login\" value=\"Delete my account\" onclick=\"checkLogin()\"/></td></tr>
+				</table>
+			</div>
+	
 </div>
 
 <!--
@@ -19,5 +31,8 @@
 
 <script>
 var	homeUsername="<!--HomeUsername-->";
+var username="<!--AccountSettings-->";
+var loggedin="<!--AccountSettings-->";
+
 $("span#HomeUsername").text(homeUsername.toUpperCase());
 </script>

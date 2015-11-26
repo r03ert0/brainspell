@@ -48,8 +48,8 @@
 		var cts={"tasks":"Cognitive Atlas Tasks","cognitive":"Cognitive Atlas Cognitive Domains","behavioural":"BrainMap Behavioural Domains","mesh":"MeSH Medical Headings"};
 		$("h2.name").html(rtag.name);
 		$("h3.ontology-title").html(cts[rtag.ontology]);
-		$("img.thumbs_up").attr("src",rootdir+"img/thumbs_up.svg");
-		$("img.thumbs_down").attr("src",rootdir+"img/thumbs_down.svg");
+		$("img.thumbs_up").attr("src","/img/thumbs_up.svg");
+		$("img.thumbs_down").attr("src","/img/thumbs_down.svg");
 		
 		// find if user has already voted
 		var	eid=parseInt($('#box #eid').text());
@@ -78,7 +78,7 @@
 
 		$.ajax({
 			type: "GET",
-			url: rootdir+"php/brainspell.php",
+			url: "/php/brainspell.php",
 			data: {
 				action:"get_concept",
 				command:"concept",

@@ -9,6 +9,7 @@ var meta;
 var exp;
 var ArticlePMID;
 var EmptyArticle;
+var flagIsNIDM;
 
 function updateArticle()
 {
@@ -40,6 +41,7 @@ function updateArticle()
 
 		// New article warning
 		$("#new-article-warning button").removeAttr('disabled');
+		$("#new-nidm-article-warning button").removeAttr('disabled');
 		
 		// Metadata stereotaxic space
 		$("span#Talairach").show();
@@ -297,10 +299,10 @@ function initBrainSpellArticle()
 	if ('ontouchstart' in document.documentElement)
 		htmlTag.className = (htmlTag.className + ' ' || '') + 'isTouch';
 	
-	$.get(rootdir+"templates/cogatlas-tasks.html",function(data){tasks=data;if(debug) console.log("[init] Tasks loaded");});
-	$.get(rootdir+"templates/cogatlas-cognitive.html",function(data){cognitive=data;if(debug) console.log("[init] Cognitive domains loaded");});
-	$.get(rootdir+"templates/brainmap-behavioural.html",function(data){behavioural=data;if(debug) console.log("[init] Behavioural domains loaded");});
-	$.get(rootdir+"templates/concept.html",function(data){concept=data;if(debug) console.log("[init] Concept loaded");});
+	$.get("/templates/cogatlas-tasks.html",function(data){tasks=data;if(debug) console.log("[init] Tasks loaded");});
+	$.get("/templates/cogatlas-cognitive.html",function(data){cognitive=data;if(debug) console.log("[init] Cognitive domains loaded");});
+	$.get("/templates/brainmap-behavioural.html",function(data){behavioural=data;if(debug) console.log("[init] Behavioural domains loaded");});
+	$.get("/templates/concept.html",function(data){concept=data;if(debug) console.log("[init] Concept loaded");});
 
 	subscribeToLoginUpdates(updateArticle);
 
@@ -313,36 +315,72 @@ function initBrainSpellArticle()
 	
 	ArticlePMID=$("#pmid").attr("href").split("/")[4];
 	if(debug) console.log("Article's PMID",ArticlePMID);
+	
+	flagIsNIDM=(ArticlePMID.substring(0,5)=="NIDM_");
 
 	if(exp_string=="<!--Experiments-->")
 	{
-		if(debug) console.log("[initBrainSpellArticle] Article not in DB, search pubmed");
-		$("#new-article-warning").show();			
-		downloadArticleXML();
+		if(debug) console.log("[initBrainSpellArticle] Article not in DB, add it");
+		
+		if(flagIsNIDM) {
+			// make and empty NIDM template
+			$("#new-nidm-article-warning").show();
+			createEmptyNIDMTemplate(ArticlePMID);
+			$(".title,.reference,.abstract,.metadata,.experiments,.discussion").hide();
+		} else {
+			if(debug) console.log("[initBrainSpellArticle] Not an NIDM article, look it up in PubMed");
+			$("#new-article-warning").show();
+			$(".experiments,.discussion").hide();
+			downloadArticleXML();
+		}
 	}
 	else
 	{
 		exp=$.parseJSON(exp_string);
 		configureExperiments();
 
-		if(meta_string)
-			meta=$.parseJSON(meta_string);
-		else
-			meta={};
-		if(meta.meshHeadings==undefined || meta.meshHeadings.length==0)
-		{
-			if(debug) console.log("[initBrainSpellArticle] Article without MeSH tags, search pubmed");
-			downloadArticleXML(function(){
-				saveMetadata();
-				logKeyValue(-1,"UserTriggeredAction",JSON.stringify({"action":"Update","element":"MeSH"}));
-			});
-		}
-		else
-		{
-			configureMetadata();
-			updateArticle();
+		if(flagIsNIDM) {
+			$(".reference,.abstract").hide();
+		} else {
+			
+			if(meta_string)	meta=$.parseJSON(meta_string);
+			else			meta={};
+			
+			if(meta.meshHeadings==undefined || meta.meshHeadings.length==0)
+			{
+				if(debug) console.log("[initBrainSpellArticle] Article without MeSH tags, search pubmed");
+				downloadArticleXML(function(){
+					saveMetadata();
+					logKeyValue(-1,"UserTriggeredAction",JSON.stringify({"action":"Update","element":"MeSH"}));
+				});
+			}
+			else
+			{
+				configureMetadata();
+				updateArticle();
+			}
 		}
 	}
+}
+function createEmptyNIDMTemplate(ArticlePMID) {
+	EmptyArticle={};
+	EmptyArticle.title="Temporary Title";
+	EmptyArticle.abstract="Temporary Abstract";
+	EmptyArticle.authors="Temporary Authors list";
+	EmptyArticle.reference="Temporary Reference";
+	EmptyArticle.pmid=ArticlePMID;
+	EmptyArticle.doi="Temporary DOI";
+	EmptyArticle.neurosynth=ArticlePMID;
+	meta={};
+
+	// Display information in webpage
+	$("h2.title").html(EmptyArticle.title);
+	$(".abstract").html(EmptyArticle.abstract);
+	$("#reference").html(EmptyArticle.reference);
+	$("#doi").attr("href","http://dx.doi.org/"+EmptyArticle.doi);
+	
+	configureMetadata();
+	updateArticle();
 }
 function downloadArticle() {
 	/*
@@ -350,7 +388,7 @@ function downloadArticle() {
 	*/
 	var i,j;
 	var str=[
-		$(".paper-title").text(),
+		$(".title").text(),
 		$("#reference").text(),
 		$("#pmid").text(),
 		$("#doi").text(),
@@ -389,7 +427,7 @@ function downloadArticleXML(callback)
 			parseArticleXML(xml);
 						
 			// Display information in webpage
-			$("h2.paper-title").html(EmptyArticle.title);
+			$("h2.title").html(EmptyArticle.title);
 			$("div.abstract").html(EmptyArticle.abstract);
 			$("#reference").html(EmptyArticle.reference);
 			$("#doi").attr("href","http://dx.doi.org/"+EmptyArticle.doi);
@@ -461,7 +499,7 @@ function parseArticleXML(xml)
 	EmptyArticle.doi=doi;
 	
 	// neurosynth
-	EmptyArticle.neurosynth="";
+	EmptyArticle.neurosynth=ArticlePMID;
 
 	// MeSH headings
 	if(meta==undefined)
@@ -473,12 +511,19 @@ function parseArticleXML(xml)
 }
 function addEmptyExperiments(obj)
 {
-	var nexp=parseInt($("input#numNewExperiments").val());
-	var	i;
+	var nexp,
+		i;
+	
+	if(flagIsNIDM) {
+		nexp=parseInt($("#new-nidm-article-warning .numNewExperiments").val());
+		EmptyArticle.title=html_sanitize($("#new-nidm-article-warning .temporaryTitle").val());
+	} else {
+		nexp=parseInt($("#new-article-warning .numNewExperiments").val());
+	}
 	
 	if(nexp>0)
 	{
-		$("#new-article-warning").hide();
+		$("#new-article-warning, #new-nidm-article-warning").hide();
 
 		// add new experiments
 		exp=[];
@@ -486,10 +531,7 @@ function addEmptyExperiments(obj)
 			exp.push({"id":100000+i,"title":"","caption":"","locations":["0,0,0"]}); // using 100000 to distinguish from neurosynth/fix ids
 		
 		// store empty article in database
-		var result=$.ajax({
-			type: "GET",
-			url: "/php/brainspell.php",
-			data: {
+		var obj={
 				action:"add_article",
 				command:"new",
 				Title:EmptyArticle.title,
@@ -501,13 +543,25 @@ function addEmptyExperiments(obj)
 				NeuroSynthID:EmptyArticle.neurosynth,
 				Experiments:JSON.stringify(exp),
 				Metadata:JSON.stringify(meta)
-			},
+		};
+		var result=$.ajax({
+			type: "GET",
+			url: "/php/brainspell.php",
+			data: obj,
 			async: false
 		}).done(function( msg ){
-			if(debug) console.log(msg);
+			if(debug)
+				console.log(msg);
 		});
 		
 		configureExperiments();
+		
+		if(flagIsNIDM) {
+			$(".title").text(EmptyArticle.title);
+			$(".title,.metadata,.experiments,.discussion").show();
+		} else {
+			$(".title,.reference,.abstract,.metadata,.experiments,.discussion").show();
+		}
 		
 		logKeyValue(-1,"UserAction",JSON.stringify("AddEmptyArticle"));
 	}
@@ -542,7 +596,7 @@ function configureMetadata()
 		var	user=meta.comments[i].user;
 		var	time=new Date();
 		time.setTime(meta.comments[i].time);
-		$("div.comments").append("</p><a href='"+rootdir+"user/"+user+"'>"+user+"</a> ("+time.toLocaleString()+")<br \>");
+		$("div.comments").append("</p><a href='"+"/user/"+user+"'>"+user+"</a> ("+time.toLocaleString()+")<br \>");
 		$("div.comments").append(comment);
 		$("div.comments").append("</p><br \>");
 	}
@@ -552,32 +606,34 @@ function configureMetadata()
 function configureMeSHDescriptors()
 {
 	var	metadata="";
-	for(i=0;i<meta.meshHeadings.length;i++)
-	{
-		meta.meshHeadings[i].ontology="mesh";
+	if(meta.meshHeadings) {
+		for(i=0;i<meta.meshHeadings.length;i++)
+		{
+			meta.meshHeadings[i].ontology="mesh";
 
-		meta.meshHeadings[i].agree=(meta.meshHeadings[i].agree)?parseInt(meta.meshHeadings[i].agree):0;
-		meta.meshHeadings[i].disagree=(meta.meshHeadings[i].disagree)?parseInt(meta.meshHeadings[i].disagree):0;
-		var	rtag=meta.meshHeadings[i];
-		var tag=$("<li>",{class:"tag"});
-		if(meta.meshHeadings[i].majorTopic=="Y")
-			tag.html('<b>'+rtag.name+'</b>');
-		else
-			tag.html(rtag.name);
-		updateTagColor(tag,rtag);
-		tag.click({rtag:rtag},function(e){openTagModal(-1,e.data.rtag)});
-		$(".tag-list").append(tag);
+			meta.meshHeadings[i].agree=(meta.meshHeadings[i].agree)?parseInt(meta.meshHeadings[i].agree):0;
+			meta.meshHeadings[i].disagree=(meta.meshHeadings[i].disagree)?parseInt(meta.meshHeadings[i].disagree):0;
+			var	rtag=meta.meshHeadings[i];
+			var tag=$("<li>",{class:"tag"});
+			if(meta.meshHeadings[i].majorTopic=="Y")
+				tag.html('<b>'+rtag.name+'</b>');
+			else
+				tag.html(rtag.name);
+			updateTagColor(tag,rtag);
+			tag.click({rtag:rtag},function(e){openTagModal(-1,e.data.rtag)});
+			$(".tag-list").append(tag);
+		}
 	}
 }
 function configureExperiments()
 {
 	if(debug) console.log("[configureExperiments]");
-	$(".experiments").html("");
+	$("#experiments").html("");
 	for(i=0;i<exp.length;i++)
 	{
 		if(exp[i].locations.length==0)
 			continue;
-		$(".experiments").append($('<div class="experiment" id="'+exp[i].id+'">').load(rootdir+"templates/experiment.html",addExperiment(exp[i].id)));
+		$("#experiments").append($('<div class="experiment" id="'+exp[i].id+'">').load("/templates/experiment.html",addExperiment(exp[i].id)));
 	}
 	if(debug) console.log("[configureExperiments] experiments configured");
 }
@@ -782,6 +838,10 @@ function splitTable(eid/*iExp*/,irow) {
 		if(exp[i].id>new_eid)
 			new_eid=exp[i].id;
 	new_eid=(new_eid<100000)?100000:(new_eid+1); // Using 100000 to distinguish from automatic ids (neurosynth/fix)
+	
+	if(ex.tags==undefined)
+		ex.tags="";
+	
 	var newExp={
 		id: new_eid,
 		title: ex.title,
@@ -805,7 +865,7 @@ function importTable(eid) {
 	var container=$("<div id='import-table'>");
 	var lightbox=$("<div>");
 	lightbox.addClass('light_content');
-	$.get(rootdir+"templates/stereoparse.html",function(data) {
+	$.get("/templates/stereoparse.html",function(data) {
 		var i;
 		var newLocations=[];
 
@@ -1082,7 +1142,7 @@ function findPreviousVoteByUser(eid/*iExp*/,rtag)
 	{
 		var result=$.ajax({
 			type: "GET",
-			url: rootdir+"php/brainspell.php",
+			url: "/php/brainspell.php",
 			data: {
 				action:"get_log",
 				type:"Vote",
@@ -1111,7 +1171,7 @@ function findPreviousTableMarkByUser(eid/*iExp*/)
 	{
 		result=$.ajax({
 			type: "GET",
-			url: rootdir+"php/brainspell.php",
+			url: "/php/brainspell.php",
 			data: {
 				action:"get_log",
 				type:"MarkTable",
@@ -1138,7 +1198,7 @@ function findPreviousStereoSpaceByUser()
 	{
 		result=$.ajax({
 			type: "GET",
-			url: rootdir+"php/brainspell.php",
+			url: "/php/brainspell.php",
 			data: {
 				action:"get_log",
 				type:"StereoSpace",
@@ -1164,7 +1224,7 @@ function findPreviousNSubjectsByUser()
 	{
 		result=$.ajax({
 			type: "GET",
-			url: rootdir+"php/brainspell.php",
+			url: "/php/brainspell.php",
 			data: {
 				action:"get_log",
 				type:"NSubjects",
@@ -1373,7 +1433,7 @@ function logVote(eid/*iExp*/,rtag,vote)
 		TagVote:vote,
 		Experiment:eid // (iExp<0)?iExp:exp[iExp].id // HAD TO CHANGE THIS FROM iExp
 	};
-	$.get(rootdir+"php/brainspell.php",obj,function(data){
+	$.get("/php/brainspell.php",obj,function(data){
 		if(debug) console.log("[logVote]",data);
 	});
 }
@@ -1389,7 +1449,7 @@ function logMarkTable(sender)
 		Mark:mark,
 		Experiment:eid // (iExp<0)?iExp:exp[iExp].id // THIS IS WHAT I HAD TO CHANGE !!
 	};
-	$.get(rootdir+"php/brainspell.php",obj,function(data){
+	$.get("/php/brainspell.php",obj,function(data){
 		var out=$.parseJSON(data);
 		var ex=findExperimentByEID(eid);
 		ex.markBadTable={"bad":out.result.bad,"ok":out.result.ok};
@@ -1409,7 +1469,7 @@ function logStereoSpace(sender)
 				PMID:ArticlePMID,
 				UserName:username,
 				StereoSpace:space};
-	$.get(rootdir+"php/brainspell.php",obj,function(data){
+	$.get("/php/brainspell.php",obj,function(data){
 		var out=$.parseJSON(data);
 		if(debug) console.log("[logStereoSpace] out",out.result);
 		meta.stereo=out.result;
@@ -1429,7 +1489,7 @@ function logNSubjects(sender)
 				PMID:ArticlePMID,
 				UserName:username,
 				NSubjects:nsubjects};
-	$.get(rootdir+"php/brainspell.php",obj,function(data){
+	$.get("/php/brainspell.php",obj,function(data){
 		var out=$.parseJSON(data);
 		if(debug) console.log("[logNSubjects] out",out.result);
 
@@ -1463,13 +1523,13 @@ function logComment()
 				PMID:ArticlePMID,
 				UserName:username,
 				Comment:comment};
-	$.get(rootdir+"php/brainspell.php",obj,function(data){
+	$.get("/php/brainspell.php",obj,function(data){
 		if(debug) console.log("[logComment]",data);
 		var out=$.parseJSON(data);
 		var	comment=$.parseJSON(out.result);
 		var	time=new Date();
 		time.setTime(comment.time);
-		$("div.comments").append("</p><a href='"+rootdir+"user/"+username+"'>"+username+"</a> ("+time.toLocaleString()+")<br \>");
+		$("div.comments").append("</p><a href='"+"/user/"+username+"'>"+username+"</a> ("+time.toLocaleString()+")<br \>");
 		$("div.comments").append(comment.comment);
 		$("div.comments").append("</p><br \>");
 		$("textarea").val("");
@@ -1488,8 +1548,8 @@ function logKeyValue(eid,key,value)
 				Experiment:eid,
 				Key:key,
 				Value:value};
-	$.get(rootdir+"php/brainspell.php",obj,function(data){
-		//if(debug)
+	$.get("/php/brainspell.php",obj,function(data){
+		if(debug)
 			console.log("[logKeyValue]",data);
 	});
 }
