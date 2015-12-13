@@ -85,6 +85,10 @@ table {
   color: #888;
   cursor: pointer; }
 
+#collections img.collection-delete {
+  width: 10px;
+  padding-right: 5px; }
+
 .info {
   font-size: 0.9rem;
   color: #888;
@@ -158,9 +162,12 @@ div.stored {
 .button {
   background-color: white;
   border: thin solid #ddd;
-  padding: 2px;
+  padding: 1px 5px;
   font-family: sans-serif;
+  font-size: 0.7rem;
   text-align: center;
+  border-radius: 4px;
+  box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.3);
   cursor: pointer; }
 
 /* Ontology modal */

@@ -46,20 +46,6 @@ function initBrainSpellSearch() {
 	initTranslucent();
 	loadLocations();
 }
-function logCollections() {
-	var	obj={	action:"add_log",
-				type:"KeyValue",
-				store:"replace",
-				UserName:username,
-				PMID:-1,
-				Experiment:-1,
-				Key:"Collection",
-				Value:JSON.stringify(collections)};
-	$.get("php/brainspell.php",obj,function(data){
-		console.log("[logCollections]",data);
-	});
-}
-
 function configureInterface() {
 	$('#toggle-selection').click(function() {
 		$(this).prop('checked',!($(this).prop('checked')));
@@ -69,10 +55,9 @@ function configureInterface() {
 		// Article list manipulation allows the user to:
 		// * add articles to a new article list
 		// * append them to an old one
+		// * display articles in article list
 		// (not here: remove articles from a article list)
 		// (not here: remove a article list)
-		// (not here: display articles in article list)
-		// For the moment, article will be added to a single global article list
 
 		// Get selected articles
 		var arr=[];
@@ -325,6 +310,8 @@ function loadTemplate()
 }	
 function loadLocations()
 {
+	var i;
+	
 	// init query volume
 	for(i=0;i<LR*PA*IS;i++)
 		sum[i]=0;
@@ -351,42 +338,43 @@ function loadLocations()
 	console.log("[loadLocations]",refs.length,"references started loading");
 	for(ii=0;ii<refs.length;ii++)
 	{
+		var jj=refs[ii];
 		$.get("/php/brainspell.php", {
 			action:"get_article",
 			command:"experiments",
-			argument:refs[ii]
+			argument:jj
 		},
 		function( msg ) {
 			//var xml=$.parseXML(msg);
 			//exp=$.parseJSON($(xml).find("experiments").text());
 			exp=$.parseJSON(msg);
 			if(exp==null) {
-				console.log("ERROR: no exp data in msg:",msg,"ref:",refs[ii],",",ii,"out of",refs.length);
-			}
-
-			// update the sum[] volume
-			var coord=new Array();
-			for(i=0;i<exp.length;i++)
-			{
-				if(exp[i].locations.length==0)
-					continue;
-				
-				for(j=0;j<exp[i].locations.length;j++)
+				console.log("ERROR: no exp data in ref ",this);
+			} else {
+				// update the sum[] volume
+				var i,j,k,coord=new Array();
+				for(i=0;i<exp.length;i++)
 				{
-					coord=exp[i].locations[j].split(",");
-					coord[0]=Math.floor(coord[0]/4+22);
-					coord[1]=Math.floor(coord[1]/4+31);
-					coord[2]=Math.floor(coord[2]/4+17.5);
-					for(k=0;k<nroi;k++)
+					if(exp[i].locations.length==0)
+						continue;
+				
+					for(j=0;j<exp[i].locations.length;j++)
 					{
-						x=Math.floor(roi[k*3+0]+coord[0]);
-						y=Math.floor(roi[k*3+1]+coord[1]);
-						z=Math.floor(roi[k*3+2]+coord[2]);
-						if(x>=0&&x<LR && y>=0&&y<PA && z>=0&&z<IS)
+						coord=exp[i].locations[j].split(",");
+						coord[0]=Math.floor(coord[0]/4+22);
+						coord[1]=Math.floor(coord[1]/4+31);
+						coord[2]=Math.floor(coord[2]/4+17.5);
+						for(k=0;k<nroi;k++)
 						{
-							sum[z*PA*LR+y*LR+x]+=1;
-							if(sum[z*PA*LR+y*LR+x]>max)
-								max=sum[z*PA*LR+y*LR+x];
+							x=Math.floor(roi[k*3+0]+coord[0]);
+							y=Math.floor(roi[k*3+1]+coord[1]);
+							z=Math.floor(roi[k*3+2]+coord[2]);
+							if(x>=0&&x<LR && y>=0&&y<PA && z>=0&&z<IS)
+							{
+								sum[z*PA*LR+y*LR+x]+=1;
+								if(sum[z*PA*LR+y*LR+x]>max)
+									max=sum[z*PA*LR+y*LR+x];
+							}
 						}
 					}
 				}
@@ -402,7 +390,8 @@ function loadLocations()
 			if(nrefs==refs.length)
 			{
 				flagLocationsLoaded=1;
-				
+
+				drawImages();
 				updateTranslucent();
 				
 				var	hdr=new Uint8Array([

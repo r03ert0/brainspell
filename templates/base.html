@@ -99,8 +99,6 @@
 	function update_user() {
 		console.log("[update_user] querying user information");
 
-		$("#collections").remove();
-
 		/*
 		Adapt search page display depending on loggin status
 		*/
@@ -112,12 +110,30 @@
 			});
 		}
 	}
+	function logCollections() {
+		var	obj={	action:"add_log",
+					type:"KeyValue",
+					store:"replace",
+					UserName:username,
+					PMID:-1,
+					Experiment:-1,
+					Key:"Collection",
+					Value:JSON.stringify(collections)};
+		$.get("/php/brainspell.php",obj,function(data){
+			console.log("[logCollections]",data);
+		});
+	}
 	function updateCollections() {
 		console.log("[updateCollections] display user's article collections");
 		if(collections.length==0)
 			return;
 
 		// Display article list button
+		
+		// remove old
+		$("#collections").remove();
+		
+		// append new
 		var li=$("<li id='collections'>");
 		var icon=$("<img src='/img/collection-icon.svg'/>");
 		li.append(icon);
@@ -142,8 +158,13 @@
 			var con=["<div style='padding:5'>"];
 			var height=icon.height();
 			var pos=icon.offset();
-			for(var i=0;i<collections.length;i++)
-				con=con.concat("<a class='old-collection'>"+collections[i].name+"</a><br/>");
+			for(var i=0;i<collections.length;i++) {
+				var c=[
+					"<img class='collection-delete' src='/img/minus-circle.svg'/>",
+					"<a style='vertical-align:middle' class='old-collection'>"+collections[i].name+"</a><br/>"
+				].join("");
+				con=con.concat(c);
+			}
 			con=con.concat(["</div>"]);
 			win.append(con.join("\n"));
 			win.css({position:"absolute",top:height+5,left:0,width: 200,textAlign:"left",border:"thin solid lightGrey",boxShadow:"2px 2px 10px rgba(0,0,0,.7)",background:"white",zIndex:10});
@@ -151,12 +172,29 @@
 			icon.parent().append(win);
 
 			// action
+			win.find("img.collection-delete").click(function(e) {
+				e.stopPropagation();
+				var a=$(this).next("a");
+				var b=a.next("br");
+				var collectionName=a.text();
+				for(var i=0;i<collections.length;i++) {
+					if(collections[i].name==collectionName) {
+						collections.splice(i,1);
+						$(this).remove();
+						a.remove();
+						b.remove();
+						logCollections(); // update collection in DB
+						update_user();
+						break;
+					}
+				}
+			});
 			win.find("a.old-collection").click(function(e) {
 				e.stopPropagation();
 				var collectionName=$(this).text();
 				for(var i=0;i<collections.length;i++) {
 					if(collections[i].name==collectionName) {
-						$(location).attr('href','list?articles='+JSON.stringify(collections[i].articles));
+						$(location).attr('href',location.origin+'/list?articles='+JSON.stringify(collections[i].articles));
 					}
 				}
 				win.remove();
