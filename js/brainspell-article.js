@@ -1588,7 +1588,6 @@ function initTranslucentBrain(eid)
 	ex.render.scene = new THREE.Scene();
 	
 	// create raycaster (for hit detection)
-	//ex.render.projector = new THREE.Projector();
 	container[0].addEventListener( 'mousedown', function(e){onDocumentMouseDown(e,eid);}, false );
 
 	// put a camera in the scene
@@ -1694,8 +1693,6 @@ function onDocumentMouseDown( event,eid ) {
 	mouseVector.x= ((event.clientX-r.left) / event.target.clientWidth ) * 2 - 1;
 	mouseVector.y=-((event.clientY-r.top) / event.target.clientHeight ) * 2 + 1;
 	
-	//projector = new THREE.Projector();
-	//var raycaster = projector.pickingRay( mouseVector.clone(), ex.render.camera );
 	var raycaster=new THREE.Raycaster();
 	raycaster.setFromCamera(mouseVector.clone(), ex.render.camera);
 	var intersects = raycaster.intersectObjects( ex.render.spheres.children );
