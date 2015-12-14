@@ -40,9 +40,6 @@ if(isset($_GET["action"]))
 		case "index_lucene":
 			index_lucene($_GET);
 			break;
-		case "add_article":
-			add_article($_GET);
-			break;
 		case "get_article":
 			get_article($_GET);
 			break;
@@ -57,6 +54,15 @@ if(isset($_GET["action"]))
 			break;
 		case "admin_updateDOI":
 			admin_updateDOI($_GET);
+			break;
+	}
+}
+if(isset($_POST["action"]))
+{
+	switch($_POST["action"])
+	{
+		case "add_article":
+			add_article($_GET);
 			break;
 	}
 }

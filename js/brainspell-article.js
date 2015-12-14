@@ -561,10 +561,9 @@ function addEmptyExperiments(obj)
 				Metadata:JSON.stringify(meta)
 		};
 		var result=$.ajax({
-			type: "GET",
+			type: "POST",
 			url: "/php/brainspell.php",
-			data: obj,
-			async: false
+			data: obj
 		}).done(function( msg ){
 			if(debug)
 				console.log(msg);
@@ -1048,15 +1047,14 @@ function saveExperiments()
 	
 	// save to database
 	var result=$.ajax({
-		type: "GET",
+		type: "POST",
 		url: "/php/brainspell.php",
 		data: {
 			action:"add_article",
 			command:"experiments",
 			Experiments:experiments_string,
 			PMID:ArticlePMID
-		},
-		async: false
+		}
 	}).done(function( msg ){
 		if(debug) console.log("[saveExperiments]",msg);
 	});
@@ -1068,15 +1066,14 @@ function saveMetadata()
 	
 	// save to database
 	var result=$.ajax({
-		type: "GET",
+		type: "POST",
 		url: "/php/brainspell.php",
 		data: {
 			action:"add_article",
 			command:"metadata",
 			Metadata:metadata_string,
 			PMID:ArticlePMID
-		},
-		async: false
+		}
 	}).done(function( msg ){
 		if(debug) console.log("[saveMetadata]",msg);
 	});
@@ -1169,8 +1166,7 @@ function findPreviousVoteByUser(eid,rtag)
 				TagOntology:rtag.ontology,
 				Experiment:eid, // (iExp<0)?iExp:exp[iExp].id, // HAD TO CHANGE THIS !!!
 				PMID:ArticlePMID
-			},
-			async: false
+			}
 		}).done(function( msg ){
 			var xml=$.parseXML(msg);
 			//var	tagVote=parseInt($.parseJSON($(xml).find("TagVote").text()));
@@ -1196,8 +1192,7 @@ function findPreviousTableMarkByUser(eid)
 				UserName:username,
 				Experiment:eid, // (iExp<0)?iExp:exp[iExp].id, // HAD TO CHANGE THIS from iExp
 				PMID:ArticlePMID
-			},
-			async: false
+			}
 		}).done(function( msg ){
 			if(debug) console.log("[findPreviousTableMarkByUser] ",msg);
 			var xml=$.parseXML(msg);
@@ -1222,8 +1217,7 @@ function findPreviousStereoSpaceByUser()
 				type:"StereoSpace",
 				UserName:username,
 				PMID:ArticlePMID
-			},
-			async: false
+			}
 		}).done(function( msg ){
 			if(debug) console.log("[findPreviousStereoSpaceByUser] ",msg);
 			var xml=$.parseXML(msg);
@@ -1248,8 +1242,7 @@ function findPreviousNSubjectsByUser()
 				type:"NSubjects",
 				UserName:username,
 				PMID:ArticlePMID
-			},
-			async: false
+			}
 		}).done(function( msg ){
 			if(debug) console.log("[findPreviousNSubjectsByUser] ",msg);
 			var xml=$.parseXML(msg);
