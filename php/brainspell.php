@@ -62,7 +62,7 @@ if(isset($_POST["action"]))
 	switch($_POST["action"])
 	{
 		case "add_article":
-			add_article($_GET);
+			add_article($_POST);
 			break;
 	}
 }
