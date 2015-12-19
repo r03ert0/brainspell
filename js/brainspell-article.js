@@ -318,7 +318,7 @@ function initBrainSpellArticle()
 		});
 		renderer.setClearColor( 0xffffff, 0 );
 		renderer.setPixelRatio(window.devicePixelRatio ? window.devicePixelRatio : 1);
-	}else{
+	} else {
 		console.log("ERROR: No WebGLRenderer available");
 		renderer = new THREE.CanvasRenderer();
 	}

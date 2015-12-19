@@ -623,9 +623,10 @@ function updateTranslucent()
 	geometry.computeBoundingBox();
 	geometry.computeBoundingSphere();
 
-//	var material=new THREE.MeshNormalMaterial();
-	var material=new THREE.MeshDepthMaterial({wireframe:false});
-	surfacemesh=new THREE.Mesh( geometry, material );
+	var colorMaterial=new THREE.MeshBasicMaterial({color: 0xff0000, transparent: true, blending: THREE.MultiplyBlending});
+	var depthMaterial=new THREE.MeshDepthMaterial({wireframe:false});
+	surfacemesh = new THREE.SceneUtils.createMultiMaterialObject(geometry, [colorMaterial, depthMaterial]);
+                
 	surfacemesh.doubleSided=true;
 	var wirematerial = new THREE.MeshBasicMaterial({
 		color : 0x909090,
@@ -649,6 +650,7 @@ function changeLevel(val)
 	cmap.level=parseFloat(level);
 	updateTranslucent();
 }
+/*
 function fullscreen()
 {
 	// allow 'f' to go fullscreen where this feature is supported
@@ -689,6 +691,8 @@ function exitFullscreenHandler()
 		cameraControl.handleResize();
 	}
 }
+*/
+
 // init the scene
 function init_render()
 {
@@ -725,6 +729,7 @@ function init_render()
 	//THREEx.Screenshot.bindKey(renderer);
 	
 	// configure fullscreen exit
+	/*
 	if (document.addEventListener)
 	{
 		document.addEventListener('webkitfullscreenchange', exitFullscreenHandler, false);
@@ -732,6 +737,7 @@ function init_render()
 		document.addEventListener('fullscreenchange', exitFullscreenHandler, false);
 		document.addEventListener('MSFullscreenChange', exitFullscreenHandler, false);
 	}
+	*/
 	
 	// Add objects
 	var light	= new THREE.AmbientLight( Math.random() * 0xffffff );
@@ -769,7 +775,6 @@ function init_render()
 			},
 			vertexShader	: [ 'varying vec3	vVertexWorldPosition;',
 								'varying vec3	vVertexNormal;',
-								'varying vec4	vFragColor;',
 								'void main(){',
 								'	vVertexNormal	= normalize(normalMatrix * normal);',
 								'	vVertexWorldPosition	= (modelMatrix * vec4(position, 1.0)).xyz;',
@@ -781,7 +786,6 @@ function init_render()
 								'uniform float	power;',
 								'varying vec3	vVertexNormal;',
 								'varying vec3	vVertexWorldPosition;',
-								'varying vec4	vFragColor;',
 								'void main(){',
 								'	vec3 worldCameraToVertex= vVertexWorldPosition - cameraPosition;',
 								'	vec3 viewCameraToVertex	= (viewMatrix * vec4(worldCameraToVertex, 0.0)).xyz;',
@@ -827,6 +831,9 @@ function animate()
 function render() {
 	// update camera controls
 	cameraControl.update();
+
+	renderer.setClearColor( 0xffffff,1 );
+	renderer.clear( true );
 
 	// actually render the scene
 	renderer.render( scene, camera );
