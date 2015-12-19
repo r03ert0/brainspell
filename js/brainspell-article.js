@@ -1632,7 +1632,6 @@ function initTranslucentBrain(eid)
 			},
 			vertexShader	: [ 'varying vec3	vVertexWorldPosition;',
 								'varying vec3	vVertexNormal;',
-								'varying vec4	vFragColor;',
 								'void main(){',
 								'	vVertexNormal	= normalize(normalMatrix * normal);',
 								'	vVertexWorldPosition	= (modelMatrix * vec4(position, 1.0)).xyz;',
@@ -1644,7 +1643,6 @@ function initTranslucentBrain(eid)
 								'uniform float	power;',
 								'varying vec3	vVertexNormal;',
 								'varying vec3	vVertexWorldPosition;',
-								'varying vec4	vFragColor;',
 								'void main(){',
 								'	vec3 worldCameraToVertex=vVertexWorldPosition - cameraPosition;',
 								'	vec3 viewCameraToVertex=(viewMatrix * vec4(worldCameraToVertex, 0.0)).xyz;',
@@ -1731,15 +1729,27 @@ function render(iExp) {
 	  return;  // it's off screen
 	}
 	// set the viewport
-	var DPR = 1;//(window.devicePixelRatio) ? window.devicePixelRatio : 1;
 	var width  = rect.right - rect.left;
 	var height = rect.bottom - rect.top;
 	var left   = rect.left;
 	var bottom = renderer.domElement.clientHeight - rect.bottom;
+	
+	// compensate for window springiness
+	var dy=window.pageYOffset;
+	if(dy<0) {
+		bottom-=dy;
+	} else {
+		dy=window.pageYOffset-document.body.scrollHeight+window.innerHeight;
+		if(dy>0) {
+			bottom-=dy;
+		}
+	}
+	
+	// place viewport
 	camera.aspect = width / height;
 	camera.updateProjectionMatrix();
-	renderer.setViewport( left, bottom, width*DPR, height*DPR );
-	renderer.setScissor( left, bottom, width*DPR, height*DPR );
+	renderer.setViewport( left, bottom, width, height );
+	renderer.setScissor( left, bottom, width, height );
 	
 	// actually render the scene
 	renderer.render( scene, camera );
