@@ -38,7 +38,7 @@ if(isset($_GET["action"]))
 			article_list($_GET["query"]);
 			break;
 		case "index_lucene":
-			index_lucene($_GET);
+			index_lucene($_GET,1);
 			break;
 		case "get_article":
 			get_article($_GET);
@@ -673,7 +673,7 @@ function getIndex_lucene()
 
 	return $indx;
 }
-function index_lucene($article)
+function index_lucene($article,$optimise)
 {
 	$index=getIndex_lucene();
 	$term = new Zend_Search_Lucene_Index_Term($article["PMID"], 'PMID');
@@ -682,6 +682,7 @@ function index_lucene($article)
 	$exactSearchQuery = new Zend_Search_Lucene_Search_Query_Term($term);
 	$hits = $index->find($exactSearchQuery);
 	if (count($hits) > 0) {
+		echo "[deleting previous version]\n";
 		foreach ($hits as $hit) {
 			$index->delete($hit->id);
 		}
@@ -692,16 +693,21 @@ function index_lucene($article)
 	$doc->addField(Zend_Search_Lucene_Field::Keyword('Year',$article["Year"]));
 	$doc->addField(Zend_Search_Lucene_Field::Keyword('Journal',$article["Journal"]));
 	$doc->addField(Zend_Search_Lucene_Field::Text('Title',$article["Title"],'utf-8'));
-	$doc->addField(Zend_Search_Lucene_Field::Text('MeshHeadings',$article["MeshHeadings"],'utf-8'));
 	$doc->addField(Zend_Search_Lucene_Field::Text('Authors',$article["Authors"],'utf-8'));
 	$doc->addField(Zend_Search_Lucene_Field::Text('Reference',$article["Reference"],'utf-8'));
 	$doc->addField(Zend_Search_Lucene_Field::UnStored('Abstract',$article["Abstract"],'utf-8'));
+	$doc->addField(Zend_Search_Lucene_Field::Text('MeshHeadings',$article["MeshHeadings"],'utf-8'));
 
 	$index->addDocument($doc);
-	$index->optimize();
+	if($optimise)
+	{
+		echo "Optimising index\n";
+		$index->optimize();
+	}
 	$index->commit();
-	echo "<p>The index contains ".$index->numDocs()." documents</p>";
+	echo "The index contains ".$index->numDocs()." documents\n";
 }
+
 function add_article($query)
 {
 	global $dbname;
@@ -735,7 +741,7 @@ function add_article($query)
 				else
 					echo "ERROR: Unable to process query: ".$q;
 		
-				// index_lucene($article);
+				index_lucene($article,0);
 			}
 			mysqli_free_result($result);
 			break;
@@ -754,7 +760,7 @@ function add_article($query)
 				else
 					echo "ERROR: Unable to process query: ".$q;
 	
-				// index_lucene($article);
+				index_lucene($article,0);
 			}
 			mysqli_free_result($result);
 			break;
@@ -773,7 +779,7 @@ function add_article($query)
 				else
 					echo "ERROR: Unable to process query: ".$q;
 	
-				// index_lucene($article);
+				index_lucene($article,0);
 			}
 			mysqli_free_result($result);
 			break;
