@@ -1,9 +1,6 @@
 <?php
 
-$dbhost = "localhost"; // this will ususally be 'localhost', but can sometimes differ
-$dbuser = "root"; // the username that you created, or were given, to access your database
-$dbpass = "beo8hkii"; // the password that you created, or were given, to access your database
-$dbname = "brainspell"; // the name of the database that you are going to use for this project
+include $_SERVER['DOCUMENT_ROOT']."/php/base.php";
 $connection=mysqli_connect($dbhost, $dbuser, $dbpass,$dbname) or die("MySQL Error 1: " . mysql_error());
 
 $rootdir = $_SERVER['DOCUMENT_ROOT'];
