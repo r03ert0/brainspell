@@ -703,6 +703,7 @@ function init_render()
 			preserveDrawingBuffer	: true	// to allow screenshot
 		});
 		renderer.setClearColor( 0xffffff, 0 );
+		renderer.setPixelRatio(window.devicePixelRatio ? window.devicePixelRatio : 1);
 	}else{
 		renderer = new THREE.CanvasRenderer();
 	}
