@@ -16,6 +16,8 @@
 
   You may need to create the tmp/mysql directory by hand.
 
+- At that stage, if you go to localhost:8888 you should see that it is serving brainspell.
+
 - You can pause and resume the container as follows:
 
   docker stop brainspell
@@ -30,4 +32,17 @@
   docker exec -t -i brainspell /bin/bash
 
   (after running brainspell.sh)
+
+- To run mysql: launch
+
+  ./run_mysql.sh
+
+  you may get a couple of possible error message 
+
+- To load the brainspell database :
+
+  ./load-brainspell-db.sh
+
+- At that stage, localhost:8888 should give you some random papers in the first list ! The search would not work, to be corrected ...
+
 
