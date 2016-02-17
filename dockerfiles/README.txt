@@ -6,6 +6,16 @@
 
   ./brainspell.sh
 
+  Note: this is a BASH shell script and will not run on Windows.  It does not
+  do much, though, so you can replace it with the following:
+
+  docker run --name=brainspell -p 127.0.0.1:8888:80 \
+             -v /path/to/brainspell/dockerfiles/tmp/mysql:/var/lib/mysql \
+             -v /path/to/brainspell:/home/brainspell \
+             -t brainspell
+
+  You may need to create the tmp/mysql directory by hand.
+
 - You can pause and resume the container as follows:
 
   docker stop brainspell
