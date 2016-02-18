@@ -12,5 +12,6 @@ db:
     environment:
         MYSQL_ROOT_PASSWORD: beo8hkii
         MYSQL_DATABASE: brainspell
-    volumes:
-        - ../tmp/mysql:/var/lib/mysql
+    # Seems to create trouble...
+    # volumes:
+    #     - ./mysql/storage/:/var/lib/mysql/
