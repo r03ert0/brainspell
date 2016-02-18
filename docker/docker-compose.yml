@@ -1,0 +1,23 @@
+web:
+    build: apache
+    ports:
+        # We map to port 8000, as some folks may be using Docker directly on a
+        # host already running a web server on port 80
+        - "8000:80"
+    links:
+        - db
+    volumes:
+        - ../site/:/var/www/html/
+
+db:
+    build: mysql
+    environment:
+        MYSQL_ROOT_PASSWORD: beo8hkii
+        MYSQL_DATABASE: brainspell
+    volumes:
+        # Creates trouble unless we make it world-writable or play tricks to
+        # match the group or user id inside and outside the container.
+        # By default, some Docker magic will create an external volume
+        # somewhere...
+        # - ./mysql/storage/:/var/lib/mysql/
+        - ./mysql/data:/docker-entrypoint-initdb.d
