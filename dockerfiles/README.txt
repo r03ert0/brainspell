@@ -1,3 +1,5 @@
+- Depending on the setting, the following commands may need to be run with "sudo" 
+
 - Build image (once only):
 
   docker build -t brainspell .
@@ -18,6 +20,16 @@
 
 - At that stage, if you go to localhost:8888 you should see that it is serving brainspell.
 
+- Change the permissions of LuceneIndex (the search tool)
+  from the dockerfile directory: 
+
+  chmod -R a+rwx ../site/php/LuceneIndex
+
+  Or the equivalent appropriate command on Windows
+
+- At that stage, if you have pull from the BIDS-collaborative, brainspell should be up and
+  running in localhost:8888  Congrats if that's the case !
+
 - You can pause and resume the container as follows:
 
   docker stop brainspell
@@ -32,6 +44,5 @@
   docker exec -t -i brainspell /bin/bash
 
   (after running brainspell.sh)
-
 
 
