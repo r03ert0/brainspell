@@ -6,6 +6,7 @@ FROM php:5.6-apache
 # It may be redundant with php5-mysql above, but probably that gets all the
 # dependencies we need
 RUN docker-php-ext-install mysqli
+RUN docker-php-ext-install mbstring
 
 # Need to enable headers module
 RUN ln -s /etc/apache2/mods-available/headers.load /etc/apache2/mods-enabled

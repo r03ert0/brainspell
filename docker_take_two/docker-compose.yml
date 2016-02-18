@@ -1,7 +1,7 @@
 web:
     build: apache
     ports:
-        - "80:80"
+        - "8000:80"
     links:
         - db
     volumes:
@@ -12,6 +12,7 @@ db:
     environment:
         MYSQL_ROOT_PASSWORD: beo8hkii
         MYSQL_DATABASE: brainspell
-    # Seems to create trouble...
-    # volumes:
-    #     - ./mysql/storage/:/var/lib/mysql/
+    volumes:
+        # Creates trouble unless we make it world-writable...
+        # - ./mysql/storage/:/var/lib/mysql/
+        - ./mysql/data:/docker-entrypoint-initdb.d
