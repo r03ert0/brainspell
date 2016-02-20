@@ -21,3 +21,13 @@ running `docker-compose up`:
 
 You will also be able to get the ip address of your docker host with
 `docker-machine ip`.
+
+After `docker-compose up` (or `sudo docker-compose` if you are not running in a
+super user shell) the shell does not complete and messages will be showing in
+the terminal. Alternatively you can run `docker-compose up -d` to have it run in
+the background. 
+
+On a linux install, the brainspell search did not work until you the 
+LuceneIndex directory was made writable by all, in the brainspell repository run:
+`chmod a+w LuceneIndex/*` or `sudo chmod a+w LuceneIndex/*`
+
