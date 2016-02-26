@@ -1,11 +1,11 @@
 <?php
 	include $_SERVER['DOCUMENT_ROOT']."/php/brainspell.php";
-	
+
 	header($_SERVER['SERVER_PROTOCOL'] . " 200 OK");
-	
+
 	$uri=$_SERVER['REQUEST_URI'];
 	$parts=preg_split("/[\/?]/",$uri);
-	
+
 	if($parts[1]=="article")
 	{
 		$id="";
@@ -54,12 +54,11 @@
 		$context  = stream_context_create($opts);
 <<<<<<< HEAD:site/404.php
 		$result = file_get_contents("http://".$_SERVER['SERVER_NAME'].":".$_SERVER['SERVER_PORT']."/php/brainspell.php?".$getdata, false, $context);
-		echo $result;	
+		echo $result;
 =======
-		$result = file_get_contents('http://'.$_SERVER['HTTP_HOST'].'/php/brainspell.php?'.$getdata, false, $context);	
+		$result = file_get_contents('http://'.$_SERVER['HTTP_HOST'].'/php/brainspell.php?'.$getdata, false, $context);
 		echo $result;
 		*/
->>>>>>> 0c580a64030c924d29aebd7758d9351411aeefe3:404.php
 	}
 	else
 	if($parts[1]=="about")
@@ -86,4 +85,3 @@
 		home();
 	}
 ?>
-

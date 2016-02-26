@@ -137,7 +137,7 @@ function user_remind()
 		{
 			$row = mysqli_fetch_array($checklogin);
 			$username = $row['Username'];
-			
+
 			// Generate password
 			$length=16;
 			$password="";
@@ -147,7 +147,7 @@ function user_remind()
 				$index = rand(0, $count - 1);
 				$password .= mb_substr($chars, $index, 1);
 			}
-		
+
 			$message = "User name: ".$username."\rPassword: ".$password;
 			mail($email, 'BrainSpell password', $message,'From: brainspell.org <no-reply@brainspell.org>');
 
@@ -163,7 +163,7 @@ function user_remind()
 			else
 			{
 				echo "<p>An unknown error occurred";
-			}    	
+			}
 		}
 		else
 		{
@@ -192,7 +192,7 @@ function user_update($username)
 	$home = file_get_contents($_SERVER['DOCUMENT_ROOT']."/templates/user.html");
 	$tmp=str_replace("<!--Core-->",$home,$html);
 	$html=$tmp;
-	
+
 	if(isset($_SESSION['Username']))
 		$tmp=str_replace("<!--Username-->",$_SESSION['Username'],$html);
 	else
@@ -204,8 +204,8 @@ function user_update($username)
 	else
 		$tmp=str_replace("<!--LoggedIn-->","0",$html);
 	$html=$tmp;
-	
-	
+
+
 	// public data
 	$tmp=str_replace("<!--HomeUsername-->",$username,$html);
 	$html=$tmp;
@@ -229,9 +229,9 @@ function user_update($username)
 		$tmp=str_replace("<!--AccountSettings-->",$account,$html);
 		$html=$tmp;
 	}
-	
+
 	print $html;
-	
+
 	/*
 
     if($_SESSION['Username']==$username)
@@ -240,7 +240,7 @@ function user_update($username)
 		$email = mysql_real_escape_string($_GET['email']);
 		$oldpassword = md5(mysql_real_escape_string($_GET['oldpassword']));
 		$newpassword = md5(mysql_real_escape_string($_GET['newpassword']));
-	
+
 		$checkuser = mysql_query("SELECT * FROM Users WHERE Username = '".$username."' AND Password = '".$oldpassword."'");
 
 		if(mysql_num_rows($checkuser) == 1)
@@ -256,8 +256,8 @@ function user_update($username)
 			else
 			{
 				echo "<h1>Error</h1>";
-				echo "<p>Sorry, your update failed. Please go back and try again.</p>";    
-			}    	
+				echo "<p>Sorry, your update failed. Please go back and try again.</p>";
+			}
 		}
 	}
 	*/
@@ -272,7 +272,7 @@ function home()
 	$home = file_get_contents($_SERVER['DOCUMENT_ROOT']."/templates/home.html");
 	$tmp=str_replace("<!--Core-->",$home,$html);
 	$html=$tmp;
-	
+
     $result=mysqli_query($connection,"SELECT COUNT(*) FROM Articles");
     $count=mysqli_fetch_assoc($result);
 	$tmp=str_replace("<!--NumberOfArticlesIndexed-->",$count["COUNT(*)"],$html);
@@ -298,7 +298,7 @@ function about()
 	$about = file_get_contents($_SERVER['DOCUMENT_ROOT']."/templates/about.html");
 	$tmp=str_replace("<!--Core-->",$about,$html);
 	$html=$tmp;
-	
+
 	if(isset($_SESSION['Username']))
 		$tmp=str_replace("<!--Username-->",$_SESSION['Username'],$html);
 	else
@@ -316,11 +316,11 @@ function about()
 function blog()
 {
 	$html = file_get_contents($_SERVER['DOCUMENT_ROOT']."/templates/base.html");
-	$blog=file_get_contents("http://brainspell.org/php/blog.php");
-	
+	$blog = file_get_contents($_SERVER['DOCUMENT_ROOT']."/templates/blog.html");
+
 	$tmp=str_replace("<!--Core-->",$blog,$html);
 	$html=$tmp;
-	
+
 	if(isset($_SESSION['Username']))
 		$tmp=str_replace("<!--Username-->",$_SESSION['Username'],$html);
 	else
@@ -341,7 +341,7 @@ function download()
 	$download = file_get_contents($_SERVER['DOCUMENT_ROOT']."/templates/download.html");
 	$tmp=str_replace("<!--Core-->",$download,$html);
 	$html=$tmp;
-	
+
 	if(isset($_SESSION['Username']))
 		$tmp=str_replace("<!--Username-->",$_SESSION['Username'],$html);
 	else
@@ -359,14 +359,14 @@ function download()
 function article($id)
 {
 	global $connection;
-	
+
     // Try $id=PMID
 	$result=mysqli_query($connection,"SELECT * FROM Articles WHERE PMID = '".$id."'");
 
     // Try $id=DOI
     if($result==false or mysqli_num_rows($result)==0)
 	    $result=mysqli_query($connection,"SELECT * FROM Articles WHERE DOI = '".$id."'");
-    
+
     if(mysqli_num_rows($result)==1)
     {
     	// Article found
@@ -376,14 +376,14 @@ function article($id)
 		$article = file_get_contents($_SERVER['DOCUMENT_ROOT']."/templates/article.html");
 		$tmp=str_replace("<!--Core-->",$article,$html);
 		$html=$tmp;
-		
+
 		// configure login information
 		if(isset($_SESSION['Username']))
 			$tmp=str_replace("<!--Username-->",$_SESSION['Username'],$html);
 		else
 			$tmp=str_replace("<!--Username-->","",$html);
 		$html=$tmp;
-	
+
 		if(isset($_SESSION['LoggedIn']))
 			$tmp=str_replace("<!--LoggedIn-->",$_SESSION['LoggedIn'],$html);
 		else
@@ -400,11 +400,11 @@ function article($id)
 	    		$tmp=str_replace("<!--".$i."-->",stripslashes(strip_cdata($record[$i])),$html);
 	    	$html=$tmp;
 	    }
-		
+
 		print $html;
     } else if (strncmp($id,"NIDM_",5)==0) {
     	// Manually entering NIDM article
-    	
+
 		$html = file_get_contents($_SERVER['DOCUMENT_ROOT']."/templates/base.html");
 		$article = file_get_contents($_SERVER['DOCUMENT_ROOT']."/templates/article.html");
 		$tmp=str_replace("<!--Core-->",$article,$html);
@@ -416,7 +416,7 @@ function article($id)
 		else
 			$tmp=str_replace("<!--Username-->","",$html);
 		$html=$tmp;
-	
+
 		if(isset($_SESSION['LoggedIn']))
 			$tmp=str_replace("<!--LoggedIn-->",$_SESSION['LoggedIn'],$html);
 		else
@@ -430,7 +430,7 @@ function article($id)
 		print $html;
     } else {
     	// Manually entering article by PMID
-    	
+
 		$html = file_get_contents($_SERVER['DOCUMENT_ROOT']."/templates/base.html");
 		$article = file_get_contents($_SERVER['DOCUMENT_ROOT']."/templates/article.html");
 		$tmp=str_replace("<!--Core-->",$article,$html);
@@ -442,7 +442,7 @@ function article($id)
 		else
 			$tmp=str_replace("<!--Username-->","",$html);
 		$html=$tmp;
-	
+
 		if(isset($_SESSION['LoggedIn']))
 			$tmp=str_replace("<!--LoggedIn-->",$_SESSION['LoggedIn'],$html);
 		else
@@ -461,7 +461,7 @@ function article_json_pmid($pmid)
 {
 	global $dbname;
 	global $connection;
-	
+
     $result=mysqli_query($connection,"SELECT * FROM Articles WHERE PMID = '".$pmid."'");
 
     if(mysqli_num_rows($result)==1)
@@ -478,7 +478,7 @@ function article_json_pmid($pmid)
     			$tmp=mysqli_real_escape_string($connection,strip_cdata($record[$i]));
 	    	else
 	    		$tmp=stripslashes(strip_cdata($record[$i]));
-	    	
+
 	    	if($k<count($fields)-1)
 		    	echo "\"".$i."\":"."\"".$tmp."\",\n";
 		    else
@@ -497,7 +497,7 @@ function article_json_doi($doi)
 {
 	global $dbname;
 	global $connection;
-	
+
     $result=mysqli_query($connection,"SELECT * FROM Articles WHERE DOI = '".$doi."'");
 
     if(mysqli_num_rows($result)==1)
@@ -513,7 +513,7 @@ function article_json_doi($doi)
     			$tmp=mysqli_real_escape_string($connection,strip_cdata($record[$i]));
 	    	else
 	    		$tmp=stripslashes(strip_cdata($record[$i]));
-	    	
+
 	    	if($k<count($fields)-1)
 		    	echo "\"".$i."\":"."\"".$tmp."\",\n";
 		    else
@@ -536,9 +536,9 @@ function search_lucene($query)
 	$search = file_get_contents($_SERVER['DOCUMENT_ROOT']."/templates/search.html");
 	$tmp=str_replace("<!--Core-->",$search,$html);
 	$html=$tmp;
-	
+
 	$index=getIndex_lucene();
-	
+
 	$hits=$index->find($query);
 	if (!empty($hits))
 	{
@@ -556,7 +556,7 @@ function search_lucene($query)
 	}
 	else
 		$str="<p>The search <b>".$query."</b> did not match any articles.</p>";
-	
+
 	$qstr=htmlentities(stripslashes($query));
 	$tmp=str_replace("<!--%SearchString%-->",$qstr,$html);
 	$html=$tmp;
@@ -567,10 +567,10 @@ function search_lucene($query)
 
 	$tmp=str_replace("<!--%SearchResultsInfo%-->",$info,$html);
 	$html=$tmp;
-	
+
 	$tmp=str_replace("<!--%SearchResults%-->",stripslashes($str),$html);
 	$html=$tmp;
-	
+
 	if(isset($_SESSION['Username']))
 		$tmp=str_replace("<!--Username-->",$_SESSION['Username'],$html);
 	else
@@ -582,7 +582,7 @@ function search_lucene($query)
 	else
 		$tmp=str_replace("<!--LoggedIn-->","0",$html);
 	$html=$tmp;
-	
+
 	print $html;
 }
 function article_list($query)
@@ -594,7 +594,7 @@ function article_list($query)
 	$search = file_get_contents($_SERVER['DOCUMENT_ROOT']."/templates/search.html");
 	$tmp=str_replace("<!--Core-->",$search,$html);
 	$html=$tmp;
-	
+
 	$pmids=json_decode(json_decode($query));
 	// list article references
 	$str='<table class="paper-list">';
@@ -613,7 +613,7 @@ function article_list($query)
 		}
 	}
 	$str=$str."</table>\n";
-	
+
 	$tmp=str_replace("<!--%SearchString%-->","",$html);
 	$html=$tmp;
 
@@ -623,10 +623,10 @@ function article_list($query)
 
 	$tmp=str_replace("<!--%SearchResultsInfo%-->",$info,$html);
 	$html=$tmp;
-	
+
 	$tmp=str_replace("<!--%SearchResults%-->",stripslashes($str),$html);
 	$html=$tmp;
-	
+
 	if(isset($_SESSION['Username']))
 		$tmp=str_replace("<!--Username-->",$_SESSION['Username'],$html);
 	else
@@ -638,7 +638,7 @@ function article_list($query)
 	else
 		$tmp=str_replace("<!--LoggedIn-->","0",$html);
 	$html=$tmp;
-	
+
 	print $html;
 }
 function getIndex_lucene()
@@ -650,9 +650,9 @@ function getIndex_lucene()
 	$loader = Zend_Loader_Autoloader::getInstance();
 	$loader->setFallbackAutoloader(true);
 	$loader->suppressNotFoundWarnings(false);
-	
+
 	Zend_Search_Lucene_Analysis_Analyzer::setDefault(new StandardAnalyzer_Analyzer_Standard_English());
-	
+
 	$path=$_SERVER['DOCUMENT_ROOT']."/php/LuceneIndex";
 	try
 	{
@@ -712,9 +712,9 @@ function add_article($query)
 {
 	global $dbname;
 	global $connection;
-		
+
 	$cmd=$query['command'];
-	
+
 	switch($cmd)
 	{
 		case "new":
@@ -740,7 +740,7 @@ function add_article($query)
 					echo "SUCCESS. Query: ".$q;
 				else
 					echo "ERROR: Unable to process query: ".$q;
-		
+
 				index_lucene($article,0);
 			}
 			mysqli_free_result($result);
@@ -759,7 +759,7 @@ function add_article($query)
 					echo "SUCCESS ";
 				else
 					echo "ERROR: Unable to process query: ".$q;
-	
+
 				index_lucene($article,0);
 			}
 			mysqli_free_result($result);
@@ -778,7 +778,7 @@ function add_article($query)
 					echo "SUCCESS ";
 				else
 					echo "ERROR: Unable to process query: ".$q;
-	
+
 				index_lucene($article,0);
 			}
 			mysqli_free_result($result);
@@ -856,7 +856,7 @@ function get_concept($query)
 			$record=mysqli_fetch_assoc($result);
 			$description="<Definition>".$record["Definition"]."</Definition>";
 			mysqli_free_result($result);
-			
+
 			header("Access-Control-Allow-Origin: *");
 			echo $description;
 			break;
@@ -867,7 +867,7 @@ function add_log($query)
 {
 	global $dbname;
 	global $connection;
-	
+
 	header("Access-Control-Allow-Origin: *");
 
 	switch($query['type'])
@@ -875,7 +875,7 @@ function add_log($query)
 		case "Vote":
 		{
 			$vote=$query['TagVote'];
-			
+
 			// 1. Log user's vote
 			//-------------------
 			// Update/Insert user's vote
@@ -891,7 +891,7 @@ function add_log($query)
 				$record=mysqli_fetch_assoc($result);
 				$prevVote=$record["Data"];
 				mysqli_free_result($result);
-	
+
 				if($vote==-1||$vote==1)	// down-voting or up-voting
 				{
 					// Update user's vote on tag
@@ -933,7 +933,7 @@ function add_log($query)
 				else
 					echo "ERROR: Unable to add user's vote: ".$q."\n";
 			}
-				
+
 			// 2. Update/Insert article:experiment:tag's agree/disagree stats
 			//--------------------------------------------------------
 			if($query['Experiment']<0)
@@ -943,13 +943,13 @@ function add_log($query)
 				$record=mysqli_fetch_assoc($result);
 				$metadata=json_decode(strip_cdata($record["Metadata"]));
 				$tags=$metadata->meshHeadings;
-		
+
 				// Find tag (should always be present)
 				$flagFound=0;
 				foreach($tags as $t)
 				{
 					if($t->name==$query['TagName'])
-					{						
+					{
 						$flagFound=1;
 						break;
 					}
@@ -1009,7 +1009,7 @@ function add_log($query)
 				$result=mysqli_query($connection,"SELECT Experiments FROM Articles WHERE PMID = '".$query['PMID']."'");
 				$record=mysqli_fetch_assoc($result);
 				$exps=json_decode(strip_cdata($record["Experiments"]));
-				
+
 				// HISTORY: This used to be $exp=$exps[$query['Experiment']], when Log indexed experiments by array position
 				for($i=0;$i<count($exps);$i++)
 					if($exps[$i]->id==$query['Experiment'])
@@ -1020,7 +1020,7 @@ function add_log($query)
 					continue;
 				}
 				$exp=$exps[$i];
-		
+
 				// Find tag, if already present
 				$flagFound=0;
 				if(isset($exp->tags))
@@ -1030,7 +1030,7 @@ function add_log($query)
 						$t=$exp->tags[$j];
 						if(	$t->ontology==$query['TagOntology'] &&
 							$t->name==$query['TagName'])
-						{						
+						{
 							$flagFound=1;
 							break;
 						}
@@ -1038,7 +1038,7 @@ function add_log($query)
 				}
 				else
 					$exp->tags=array();
-		
+
 				// If tag is added for the 1st time, initialise it
 				if(!$flagFound)
 				{
@@ -1074,7 +1074,7 @@ function add_log($query)
 					else
 						$t->disagree+=1;
 				}
-		
+
 				// Update experiments
 				$result = mysqli_query($connection,"SELECT * FROM Articles WHERE PMID = '".$query['PMID']."'");
 				if(mysqli_num_rows($result)>=1)
@@ -1111,7 +1111,7 @@ function add_log($query)
 				$record=mysqli_fetch_assoc($result);
 				$prevMark=$record["Data"];
 				mysqli_free_result($result);
-		
+
 				// Update user's vote on tag
 				$q="UPDATE Log SET Data = ".$query['Mark']." WHERE";
 				$q.="    UserName = '".$query['UserName']."' AND";
@@ -1143,14 +1143,14 @@ function add_log($query)
 				else
 					$out["userInsert"]="ERROR: Unable to add user's table mark: ".$q;
 			}
-				
+
 			// 2. Update/Insert article:experiment:tag's bad/ok stats
 			//--------------------------------------------------------
 			$result=mysqli_query($connection,"SELECT Experiments FROM Articles WHERE PMID = '".$query['PMID']."'");
 			$record=mysqli_fetch_assoc($result);
 			$exps=json_decode(strip_cdata($record["Experiments"]));
-			
-			
+
+
 			// HISTORY: This used to be $exp=$exps[$query['Experiment']];
 			for($i=0;$i<count($exps);$i++)
 				if($exps[$i]->id==$query['Experiment'])
@@ -1177,7 +1177,7 @@ function add_log($query)
 				$m->bad=0;
 			if(!isset($m->ok))
 				$m->ok=0;
-				
+
 			// User is changing mind
 			if($prevMark==-1)
 			{
@@ -1231,7 +1231,7 @@ function add_log($query)
 				$record=mysqli_fetch_assoc($result);
 				$prevSpace=$record["Data"];
 				mysqli_free_result($result);
-		
+
 				// Update user's vote on tag
 				$q="UPDATE Log SET Data = '".$query['StereoSpace']."' WHERE";
 				$q.="    UserName = '".$query['UserName']."' AND";
@@ -1263,13 +1263,13 @@ function add_log($query)
 				else
 					$out["userInsert"]="ERROR: Unable to add user's stereotaxic space: ".$q;
 			}
-				
+
 			// 2. Update/Insert article stereotaxic space
 			//-------------------------------------------
 			$result=mysqli_query($connection,"SELECT Metadata FROM Articles WHERE PMID = '".$query['PMID']."'");
 			$record=mysqli_fetch_assoc($result);
 			$meta=json_decode($record["Metadata"]);
-	
+
 			// Find previous stereotaxic space data, if already present, create it otherwise
 			if(isset($meta->stereo))
 				$m=$meta->stereo;
@@ -1285,7 +1285,7 @@ function add_log($query)
 				$m->Talairach=0;
 			if(!isset($m->MNI))
 				$m->MNI=0;
-				
+
 			// User is changing her mind
 			if($prevSpace==-1)
 			{
@@ -1336,7 +1336,7 @@ function add_log($query)
 				$record=mysqli_fetch_assoc($result);
 				$prevNSubjects=$record["Data"];
 				mysqli_free_result($result);
-		
+
 				// Update user's vote on tag
 				$q="UPDATE Log SET Data = '".$query['NSubjects']."' WHERE";
 				$q.="    UserName = '".$query['UserName']."' AND";
@@ -1368,13 +1368,13 @@ function add_log($query)
 				else
 					$out["userInsert"]="ERROR: Unable to add user's nsubjects: ".$q;
 			}
-				
+
 			// 2. Update/Insert article nsubjects
 			//-------------------------------------------
 			$result=mysqli_query($connection,"SELECT Metadata FROM Articles WHERE PMID = '".$query['PMID']."'");
 			$record=mysqli_fetch_assoc($result);
 			$meta=json_decode($record["Metadata"]);
-	
+
 			// Find previous stereotaxic space data, if already present, create it otherwise
 			if(!isset($meta->nsubjects))
 				$meta->nsubjects=array();
@@ -1438,7 +1438,7 @@ function add_log($query)
 			$result=mysqli_query($connection,"SELECT Metadata FROM Articles WHERE PMID = '".$query['PMID']."'");
 			$record=mysqli_fetch_assoc($result);
 			$meta=json_decode($record["Metadata"]);
-	
+
 			// Find previous comments, if already present, create it otherwise
 			if(!isset($meta->comments))
 				$meta->comments=array();
@@ -1473,12 +1473,12 @@ function add_log($query)
 		{
 			$type=$query["Key"];
 			$data=$query["Value"];
-			
+
 			if(!isset($query['store']))
 				$store="append";
 			else
 				$store=$query['store']; /* 2 types: append and replace, append by default */
-			
+
 			if($store=="replace") {
 				$q = "SELECT * FROM Log WHERE UserName = '".$query["UserName"]."' AND PMID = '".$query["PMID"]."' AND Experiment = '".$query["Experiment"]."' AND Type = '".$type."'";
 				$result = mysqli_query($connection,$q);
@@ -1487,7 +1487,7 @@ function add_log($query)
 					$result = mysqli_query($connection,$q);
 				}
 			}
-			
+
 			$q="INSERT INTO Log (UserName,PMID,Experiment,Type,Data) VALUES(";
 			$q.="'".$query['UserName']."',";
 			$q.="'".$query['PMID']."',";
@@ -1507,9 +1507,9 @@ function get_log($query)
 {
 	global $dbname;
 	global $connection;
-	
+
 	header("Access-Control-Allow-Origin: *");
-	
+
 	switch($query['type'])
 	{
 		case "Vote":
