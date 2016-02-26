@@ -5,7 +5,7 @@
 		<fieldset id="home-search">
 			<input type="text" id="search" name="query" placeholder="Search articles by title, author, keyword…" value="<!--%SearchString%-->"/>
 			<button style="border:0;top:5px;width:25px;height:25px;background-color:white">
-				<img src="<!--ROOTDIR-->img/search.svg" alt="Search" width=25px height=25px/>
+				<img src="/img/search.svg" alt="Search" width=25px height=25px/>
 			</button>
 		</fieldset>
 	</form>
@@ -66,8 +66,11 @@
 	</tr>
 	<tr><td>
 		<br/>
-		<h2><b><!--%SearchResultsNumber%--> article<!--%SearchResultsMultiplicity%--> corresponding to the search "<!--%SearchString%-->"</b></h2>
-		<br/>
+		<h2>
+			<button style="width:2rem;height:2rem"><input type='checkbox' id='toggle-selection' /></button>
+			<button style="width:2rem;height:2rem" id='add-to-collections'>+</button>
+			<b><!--%SearchResultsInfo%--></b>
+		</h2>
 		<!--%SearchResults%-->
 	</td></tr>
 	</table>
@@ -77,9 +80,11 @@
 <!-- Translucent Viewer -->
 <script src="js/three.min.js"></script>
 <script src="js/Detector.js"></script>
+<!--
 <script src="js/threex/THREEx.screenshot.js"></script>
 <script src="js/threex/THREEx.FullScreen.js"></script>
 <script src="js/threex/THREEx.WindowResize.js"></script>
+-->
 <script src='js/SubdivisionModifier.js'></script>
 <script src="js/PLYLoader.js"></script>
 <script src="js/TrackballControls.js"></script>
@@ -90,9 +95,5 @@
 <script>
 	// BrainSpell search and search results page initialisation
 	setSearchString("<!--%SearchString%-->");
-	configureTemplateImage();
-	configureLocationsImage();
-	loadTemplate();
-	initTranslucent();
-	loadLocations();
+	initBrainSpellSearch();
 </script>

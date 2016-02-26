@@ -33,11 +33,6 @@ $fontTitle:     1rem;
     padding:0
 }
 
-.paper-stuff h3
-{
-    margin:0;
-}
-
 /* START RT */
 html {
     height:100%
@@ -57,7 +52,7 @@ h2 {
     font-weight:bold;
     padding:5px 0px;
 }
-h2.paper-title{
+h2.title{
     text-transform:uppercase
 }
 h2.blog{
@@ -96,13 +91,32 @@ table {
 }
 
 /* Reference list */
-.paper-list li{
-    list-style-type:none;
+.paper-stuff h3
+{
+    margin:0;
+}
+.paper-stuff span
+{
+    display:inline-block;
+    vertical-align:top;
+}
+.paper-list td{
     position:relative;
     padding-bottom:10px;
 }
 .paper-list h3 {
     margin:0
+}
+#collections img {
+    width: 16px;
+    height:16px;
+    vertical-align:middle;
+    color:$grey;
+    cursor:pointer;
+}
+#collections img.collection-delete {
+    width:10px;
+    padding-right:5px;
 }
 .info {
     font-size:$fontSubtitle;
@@ -110,8 +124,11 @@ table {
     margin:0
 }
 
-/* New article warning */
+/* New article and NIDM article warning */
 #new-article-warning {
+    display:none;
+}
+#new-nidm-article-warning {
     display:none;
 }
 
@@ -178,9 +195,12 @@ div.stored {
 .button {
     background-color:white;
     border:thin solid $lightGrey;
-    padding:2px;
-    font-family: $tagSans;
+    padding:1px 5px;
+    font-family:$tagSans;
+    font-size:$fontSmall;
     text-align:center;
+    border-radius:4px;
+    box-shadow:1px 1px 1px rgba(0,0,0,.3);
     cursor:pointer;
 }
 /* Ontology modal */
@@ -245,7 +265,7 @@ div.stored {
     border:1px solid lightGrey;
     border-radius:2px;
     background-color:$white;
-    box-shadow:1px 1px 3px rgba(0,0,0,.3);
+    box-shadow:1px 1px 1px rgba(0,0,0,.3);
     -webkit-transition: all 0.2s ease-out;
     -moz-transition: all 0.2s ease-out;
     -ms-transition: all 0.2s ease-out;
@@ -374,20 +394,10 @@ a.nav:hover{
 }
 .header .fr li a{
     display:inline-block;
-    padding-bottom:1rem;
-    margin-bottom:1px;
     text-decoration:none
 }
-.header .fr li a:hover,.header .fr li a:focus{
-    margin-bottom:0;
-    border-bottom:1px solid $lightGrey;
-}
 .header .fr li.on a{
-    margin-bottom:0;
-    border-bottom:2px solid $lightGrey;
-    color:$black}
-.header .fr li.on a:hover,.header .fr li.on a:focus{
-    border-color:$orange
+    color:$black
 }
 
 #search{

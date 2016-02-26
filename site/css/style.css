@@ -7,9 +7,6 @@
 * {
   padding: 0; }
 
-.paper-stuff h3 {
-  margin: 0; }
-
 /* START RT */
 html {
   height: 100%; }
@@ -18,7 +15,7 @@ body {
   margin: 0;
   height: 100%;
   text-align: left;
-  color: #444444;
+  color: #444;
   font-family: Georgia, "New Century Schoolbook", "Nimbus Roman No9 L", serif;
   font-size: 0.8rem;
   line-height: 1.5; }
@@ -29,7 +26,7 @@ h2 {
   font-weight: bold;
   padding: 5px 0px; }
 
-h2.paper-title {
+h2.title {
   text-transform: uppercase; }
 
 h2.blog {
@@ -37,23 +34,23 @@ h2.blog {
   padding: 0; }
 
 .blog a {
-  color: #444444; }
+  color: #444; }
 
 h2 strong {
-  color: #444444; }
+  color: #444; }
 
 h3 {
   font-family: Tahoma, Geneva, Verdana, sans-serif;
   font-size: 1rem;
   font-weight: 400;
   line-height: 1;
-  color: #444444; }
+  color: #444; }
 
 h3 span {
   text-transform: none; }
 
 h3 strong {
-  color: #444444;
+  color: #444;
   font-weight: 400; }
 
 h4 {
@@ -67,21 +64,41 @@ table {
   font-size: 0.8rem; }
 
 /* Reference list */
-.paper-list li {
-  list-style-type: none;
+.paper-stuff h3 {
+  margin: 0; }
+
+.paper-stuff span {
+  display: inline-block;
+  vertical-align: top; }
+
+.paper-list td {
   position: relative;
   padding-bottom: 10px; }
 
 .paper-list h3 {
   margin: 0; }
 
+#collections img {
+  width: 16px;
+  height: 16px;
+  vertical-align: middle;
+  color: #888;
+  cursor: pointer; }
+
+#collections img.collection-delete {
+  width: 10px;
+  padding-right: 5px; }
+
 .info {
   font-size: 0.9rem;
-  color: #888888;
+  color: #888;
   margin: 0; }
 
-/* New article warning */
+/* New article and NIDM article warning */
 #new-article-warning {
+  display: none; }
+
+#new-nidm-article-warning {
   display: none; }
 
 /* Article */
@@ -118,7 +135,7 @@ div.stored {
 
 .experiment-locations table {
   width: 150px;
-  color: #444444;
+  color: #444;
   text-align: center; }
 
 .experiment-locations table thead th {
@@ -136,7 +153,7 @@ div.stored {
 
 .xyztable {
   overflow-y: auto;
-  border-bottom: thin solid #dddddd; }
+  border-bottom: thin solid #ddd; }
 
 .tableActions {
   display: none;
@@ -144,10 +161,13 @@ div.stored {
 
 .button {
   background-color: white;
-  border: thin solid #dddddd;
-  padding: 2px;
+  border: thin solid #ddd;
+  padding: 1px 5px;
   font-family: sans-serif;
+  font-size: 0.7rem;
   text-align: center;
+  border-radius: 4px;
+  box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.3);
   cursor: pointer; }
 
 /* Ontology modal */
@@ -158,7 +178,7 @@ div.stored {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: black;
+  background-color: #000;
   opacity: .2;
   z-index: 1001; }
 
@@ -170,7 +190,7 @@ div.stored {
   bottom: 3rem;
   right: 3rem;
   margin: 0 auto;
-  background-color: white;
+  background-color: #fff;
   box-shadow: 2px 2px 20px rgba(0, 0, 0, 0.7);
   z-index: 1002; }
 
@@ -182,7 +202,7 @@ div.stored {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: black;
+  background-color: #000;
   opacity: 0.2;
   z-index: 1003; }
 
@@ -194,7 +214,7 @@ div.stored {
   bottom: 30px;
   right: 30px;
   margin: auto auto;
-  background-color: white;
+  background-color: #fff;
   box-shadow: 2px 2px 20px rgba(0, 0, 0, 0.7);
   z-index: 1004; }
 
@@ -209,8 +229,8 @@ div.stored {
   padding: 0px 4px;
   border: 1px solid lightGrey;
   border-radius: 2px;
-  background-color: white;
-  box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+  background-color: #fff;
+  box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.3);
   -webkit-transition: all 0.2s ease-out;
   -moz-transition: all 0.2s ease-out;
   -ms-transition: all 0.2s ease-out;
@@ -220,27 +240,27 @@ div.stored {
   border-bottom-left-radius: 10px; }
 
 .tag:hover {
-  background-color: #dddddd;
-  border-color: #888888; }
+  background-color: #ddd;
+  border-color: #888; }
 
 .tag a {
-  color: #444444; }
+  color: #444; }
 
 .tag a:hover, .tag a:focus {
   color: #ed8000;
   text-decoration: none; }
 
 .green {
-  border-left: 7px solid #88cc88; }
+  border-left: 7px solid #8c8; }
 
 .orange {
-  border-left: 7px solid #ffbb88; }
+  border-left: 7px solid #fb8; }
 
 .red {
-  border-left: 7px solid #ee7777; }
+  border-left: 7px solid #e77; }
 
 textarea {
-  border: 1px solid #dddddd; }
+  border: 1px solid #ddd; }
 
 /* Start general */
 button {
@@ -262,7 +282,7 @@ html {
 
 a {
   cursor: pointer;
-  color: #444444;
+  color: #444;
   text-decoration: none; }
 
 a:hover, a:focus {
@@ -271,7 +291,7 @@ a:hover, a:focus {
 
 /* Style of navigation tab links */
 a.nav {
-  color: #444444; }
+  color: #444; }
 
 a.nav:hover {
   color: #ed8000; }
@@ -337,26 +357,15 @@ a.nav:hover {
 
 .header .fr li a {
   display: inline-block;
-  padding-bottom: 1rem;
-  margin-bottom: 1px;
   text-decoration: none; }
 
-.header .fr li a:hover, .header .fr li a:focus {
-  margin-bottom: 0;
-  border-bottom: 1px solid #dddddd; }
-
 .header .fr li.on a {
-  margin-bottom: 0;
-  border-bottom: 2px solid #dddddd;
-  color: black; }
-
-.header .fr li.on a:hover, .header .fr li.on a:focus {
-  border-color: #ed8000; }
+  color: #000; }
 
 #search {
   width: 100%;
   padding: 10px 80px 10px 20px;
-  border: 1px solid #dddddd;
+  border: 1px solid #ddd;
   font-family: Georgia, "New Century Schoolbook", "Nimbus Roman No9 L", serif;
   font-size: 1rem; }
 

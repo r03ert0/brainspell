@@ -4,29 +4,46 @@
 		<p><b>This article is not yet in the database, but you can add it manually: Log in,
 		enter below the number of stereotaxic tables the article contains, and click "Add
 		new article".</b></p>
-		Number of stereotaxic tables: <input type="text" id="numNewExperiments"/>
-		<button onclick="addEmptyExperiments()">Add new article</button>
+		Number of stereotaxic tables: <input type="text" class="numNewExperiments"/>
+		<p><button onclick="addEmptyExperiments()">Add new article</button>
+	</div>
+</div>
+
+<!-- New NIDM article warning -->
+<div id="new-nidm-article-warning">
+	<div style="border:1px solid lightGrey;padding:1rem">
+		<p><b>You are manually adding a new NIDM article: Log in, enter a temporary title,
+		enter the number of stereotaxic tables the article contains, and click "Add
+		new article".</b></p>
+		<table>
+		<tr><td>Temporary Title</td><td><input type="text" class="temporaryTitle"/></td></tr>
+		<tr><td>Number of stereotaxic tables</td><td><input type="text" class="numNewExperiments"/></td></tr>
+		</table>
+		<p><button onclick="addEmptyExperiments()">Add new article</button>
 	</div>
 </div>
 
 <!-- Title, authors and abstract -->
 <div class="subsection">
-	<h2 class="paper-title"><!--Title--></h2>
-	<strong id="reference"><!--Reference--></strong>
-	<br/>
-	<span class="button" id="pmid" href="http://www.ncbi.nlm.nih.gov/pubmed/<!--PMID-->" target="_blank">PubMed</span>
-	<span class="button" id="doi" href="http://dx.doi.org/<!--DOI-->" target="_blank">Full Text</span>
-	<span class="button" id="neurosynth" href="http://neurosynth.org/studies/<!--NeuroSynthID-->" target="_blank">Neurosynth</span>
-	<span class="button" id="download">Download</span>
+	<h2 class="title"><!--Title--></h2>
 
-	<div class="abstract subsection">
-	<!--Abstract-->
+	<div class="reference">
+		<strong id="reference"><!--Reference--></strong>
+		<br />
+		<span class="button" id="pmid" href="http://www.ncbi.nlm.nih.gov/pubmed/<!--PMID-->" target="_blank">PubMed</span>
+		<span class="button" id="doi" href="http://dx.doi.org/<!--DOI-->" target="_blank">Full Text</span>
+		<span class="button" id="neurosynth" href="http://neurosynth.org/studies/<!--PMID-->" target="_blank">Neurosynth</span>
+		<span class="button" id="download">Download</span>
+	</div>
+	
+	<div class="subsection abstract">
+		<!--Abstract-->
 	</div>
 </div>
 
 <!-- Metadata: MeSH descriptors, stereotaxic space and number of subjects -->
-<div class="subsection">
-<b style="font-family:sans-serif">Metadata</b>
+<div class="subsection metadata">
+<!--<b style="font-family:sans-serif">Metadata</b>-->
 <div style="padding:10px;border:1px solid lightGrey">
 	<table style="width:100%">
 	<tr>
@@ -58,16 +75,16 @@
 </div>
 
 <!-- Experiments: Locations tables, tags -->
-<div class="subsection">
+<div class="subsection experiments">
 <b style="font-family:sans-serif">Experiments</b>
 <div style="padding:5px;border:1px solid lightGrey">
-	<div class="experiments">
+	<div id="experiments">
 	</div>
 </div>
 </div>
 
 <!-- Discussion -->
-<div class="subsection">
+<div class="subsection discussion">
 	<b style="font-family:sans-serif">Discussion</b>
 	<div class="comments">
 	</div>
@@ -80,18 +97,17 @@
 <br />
 
 <!-- HTML sanitizer -->
-<script src="<!--ROOTDIR-->js/html-sanitizer-minified.js"></script>
+<script src="/js/html-sanitizer-minified.js"></script>
 
 <!-- Translucent Viewer -->
 <script src="/js/three.min.js"></script>
 <script src="/js/Detector.js"></script>
-<script src="/js/threex/THREEx.screenshot.js"></script>
-<script src="/js/threex/THREEx.FullScreen.js"></script>
-<script src="/js/threex/THREEx.WindowResize.js"></script>
 <script src='/js/SubdivisionModifier.js'></script>
 <script src="/js/PLYLoader.js"></script>
 <script src="/js/TrackballControls.js"></script>
-<script src="/js/jquery-1.10.2.min.js"></script>
+<!--<script src="/js/threex/THREEx.screenshot.js"></script>
+    <script src="/js/threex/THREEx.FullScreen.js"></script>
+    <script src="/js/threex/THREEx.WindowResize.js"></script>-->
 
 <!-- BrainSpell article -->
 <script src="/js/brainspell-article.js"></script>
@@ -100,4 +116,3 @@
 	var	exp_string='<!--Experiments-->';
 	initBrainSpellArticle();
 </script>
-

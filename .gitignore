@@ -1,1 +1,5 @@
+<<<<<<< HEAD
 *.lock.file
+=======
+php/base.php
+>>>>>>> 0c580a64030c924d29aebd7758d9351411aeefe3

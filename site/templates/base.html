@@ -1,5 +1,5 @@
 <html>
-<html lang="en">
+
 <head>
     <meta charset="utf-8">
     <meta name="description" content="Open, collaborative platform for a human-curated classification of the neuroimaging literature">
@@ -7,11 +7,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><!-- Always force latest IE rendering engine (even in intranet) & Chrome Frame. -->
     <title>brainspell</title>
-    <link rel="shortcut icon" type="image/x-icon" href="<!--ROOTDIR-->img/favicon.ico">
+    <link rel="shortcut icon" type="image/x-icon" href="/img/favicon.ico">
     <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
-    <link rel="stylesheet" type="text/css" href="<!--ROOTDIR-->css/style.css">
-	<script>var	rootdir="<!--ROOTDIR-->";</script>
-    <script src="<!--ROOTDIR-->js/jquery-1.10.2.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="/css/style.css">
+    <script src="/js/jquery-1.10.2.min.js"></script>
     <script type="text/javascript">
         // Is JS enabled? Is it a touch device?
         var init = function(){
@@ -34,69 +33,177 @@
 		<table style="width:100%">
 		<tr>
 			<td>
-				<a href="<!--ROOTDIR-->">
-					<h1><img src="<!--ROOTDIR-->img/brainspell.svg" alt="brainSpell"/></h1>
+				<a href="/">
+					<h1><img src="/img/brainspell.svg" alt="brainSpell"/></h1>
 				</a>
 			</td>
 			<td>
 				<ul class="fr">
 					<li class="login"></li>
-					<li><a href="<!--ROOTDIR-->blog" class="nav">BLOG</a></li>
-					<li><a href="<!--ROOTDIR-->about" class="nav">ABOUT</a></li>
-					<li><a href="<!--ROOTDIR-->download" class="nav">DOWNLOAD</a></li>
-					<li><a href="http://siphonophore.org/blog/?cat=2&feed=rss2" class="nav"><img src="<!--ROOTDIR-->img/feed-icon.svg" width="14px" height="14px" style="margin-left:4px;vertical-align:middle"/></a></li>
+					<li><a href="/blog" class="nav">BLOG</a></li>
+					<li><a href="/about" class="nav">ABOUT</a></li>
+					<li><a href="/download" class="nav">DOWNLOAD</a></li>
+					<li><a href="http://siphonophore.org/blog/?cat=2&feed=rss2" class="nav"><img src="/img/feed-icon.svg" width="14px" height="14px" style="margin-left:4px;vertical-align:middle"/></a></li>
 				</ul>
 			</td>
 		</tr>
 		</table>
 		</div>
-
-		<script>
-		var username="<!--Username-->";
-		var loggedin=<!--LoggedIn-->;
-		var	loginUpdateSubscribers=new Array();
-
-		console.log("[ROOT] calling update_login");
-		update_login();
-
-		function subscribeToLoginUpdates(f)
-		{
-			loginUpdateSubscribers.push(f);
-			//console.log("[subscribeToLoginUpdates] subscribe",loginUpdateSubscribers);
-		}
-		function unsubscribeToLoginUpdates(f)
-		{
-			loginUpdateSubscribers.splice(loginUpdateSubscribers.indexOf(f),1);
-			//console.log("[unsubscribeToLoginUpdates] unsubscribe",loginUpdateSubscribers);
-		}
-		function update_login()
-		{
-			if(loggedin)
-				$('.login').html('<a href="<!--ROOTDIR-->user/'+username+'" style="display:inline">'+username+'</a> (<a onclick="logout()" style="display:inline">LOG OUT</a>)');
-			else
-				$('.login').html('<a onclick="login()">LOG IN</a>');
-
-			// call login update subscribers
-			console.log("[update_login] informing login update subscribers");
-			for(i=0;i<loginUpdateSubscribers.length;i++)
-				loginUpdateSubscribers[i]();
-		}
-		function login()
-		{
-			$('body').append($('<div class="login">'));
-			$('div.login').load("<!--ROOTDIR-->templates/login.html");
-		}
-		function logout()
-		{
-			$.get(rootdir+"php/brainspell.php",{"action":"logout"},function(data){console.log("[logout] Logout:",data)});
-			username="";
-			loggedin=0;
-			console.log("[logout] calling update_login");
-			update_login();
-		}
-		</script>
 	</div><!-- /header -->
 
+	<script>
+	// User login globals
+	var username="<!--Username-->";
+	var loggedin=parseInt("<!--LoggedIn-->");
+	var	loginUpdateSubscribers=new Array();
+
+	// Article collections global
+	var collections=[];
+	subscribeToLoginUpdates(update_user);
+
+	update_login();
+
+	/* Login related functions */
+	function subscribeToLoginUpdates(f) {
+		loginUpdateSubscribers.push(f);
+		//console.log("[subscribeToLoginUpdates] subscribe",loginUpdateSubscribers);
+	}
+	function unsubscribeToLoginUpdates(f) {
+		loginUpdateSubscribers.splice(loginUpdateSubscribers.indexOf(f),1);
+		//console.log("[unsubscribeToLoginUpdates] unsubscribe",loginUpdateSubscribers);
+	}
+	function update_login() {
+		if(loggedin)
+			$('.login').html('<a href="/user/'+username+'" style="display:inline">'+username+'</a> (<a onclick="logout()" style="display:inline">LOG OUT</a>)');
+		else
+			$('.login').html('<a onclick="login()">LOG IN</a>');
+
+		// call login update subscribers
+		console.log("[update_login] informing login update subscribers");
+		for(i=0;i<loginUpdateSubscribers.length;i++)
+			loginUpdateSubscribers[i]();
+	}
+	function login() {
+		$('body').append($('<div class="login">'));
+		$('div.login').load("/templates/login.html");
+	}
+	function logout() {
+		$.get("/php/brainspell.php",{"action":"logout"},function(data){console.log("[logout] Logout:",data)});
+		username="";
+		loggedin=0;
+		console.log("[logout] calling update_login");
+		update_login();
+	}
+
+	/* User related functions */
+	function update_user() {
+		console.log("[update_user] querying user information");
+
+		/*
+		Adapt search page display depending on loggin status
+		*/
+		if(loggedin) {
+			$.getJSON("/php/brainspell.php",{action:"get_log",type:"Collection",UserName:username,PMID:"-1",Experiment:"-1"},
+			function(mydata) {
+				collections=mydata;
+				updateCollections();
+			});
+		}
+	}
+	function logCollections() {
+		var	obj={	action:"add_log",
+					type:"KeyValue",
+					store:"replace",
+					UserName:username,
+					PMID:-1,
+					Experiment:-1,
+					Key:"Collection",
+					Value:JSON.stringify(collections)};
+		$.get("/php/brainspell.php",obj,function(data){
+			console.log("[logCollections]",data);
+		});
+	}
+	function updateCollections() {
+		console.log("[updateCollections] display user's article collections");
+		if(collections.length==0)
+			return;
+
+		// Display article list button
+		
+		// remove old
+		$("#collections").remove();
+		
+		// append new
+		var li=$("<li id='collections'>");
+		var icon=$("<img src='/img/collection-icon.svg'/>");
+		li.append(icon);
+		li.append(" ("+collections.length+" list"+((collections.length>1)?"s":"")+")");
+		$("ul.fr").find(".login").after(li);
+		icon.click(function() {
+			if(collections.length==0)
+				return;
+
+			// create overlay
+			var overlay=$("<div>");
+			overlay.html(" ");
+			overlay.css({position:"fixed",top:0,left:0,width:"100%",height:"100%",zIndex:9});
+			overlay.click(function() {
+				overlay.remove();
+				win.remove();
+			});
+			$("body").append(overlay);
+
+			// create dialog box
+			var win=$("<div>");
+			var con=["<div style='padding:5'>"];
+			var height=icon.height();
+			var pos=icon.offset();
+			for(var i=0;i<collections.length;i++) {
+				var c=[
+					"<img class='collection-delete' src='/img/minus-circle.svg'/>",
+					"<a style='vertical-align:middle' class='old-collection'>"+collections[i].name+"</a><br/>"
+				].join("");
+				con=con.concat(c);
+			}
+			con=con.concat(["</div>"]);
+			win.append(con.join("\n"));
+			win.css({position:"absolute",top:height+5,left:0,width: 200,textAlign:"left",border:"thin solid lightGrey",boxShadow:"2px 2px 10px rgba(0,0,0,.7)",background:"white",zIndex:10});
+			icon.parent().css("position","relative");
+			icon.parent().append(win);
+
+			// action
+			win.find("img.collection-delete").click(function(e) {
+				e.stopPropagation();
+				var a=$(this).next("a");
+				var b=a.next("br");
+				var collectionName=a.text();
+				for(var i=0;i<collections.length;i++) {
+					if(collections[i].name==collectionName) {
+						collections.splice(i,1);
+						$(this).remove();
+						a.remove();
+						b.remove();
+						logCollections(); // update collection in DB
+						update_user();
+						break;
+					}
+				}
+			});
+			win.find("a.old-collection").click(function(e) {
+				e.stopPropagation();
+				var collectionName=$(this).text();
+				for(var i=0;i<collections.length;i++) {
+					if(collections[i].name==collectionName) {
+						$(location).attr('href',location.origin+'/list?articles='+JSON.stringify(collections[i].articles));
+					}
+				}
+				win.remove();
+				overlay.remove();			
+			});
+		});
+	}
+	</script>
+	
 	<!-- Main content  -->
 	<!--Core-->
 
@@ -110,12 +217,12 @@
 			<td>
 			<a  style="display:inline" rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/deed.en_US">
 			<!-- Original image location http://i.creativecommons.org/l/by-sa/3.0/88x31.png" -->
-			<img align="left" alt="Creative Commons License" style="border:1px solid white" src="<!--ROOTDIR-->img/cc-by-sa-88x31.png">
+			<img align="left" alt="Creative Commons License" style="border:1px solid white" src="/img/cc-by-sa-88x31.png">
 			</a>
 			</td>
 			<td style="vertical-align:top;font-size:0.8rem;color:#fff;font-family:sans-serif">
 			<span  style="display:inline" xmlns:dct="http://purl.org/dc/terms/" property="dct:title">brainspell</span> by
-			<a style="display:inline" xmlns:cc="http://creativecommons.org/ns#" href="brainspell.org" property="cc:attributionName" rel="cc:attributionURL">Roberto Toro</a>
+			<a style="display:inline" xmlns:cc="http://creativecommons.org/ns#" href="//brainspell.org" property="cc:attributionName" rel="cc:attributionURL">Roberto Toro</a>
 			is licensed under a <a style="display:inline" rel="license" href="http://creativecommons.org/licenses/by-sa/3.0/deed.en_US">Creative Commons Attribution-ShareAlike 3.0 Unported License</a>.
 			</td>
 			</tr>
@@ -123,6 +230,7 @@
 	</div>
 </div>
 
+<!--
 <script type="text/javascript">
   var _gaq = _gaq || [];
   _gaq.push(['_setAccount', 'UA-47722508-1']);
@@ -135,6 +243,7 @@
     var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
   })();
 </script>
+-->
 
 </body>
 

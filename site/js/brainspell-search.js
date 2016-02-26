@@ -38,6 +38,129 @@ function setSearchString(str)
 {
 	searchString=str;
 }
+function initBrainSpellSearch() {
+	configureInterface();
+	configureTemplateImage();
+	configureLocationsImage();
+	loadTemplate();
+	initTranslucent();
+	loadLocations();
+}
+function configureInterface() {
+	$('#toggle-selection').click(function() {
+		$(this).prop('checked',!($(this).prop('checked')));
+		$('input[type=checkbox]').each(function(){$(this).prop('checked',!($(this).prop('checked')))});
+	});
+	$('#add-to-collections').click(function() {
+		// Article list manipulation allows the user to:
+		// * add articles to a new article list
+		// * append them to an old one
+		// * display articles in article list
+		// (not here: remove articles from a article list)
+		// (not here: remove a article list)
+
+		// Get selected articles
+		var arr=[];
+		$(".paper-stuff").each(function() {
+			var parent=this;
+			$(parent).find("input").each(function(){
+				if($(this).prop('checked')==true) {
+					$(parent).find("a").each(function(){
+						var obj=parseInt($(this).attr('href').match(/\d+/)[0]);
+						arr.push(obj);
+					});
+				}
+			});
+		});
+
+		// Ask whether to add to new article list or to append to existing one
+		var height=$('#add-to-collections').parent().height();
+		var pos=$('#add-to-collections').offset();
+		
+		// create overlay
+		var overlay=$("<div>");
+		overlay.html(" ");
+		overlay.css({
+			position:"fixed",
+			top:0,
+			left:0,
+			width:"100%",
+			height:"100%",
+			zIndex:9
+		});
+		overlay.click(function() {
+			overlay.remove();
+			win.remove();
+		});
+		$("body").append(overlay);
+		
+		// create dialog box
+		var win=$("<div>");
+		var con=[];
+		if(collections.length) {
+			con=con.concat([
+				"<div style='padding:5'>",
+				"<b>Add to</b><br/>"
+			]);
+			for(var i=0;i<collections.length;i++)
+				con=con.concat("<a class='old-collection'>"+collections[i].name+"</a><br/>");
+			con=con.concat(["</div>","<hr>"]);
+		}
+		con=con.concat([
+			"<div style='padding:5'>",
+			"<a class='new-collection'><b>Create new article collection...</b></a>",
+			"</div>"
+		]);
+		win.append(con.join("\n"));
+		win.css({
+			position:"absolute",
+			top:height+5,
+			left:0, //pos.left,
+			width: 200,
+			textAlign:"left",
+			border:"thin solid lightGrey",
+			boxShadow:"2px 2px 10px rgba(0,0,0,.7)",
+			background:"white",
+			zIndex:10
+		});
+		$('#add-to-collections').css("position","relative");
+		$('#add-to-collections').append(win);
+		
+		// Actions
+		
+		// append articles to an existing collection
+		win.find("a.old-collection").click(function(e) {
+			e.stopPropagation();
+			var collectionName=$(this).text();
+			for(var i=0;i<collections.length;i++) {
+				if(collections[i].name==collectionName) {
+					for(var j=0;j<arr.length;j++) {
+						if(collections[i].articles.indexOf(arr[j])==-1)
+							collections[i].articles.push(arr[j]);
+					}
+					logCollections(); // update collection in DB
+				}
+			}
+			win.remove();
+			overlay.remove();			
+		});
+		
+		// create a new collection with the selected articles
+		win.find("a.new-collection").click(function(e) {
+			e.stopPropagation();
+			if(arr.length==0) {
+				alert("No selected articles");
+			} else {
+				var collectionName=prompt("Create new collection with "+arr.length+" articles");
+				collections.push({name:collectionName,articles:arr});
+				logCollections(); // update collection in DB
+			}
+			win.remove();
+			overlay.remove();			
+			updateCollections();
+		});
+	});
+}
 // Stereotaxic viewer
 function changeView(theView)
 {
@@ -187,6 +310,8 @@ function loadTemplate()
 }	
 function loadLocations()
 {
+	var i;
+	
 	// init query volume
 	for(i=0;i<LR*PA*IS;i++)
 		sum[i]=0;
@@ -213,23 +338,26 @@ function loadLocations()
 	console.log("[loadLocations]",refs.length,"references started loading");
 	for(ii=0;ii<refs.length;ii++)
 	{
-		(function(rrr){
-		$.get("/php/brainspell.php",
-			  {	action:"get_article",
-				command:"experiments",
-				argument:refs[ii]},
-			  function( msg ){
-				var xml=$.parseXML(msg);
-				exp=$.parseJSON($(xml).find("experiments").text());
-				//$("#mylog").append("<p>"+rrr+" "+msg+"</p>");
-
+		var jj=refs[ii];
+		$.get("/php/brainspell.php", {
+			action:"get_article",
+			command:"experiments",
+			argument:jj
+		},
+		function( msg ) {
+			//var xml=$.parseXML(msg);
+			//exp=$.parseJSON($(xml).find("experiments").text());
+			exp=$.parseJSON(msg);
+			if(exp==null) {
+				console.log("ERROR: no exp data in ref ",this);
+			} else {
 				// update the sum[] volume
-				var coord=new Array();
+				var i,j,k,coord=new Array();
 				for(i=0;i<exp.length;i++)
 				{
 					if(exp[i].locations.length==0)
 						continue;
-					
+				
 					for(j=0;j<exp[i].locations.length;j++)
 					{
 						coord=exp[i].locations[j].split(",");
@@ -250,21 +378,23 @@ function loadLocations()
 						}
 					}
 				}
-			
-				// refresh the image
-				drawImages();
-				if((nrefs%10)==0)
-					updateTranslucent();
+			}
+		
+			// refresh the image
+			drawImages();
+			if((nrefs%10)==0)
+				updateTranslucent();
 
-				// display progress
-				nrefs++;
-				if(nrefs==refs.length)
-				{
-					flagLocationsLoaded=1;
-					
-					updateTranslucent();
-					
-					var	hdr=new Uint8Array([
+			// display progress
+			nrefs++;
+			if(nrefs==refs.length)
+			{
+				flagLocationsLoaded=1;
+
+				drawImages();
+				updateTranslucent();
+				
+				var	hdr=new Uint8Array([
 92,1,0,0,100,115,114,32,32,32,32,32,32,0,82,79,73,52,109,109,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,114,48,4,0,45,0,54,0,45,0,1,0,0,0,0,0,0,0,109,109,176,0,0,0,0,0,0,0,0,0,0,0,4,0,8,
 0,0,0,0,0,0,0,0,0,128,64,0,0,128,64,0,0,128,64,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,176,67,
@@ -274,15 +404,14 @@ function loadLocations()
 111,110,101,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,0,0,22,0,30,0,18,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]);
-					var niiBlob = new Blob([hdr,sum]);
-					$("a.download_nii").attr("href",window.URL.createObjectURL(niiBlob));
-					$("a.download_nii").attr("download",searchString+".brainspell.nii");
-					$("a.download_nii").show();
-				}
-				else
-					nLocationsLoaded=Math.round(100*nrefs/refs.length);
-			});
-		})(refs[ii]);
+				var niiBlob = new Blob([hdr,sum]);
+				$("a.download_nii").attr("href",window.URL.createObjectURL(niiBlob));
+				$("a.download_nii").attr("download",searchString+".brainspell.nii");
+				$("a.download_nii").show();
+			}
+			else
+				nLocationsLoaded=Math.round(100*nrefs/refs.length);
+		});
 	}
 }
 function colourmap(val)
@@ -494,9 +623,10 @@ function updateTranslucent()
 	geometry.computeBoundingBox();
 	geometry.computeBoundingSphere();
 
-//	var material=new THREE.MeshNormalMaterial();
-	var material=new THREE.MeshDepthMaterial({wireframe:false});
-	surfacemesh=new THREE.Mesh( geometry, material );
+	var colorMaterial=new THREE.MeshBasicMaterial({color: 0xff0000, transparent: true, blending: THREE.MultiplyBlending});
+	var depthMaterial=new THREE.MeshDepthMaterial({wireframe:false});
+	surfacemesh = new THREE.SceneUtils.createMultiMaterialObject(geometry, [colorMaterial, depthMaterial]);
+                
 	surfacemesh.doubleSided=true;
 	var wirematerial = new THREE.MeshBasicMaterial({
 		color : 0x909090,
@@ -520,6 +650,7 @@ function changeLevel(val)
 	cmap.level=parseFloat(level);
 	updateTranslucent();
 }
+/*
 function fullscreen()
 {
 	// allow 'f' to go fullscreen where this feature is supported
@@ -560,6 +691,8 @@ function exitFullscreenHandler()
 		cameraControl.handleResize();
 	}
 }
+*/
+
 // init the scene
 function init_render()
 {
@@ -570,6 +703,7 @@ function init_render()
 			preserveDrawingBuffer	: true	// to allow screenshot
 		});
 		renderer.setClearColor( 0xffffff, 0 );
+		renderer.setPixelRatio(window.devicePixelRatio ? window.devicePixelRatio : 1);
 	}else{
 		renderer = new THREE.CanvasRenderer();
 	}
@@ -596,6 +730,7 @@ function init_render()
 	//THREEx.Screenshot.bindKey(renderer);
 	
 	// configure fullscreen exit
+	/*
 	if (document.addEventListener)
 	{
 		document.addEventListener('webkitfullscreenchange', exitFullscreenHandler, false);
@@ -603,6 +738,7 @@ function init_render()
 		document.addEventListener('fullscreenchange', exitFullscreenHandler, false);
 		document.addEventListener('MSFullscreenChange', exitFullscreenHandler, false);
 	}
+	*/
 	
 	// Add objects
 	var light	= new THREE.AmbientLight( Math.random() * 0xffffff );
@@ -640,7 +776,6 @@ function init_render()
 			},
 			vertexShader	: [ 'varying vec3	vVertexWorldPosition;',
 								'varying vec3	vVertexNormal;',
-								'varying vec4	vFragColor;',
 								'void main(){',
 								'	vVertexNormal	= normalize(normalMatrix * normal);',
 								'	vVertexWorldPosition	= (modelMatrix * vec4(position, 1.0)).xyz;',
@@ -652,7 +787,6 @@ function init_render()
 								'uniform float	power;',
 								'varying vec3	vVertexNormal;',
 								'varying vec3	vVertexWorldPosition;',
-								'varying vec4	vFragColor;',
 								'void main(){',
 								'	vec3 worldCameraToVertex= vVertexWorldPosition - cameraPosition;',
 								'	vec3 viewCameraToVertex	= (viewMatrix * vec4(worldCameraToVertex, 0.0)).xyz;',
@@ -698,6 +832,9 @@ function animate()
 function render() {
 	// update camera controls
 	cameraControl.update();
+
+	renderer.setClearColor( 0xffffff,1 );
+	renderer.clear( true );
 
 	// actually render the scene
 	renderer.render( scene, camera );

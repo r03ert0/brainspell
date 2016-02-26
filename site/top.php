@@ -1,8 +1,6 @@
 <?php
 
-$rootdir = "/";
-
-include $_SERVER['DOCUMENT_ROOT'].$rootdir."php/base.php";
+include $_SERVER['DOCUMENT_ROOT']."/php/base.php";
 
 $result = mysql_query("SELECT Username, PMID FROM ".$dbname.".Log");
 $nrows=mysql_num_rows($result);

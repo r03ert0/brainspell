@@ -9,6 +9,8 @@ var meta;
 var exp;
 var ArticlePMID;
 var EmptyArticle;
+var flagIsNIDM;
+var renderer;
 
 function updateArticle()
 {
@@ -40,6 +42,7 @@ function updateArticle()
 
 		// New article warning
 		$("#new-article-warning button").removeAttr('disabled');
+		$("#new-nidm-article-warning button").removeAttr('disabled');
 		
 		// Metadata stereotaxic space
 		$("span#Talairach").show();
@@ -176,9 +179,9 @@ function findIndexOfExperimentByEID(eid) {
 	}
 	return i;
 }
-function updateExperiment(eid/*iExp*/)
+function updateExperiment(eid)
 {
-	if(debug) console.log("[updateExperiment] Login update at experiment "+eid/*iExp*/+" (Login: "+(loggedin?"Yes":"No")+")");
+	if(debug) console.log("[updateExperiment] Login update at experiment "+eid+" (Login: "+(loggedin?"Yes":"No")+")");
 	
 	/*
 		Experiment-level display
@@ -186,14 +189,14 @@ function updateExperiment(eid/*iExp*/)
 	*/
 	if(loggedin)
 	{
-		$(".experiment#"+eid/*iExp*/+" .title").addClass('stored');
-		$(".experiment#"+eid/*iExp*/+" .caption").addClass('stored');
-		$(".experiment#"+eid/*iExp*/+" div.tableAlert").hide();
-		$(".experiment#"+eid/*iExp*/+" div.tableMark").show();
-		$(".experiment#"+eid/*iExp*/+" td.coordinate").attr("contentEditable","true");
-		$(".experiment#"+eid/*iExp*/+" th.input").show();
-		$(".experiment#"+eid/*iExp*/+" td.input").show();
-		$(".experiment#"+eid/*iExp*/+" .tableActions").show();
+		$(".experiment#"+eid+" .title").addClass('stored');
+		$(".experiment#"+eid+" .caption").addClass('stored');
+		$(".experiment#"+eid+" div.tableAlert").hide();
+		$(".experiment#"+eid+" div.tableMark").show();
+		$(".experiment#"+eid+" td.coordinate").attr("contentEditable","true");
+		$(".experiment#"+eid+" th.input").show();
+		$(".experiment#"+eid+" td.input").show();
+		$(".experiment#"+eid+" .tableActions").show();
 
 		// Stored text fields (title, caption)
 		$(".stored").click(function() {
@@ -215,33 +218,33 @@ function updateExperiment(eid/*iExp*/)
 
 		// Experiment table mark
 		var ex=findExperimentByEID(eid);
-		var prevMark=findPreviousTableMarkByUser(eid/*iExp*/);
+		var prevMark=findPreviousTableMarkByUser(eid);
 		var markBadTable=ex.markBadTable;
 		if(markBadTable && (markBadTable.bad+markBadTable.ok>=minVotes))
 		{
-			if(debug) console.log("[updateExperiment] eid:",eid/*iExp*/,"markbad:",markBadTable);
-			$(".experiment#"+eid/*iExp*/+":first span#Yes").html('('+markBadTable.ok+')');
-			$(".experiment#"+eid/*iExp*/+":first span#No").html('('+markBadTable.bad+')');
+			if(debug) console.log("[updateExperiment] eid:",eid,"markbad:",markBadTable);
+			$(".experiment#"+eid+":first span#Yes").html('('+markBadTable.ok+')');
+			$(".experiment#"+eid+":first span#No").html('('+markBadTable.bad+')');
 		
 			if(markBadTable.bad>markBadTable.ok)
-				$(".experiment#"+eid/*iExp*/+":first .tableAlert ").html('<img src="/img/alert.svg" style="height:0.8rem;display:inline;position:relative;top:0rem"/>This table may be incorrect');
+				$(".experiment#"+eid+":first .tableAlert ").html('<img src="/img/alert.svg" style="height:0.8rem;display:inline;position:relative;top:0rem"/>This table may be incorrect');
 			else
-				$(".experiment#"+eid/*iExp*/+":first .tableAlert ").html("");
+				$(".experiment#"+eid+":first .tableAlert ").html("");
 		}
 		else
 		{
-			$(".experiment#"+eid/*iExp*/+":first span#Yes").html('');
-			$(".experiment#"+eid/*iExp*/+":first span#No").html('');			
+			$(".experiment#"+eid+":first span#Yes").html('');
+			$(".experiment#"+eid+":first span#No").html('');			
 		}
 		if(prevMark>-1)
 		{
-			$(".experiment#"+eid/*iExp*/+" input:radio[value='Yes']").attr('checked',prevMark==0);
-			$(".experiment#"+eid/*iExp*/+" input:radio[value='No']").attr('checked',prevMark==1);
+			$(".experiment#"+eid+" input:radio[value='Yes']").attr('checked',prevMark==0);
+			$(".experiment#"+eid+" input:radio[value='No']").attr('checked',prevMark==1);
 		}
 		else
 		{
-			$(".experiment#"+eid/*iExp*/+" input:radio[value='Yes']").removeAttr('checked');
-			$(".experiment#"+eid/*iExp*/+" input:radio[value='No']").removeAttr('checked');
+			$(".experiment#"+eid+" input:radio[value='Yes']").removeAttr('checked');
+			$(".experiment#"+eid+" input:radio[value='No']").removeAttr('checked');
 		}
 	
 		// Experiment tags (specific)
@@ -254,40 +257,40 @@ function updateExperiment(eid/*iExp*/)
 			
 				// Show tags only if there are at least minVotes votes,
 				// or if the current user voted for it
-				var	prevVote=findPreviousVoteByUser(eid/*iExp*/,rtag);
+				var	prevVote=findPreviousVoteByUser(eid,rtag);
 				if(rtag.agree+rtag.disagree>=minVotes || prevVote!=0)
-					addTag(eid/*iExp*/,rtag);
+					addTag(eid,rtag);
 				else
-					removeTag(eid/*iExp*/,rtag);
+					removeTag(eid,rtag);
 			}
 	}
 	else
 	{
 		$(".stored").removeAttr('contentEditable');
-		$(".experiment#"+eid/*iExp*/+" .stored").removeClass('stored');
+		$(".experiment#"+eid+" .stored").removeClass('stored');
 
 		// Experiment table mark (global)
-		$(".experiment#"+eid/*iExp*/+" div.tableAlert").show();
-		$(".experiment#"+eid/*iExp*/+" div.tableMark").hide();
-		$(".experiment#"+eid/*iExp*/+" td.coordinate").removeAttr("contentEditable");
-		$(".experiment#"+eid/*iExp*/+" th.input").hide();
-		$(".experiment#"+eid/*iExp*/+" td.input").hide();
-		$(".experiment#"+eid/*iExp*/+" .tableActions").hide();
+		$(".experiment#"+eid+" div.tableAlert").show();
+		$(".experiment#"+eid+" div.tableMark").hide();
+		$(".experiment#"+eid+" td.coordinate").removeAttr("contentEditable");
+		$(".experiment#"+eid+" th.input").hide();
+		$(".experiment#"+eid+" td.input").hide();
+		$(".experiment#"+eid+" .tableActions").hide();
 	}
 	
 	// Adjust locations table height
 	var padd,legendheight,xyzhdrheight,ontheight,tableActionsHeight;
-	padd=parseInt($('.experiment#'+eid/*iExp*/).css('padding-top'));
-	legendheight=$('.experiment#'+eid/*iExp*/+' .experiment-title').innerHeight();
-	legendheight+=$('.experiment#'+eid/*iExp*/+' .experiment-caption').innerHeight();
-	xyzhdrheight=$('.experiment#'+eid/*iExp*/+' .xyzheader').innerHeight();
-	ontheight=$('.experiment#'+eid/*iExp*/+' .ontologies').innerHeight();
-	badTableHeight=$(".experiment#"+eid/*iExp*/+" input.badTable").innerHeight()+10;
+	padd=parseInt($('.experiment#'+eid).css('padding-top'));
+	legendheight=$('.experiment#'+eid+' .experiment-title').innerHeight();
+	legendheight+=$('.experiment#'+eid+' .experiment-caption').innerHeight();
+	xyzhdrheight=$('.experiment#'+eid+' .xyzheader').innerHeight();
+	ontheight=$('.experiment#'+eid+' .ontologies').innerHeight();
+	badTableHeight=$(".experiment#"+eid+" input.badTable").innerHeight()+10;
 	if(loggedin)
-		tableActionsHeight=$(".experiment#"+eid/*iExp*/+" .tableActions").outerHeight();
+		tableActionsHeight=$(".experiment#"+eid+" .tableActions").outerHeight();
 	else
 		tableActionsHeight=0;
-	$('.experiment#'+eid/*iExp*/+' .xyztable').css({"height":300,"max-height":300-badTableHeight-padd-tableActionsHeight});
+	$('.experiment#'+eid+' .xyztable').css({"height":300,"max-height":300-badTableHeight-padd-tableActionsHeight});
 }
 function initBrainSpellArticle()
 {
@@ -297,13 +300,28 @@ function initBrainSpellArticle()
 	if ('ontouchstart' in document.documentElement)
 		htmlTag.className = (htmlTag.className + ' ' || '') + 'isTouch';
 	
-	$.get(rootdir+"templates/cogatlas-tasks.html",function(data){tasks=data;if(debug) console.log("[init] Tasks loaded");});
-	$.get(rootdir+"templates/cogatlas-cognitive.html",function(data){cognitive=data;if(debug) console.log("[init] Cognitive domains loaded");});
-	$.get(rootdir+"templates/brainmap-behavioural.html",function(data){behavioural=data;if(debug) console.log("[init] Behavioural domains loaded");});
-	$.get(rootdir+"templates/concept.html",function(data){concept=data;if(debug) console.log("[init] Concept loaded");});
+	$.get("/templates/cogatlas-tasks.html",function(data){tasks=data;if(debug) console.log("[init] Tasks loaded");});
+	$.get("/templates/cogatlas-cognitive.html",function(data){cognitive=data;if(debug) console.log("[init] Cognitive domains loaded");});
+	$.get("/templates/brainmap-behavioural.html",function(data){behavioural=data;if(debug) console.log("[init] Behavioural domains loaded");});
+	$.get("/templates/concept.html",function(data){concept=data;if(debug) console.log("[init] Concept loaded");});
 
 	subscribeToLoginUpdates(updateArticle);
 
+	// Init renderer
+	$("body").append("<canvas id='3d' style='position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none'>");
+	if( Detector.webgl ){
+		renderer = new THREE.WebGLRenderer({
+			canvas: document.getElementById( "3d" ),
+			antialias				: true,	// to get smoother output
+			preserveDrawingBuffer	: true,	// to allow screenshot
+			alpha: true
+		});
+		renderer.setClearColor( 0xffffff, 0 );
+		renderer.setPixelRatio(window.devicePixelRatio ? window.devicePixelRatio : 1);
+	} else {
+		console.log("ERROR: No WebGLRenderer available");
+		renderer = new THREE.CanvasRenderer();
+	}
 	animate();
 
 	$("#pmid").click(function(){window.location=$(this).attr('href')});
@@ -313,36 +331,72 @@ function initBrainSpellArticle()
 	
 	ArticlePMID=$("#pmid").attr("href").split("/")[4];
 	if(debug) console.log("Article's PMID",ArticlePMID);
+	
+	flagIsNIDM=(ArticlePMID.substring(0,5)=="NIDM_");
 
 	if(exp_string=="<!--Experiments-->")
 	{
-		if(debug) console.log("[initBrainSpellArticle] Article not in DB, search pubmed");
-		$("#new-article-warning").show();			
-		downloadArticleXML();
+		if(debug) console.log("[initBrainSpellArticle] Article not in DB, add it");
+		
+		if(flagIsNIDM) {
+			// make and empty NIDM template
+			$("#new-nidm-article-warning").show();
+			createEmptyNIDMTemplate(ArticlePMID);
+			$(".title,.reference,.abstract,.metadata,.experiments,.discussion").hide();
+		} else {
+			if(debug) console.log("[initBrainSpellArticle] Not an NIDM article, look it up in PubMed");
+			$("#new-article-warning").show();
+			$(".experiments,.discussion").hide();
+			downloadArticleXML();
+		}
 	}
 	else
 	{
 		exp=$.parseJSON(exp_string);
 		configureExperiments();
 
-		if(meta_string)
-			meta=$.parseJSON(meta_string);
-		else
-			meta={};
-		if(meta.meshHeadings==undefined || meta.meshHeadings.length==0)
-		{
-			if(debug) console.log("[initBrainSpellArticle] Article without MeSH tags, search pubmed");
-			downloadArticleXML(function(){
-				saveMetadata();
-				logKeyValue(-1,"UserTriggeredAction",JSON.stringify({"action":"Update","element":"MeSH"}));
-			});
-		}
-		else
-		{
-			configureMetadata();
-			updateArticle();
+		if(flagIsNIDM) {
+			$(".reference,.abstract").hide();
+		} else {
+			
+			if(meta_string)	meta=$.parseJSON(meta_string);
+			else			meta={};
+			
+			if(meta.meshHeadings==undefined || meta.meshHeadings.length==0)
+			{
+				if(debug) console.log("[initBrainSpellArticle] Article without MeSH tags, search pubmed");
+				downloadArticleXML(function(){
+					saveMetadata();
+					logKeyValue(-1,"UserTriggeredAction",JSON.stringify({"action":"Update","element":"MeSH"}));
+				});
+			}
+			else
+			{
+				configureMetadata();
+				updateArticle();
+			}
 		}
 	}
+}
+function createEmptyNIDMTemplate(ArticlePMID) {
+	EmptyArticle={};
+	EmptyArticle.title="Temporary Title";
+	EmptyArticle.abstract="Temporary Abstract";
+	EmptyArticle.authors="Temporary Authors list";
+	EmptyArticle.reference="Temporary Reference";
+	EmptyArticle.pmid=ArticlePMID;
+	EmptyArticle.doi="Temporary DOI";
+	EmptyArticle.neurosynth=ArticlePMID;
+	meta={};
+
+	// Display information in webpage
+	$("h2.title").html(EmptyArticle.title);
+	$(".abstract").html(EmptyArticle.abstract);
+	$("#reference").html(EmptyArticle.reference);
+	$("#doi").attr("href","http://dx.doi.org/"+EmptyArticle.doi);
+	
+	configureMetadata();
+	updateArticle();
 }
 function downloadArticle() {
 	/*
@@ -350,7 +404,7 @@ function downloadArticle() {
 	*/
 	var i,j;
 	var str=[
-		$(".paper-title").text(),
+		$(".title").text(),
 		$("#reference").text(),
 		$("#pmid").text(),
 		$("#doi").text(),
@@ -389,7 +443,7 @@ function downloadArticleXML(callback)
 			parseArticleXML(xml);
 						
 			// Display information in webpage
-			$("h2.paper-title").html(EmptyArticle.title);
+			$("h2.title").html(EmptyArticle.title);
 			$("div.abstract").html(EmptyArticle.abstract);
 			$("#reference").html(EmptyArticle.reference);
 			$("#doi").attr("href","http://dx.doi.org/"+EmptyArticle.doi);
@@ -461,7 +515,7 @@ function parseArticleXML(xml)
 	EmptyArticle.doi=doi;
 	
 	// neurosynth
-	EmptyArticle.neurosynth="";
+	EmptyArticle.neurosynth=ArticlePMID;
 
 	// MeSH headings
 	if(meta==undefined)
@@ -473,12 +527,19 @@ function parseArticleXML(xml)
 }
 function addEmptyExperiments(obj)
 {
-	var nexp=parseInt($("input#numNewExperiments").val());
-	var	i;
+	var nexp,
+		i;
+	
+	if(flagIsNIDM) {
+		nexp=parseInt($("#new-nidm-article-warning .numNewExperiments").val());
+		EmptyArticle.title=html_sanitize($("#new-nidm-article-warning .temporaryTitle").val());
+	} else {
+		nexp=parseInt($("#new-article-warning .numNewExperiments").val());
+	}
 	
 	if(nexp>0)
 	{
-		$("#new-article-warning").hide();
+		$("#new-article-warning, #new-nidm-article-warning").hide();
 
 		// add new experiments
 		exp=[];
@@ -486,10 +547,7 @@ function addEmptyExperiments(obj)
 			exp.push({"id":100000+i,"title":"","caption":"","locations":["0,0,0"]}); // using 100000 to distinguish from neurosynth/fix ids
 		
 		// store empty article in database
-		var result=$.ajax({
-			type: "GET",
-			url: "/php/brainspell.php",
-			data: {
+		var obj={
 				action:"add_article",
 				command:"new",
 				Title:EmptyArticle.title,
@@ -501,13 +559,24 @@ function addEmptyExperiments(obj)
 				NeuroSynthID:EmptyArticle.neurosynth,
 				Experiments:JSON.stringify(exp),
 				Metadata:JSON.stringify(meta)
-			},
-			async: false
+		};
+		var result=$.ajax({
+			type: "POST",
+			url: "/php/brainspell.php",
+			data: obj
 		}).done(function( msg ){
-			if(debug) console.log(msg);
+			if(debug)
+				console.log(msg);
 		});
 		
 		configureExperiments();
+		
+		if(flagIsNIDM) {
+			$(".title").text(EmptyArticle.title);
+			$(".title,.metadata,.experiments,.discussion").show();
+		} else {
+			$(".title,.reference,.abstract,.metadata,.experiments,.discussion").show();
+		}
 		
 		logKeyValue(-1,"UserAction",JSON.stringify("AddEmptyArticle"));
 	}
@@ -542,7 +611,7 @@ function configureMetadata()
 		var	user=meta.comments[i].user;
 		var	time=new Date();
 		time.setTime(meta.comments[i].time);
-		$("div.comments").append("</p><a href='"+rootdir+"user/"+user+"'>"+user+"</a> ("+time.toLocaleString()+")<br \>");
+		$("div.comments").append("</p><a href='"+"/user/"+user+"'>"+user+"</a> ("+time.toLocaleString()+")<br \>");
 		$("div.comments").append(comment);
 		$("div.comments").append("</p><br \>");
 	}
@@ -552,36 +621,38 @@ function configureMetadata()
 function configureMeSHDescriptors()
 {
 	var	metadata="";
-	for(i=0;i<meta.meshHeadings.length;i++)
-	{
-		meta.meshHeadings[i].ontology="mesh";
+	if(meta.meshHeadings) {
+		for(i=0;i<meta.meshHeadings.length;i++)
+		{
+			meta.meshHeadings[i].ontology="mesh";
 
-		meta.meshHeadings[i].agree=(meta.meshHeadings[i].agree)?parseInt(meta.meshHeadings[i].agree):0;
-		meta.meshHeadings[i].disagree=(meta.meshHeadings[i].disagree)?parseInt(meta.meshHeadings[i].disagree):0;
-		var	rtag=meta.meshHeadings[i];
-		var tag=$("<li>",{class:"tag"});
-		if(meta.meshHeadings[i].majorTopic=="Y")
-			tag.html('<b>'+rtag.name+'</b>');
-		else
-			tag.html(rtag.name);
-		updateTagColor(tag,rtag);
-		tag.click({rtag:rtag},function(e){openTagModal(-1,e.data.rtag)});
-		$(".tag-list").append(tag);
+			meta.meshHeadings[i].agree=(meta.meshHeadings[i].agree)?parseInt(meta.meshHeadings[i].agree):0;
+			meta.meshHeadings[i].disagree=(meta.meshHeadings[i].disagree)?parseInt(meta.meshHeadings[i].disagree):0;
+			var	rtag=meta.meshHeadings[i];
+			var tag=$("<li>",{class:"tag"});
+			if(meta.meshHeadings[i].majorTopic=="Y")
+				tag.html('<b>'+rtag.name+'</b>');
+			else
+				tag.html(rtag.name);
+			updateTagColor(tag,rtag);
+			tag.click({rtag:rtag},function(e){openTagModal(-1,e.data.rtag)});
+			$(".tag-list").append(tag);
+		}
 	}
 }
 function configureExperiments()
 {
 	if(debug) console.log("[configureExperiments]");
-	$(".experiments").html("");
+	$("#experiments").html("");
 	for(i=0;i<exp.length;i++)
 	{
 		if(exp[i].locations.length==0)
 			continue;
-		$(".experiments").append($('<div class="experiment" id="'+exp[i].id+'">').load(rootdir+"templates/experiment.html",addExperiment(exp[i].id)));
+		$("#experiments").append($('<div class="experiment" id="'+exp[i].id+'">').load("/templates/experiment.html",addExperiment(exp[i].id)));
 	}
 	if(debug) console.log("[configureExperiments] experiments configured");
 }
-function addExperiment(eid/*iExp*/)
+function addExperiment(eid)
 {
 	if(debug) console.log("[addExperiment]");
 	return function(responseText, textStatus, XMLHttpRequest){
@@ -591,18 +662,18 @@ function addExperiment(eid/*iExp*/)
 		var ex=findExperimentByEID(eid);
 		var title=(ex.title)?ex.title:"(Empty)";
 		var caption=(ex.caption)?ex.caption:"(Empty)";
-		$(".experiment#"+eid/*iExp*/+" .title").append(title);
-		$(".experiment#"+eid/*iExp*/+" .caption").append(caption);
+		$(".experiment#"+eid+" .title").append(title);
+		$(".experiment#"+eid+" .caption").append(caption);
 
 		// Configure locations to 3D view
 		//-------------------------------
-		initTranslucentBrain(eid/*iExp*/);
+		initTranslucentBrain(eid);
 		ex.render.spheres = new THREE.Object3D();
 		ex.render.scene.add(ex.render.spheres);
 
 		// Configure stereotaxic table
 		//----------------------------
-		var table=$(".experiment#"+eid/*iExp*/+" .xyztable table");
+		var table=$(".experiment#"+eid+" .xyztable table");
 		if(table==undefined)
 			console.log("ERROR: table undefined");
 		table.click(function(e){if(e.target.tagName=="TD") clickOnTable(e.target)});
@@ -612,7 +683,7 @@ function addExperiment(eid/*iExp*/)
 		if(!ex.locations)
 			return;
 		var html="";
-		table=$(".experiment#"+eid/*iExp*/+" .xyztable table")[0];
+		table=$(".experiment#"+eid+" .xyztable table")[0];
 		for(j=0;j<ex.locations.length;j++)
 		{
 			var coords=[];
@@ -639,43 +710,43 @@ function addExperiment(eid/*iExp*/)
 		}
 
 		// Intercept enter on table cells
-		$(".experiment#"+eid/*iExp*/+" .xyztable table td").on( 'keydown',function(e) {
+		$(".experiment#"+eid+" .xyztable table td").on( 'keydown',function(e) {
 			if(e.which==13&&e.shiftKey==false) {	// enter (without shift)
-				parseTable(this,eid/*iExp*/);
+				parseTable(this,eid);
 				return false;
 			}
 			if(e.which==9) {	// tab
-				parseTable(this,eid/*iExp*/);
+				parseTable(this,eid);
 			}
 		});
 		
 		// Table actions
 		//--------------
 		// Split table
-		$(".experiment#"+eid/*iExp*/+" .button.split").click(function() {
-			splitTable(eid/*iExp*/,ex.selectedRow);
+		$(".experiment#"+eid+" .button.split").click(function() {
+			splitTable(eid,ex.selectedRow);
 		});
 		// Import table
-		$(".experiment#"+eid/*iExp*/+" .button.import").click(function() {
+		$(".experiment#"+eid+" .button.import").click(function() {
 			importTable(eid);
 		});
 
 		// Parse locations: add locations to
 		// 3d view and to stereotaxic table
 		//----------------------------------
-		parseTable("",eid/*iExp*/);
+		parseTable("",eid);
 
 		// Add ontologies
-		$(".experiment#"+eid/*iExp*/+" .ontologies").append(addOntology(eid/*iExp*/,"tasks"));
-		$(".experiment#"+eid/*iExp*/+" .ontologies").append(addOntology(eid/*iExp*/,"cognitive"));
-		$(".experiment#"+eid/*iExp*/+" .ontologies").append(addOntology(eid/*iExp*/,"behavioural"));
+		$(".experiment#"+eid+" .ontologies").append(addOntology(eid,"tasks"));
+		$(".experiment#"+eid+" .ontologies").append(addOntology(eid,"cognitive"));
+		$(".experiment#"+eid+" .ontologies").append(addOntology(eid,"behavioural"));
 		
 		// Configure radio button groups for table marks
-		$(".experiment#"+eid/*iExp*/+" input:radio[value='Yes']").attr('name',"radio"+eid/*iExp*/);
-		$(".experiment#"+eid/*iExp*/+" input:radio[value='No']").attr('name',"radio"+eid/*iExp*/);
+		$(".experiment#"+eid+" input:radio[value='Yes']").attr('name',"radio"+eid);
+		$(".experiment#"+eid+" input:radio[value='No']").attr('name',"radio"+eid);
 
-		updateExperiment(eid/*iExp*/);
-		subscribeToLoginUpdates(function(){updateExperiment(eid/*iExp*/)});
+		updateExperiment(eid);
+		subscribeToLoginUpdates(function(){updateExperiment(eid)});
 	}
 }
 //========================================================================================
@@ -686,20 +757,20 @@ function clickOnTable(target)
 	var	targetClass=$(target).attr('class');
 	var row=$(target).closest("tr");
 	var	div=$(target).closest(".experiment");
-	var eid/*iExp*/=div.attr('id');
+	var eid=div.attr('id');
 	var	index=$(row).index();
 	
 	if(index>=0 && targetClass!="del" && targetClass!="add")
-		selectRow(row,eid/*iExp*/);
+		selectRow(row,eid);
 }
 function keydownOnTable(target)
 {
 	if(debug) console.log("keydown:",target);
 }
-function selectRow(row,eid/*iExp*/) {
+function selectRow(row,eid) {
 	var ex=findExperimentByEID(eid);
 	var i=$(row).index();
-	$(".experiment#"+eid/*iExp*/+" .xyztable table td").css({'background-color':''});
+	$(".experiment#"+eid+" .xyztable table td").css({'background-color':''});
 	ex.render.spheres.children.forEach(function( sph ) { sph.material.color.setRGB( 1,0,0 );});
 	if(i>=0) {
 		$(row).children('td.coordinate').css({'background-color':'lightGreen'});
@@ -709,39 +780,39 @@ function selectRow(row,eid/*iExp*/) {
 	else
 		ex.selectedRow=undefined;
 }
-function enterRow(row,eid/*iExp*/) {
+function enterRow(row,eid) {
 	$(row).on('keydown',function(e) {
 		if(e.which==13&&e.shiftKey==false) {	// enter (without shift)
-			parseTable(row,eid/*iExp*/);
+			parseTable(row,eid);
 			return false;
 		}
 		if(e.which==9) {	// tab
-			parseTable(row,eid/*iExp*/);
+			parseTable(row,eid);
 		}				
 	});
 }
 function delRow(row)
 {
 	var	par=$(row).closest(".experiment");
-	var eid/*iExp*/=par.attr('id');
+	var eid=par.attr('id');
     var i=$(row).closest("tr").index();
     var ex=findExperimentByEID(eid);
     
-    $(".experiment#"+eid/*iExp*/+" .xyztable table")[0].deleteRow(i);
+    $(".experiment#"+eid+" .xyztable table")[0].deleteRow(i);
 
     ex.render.scene.remove(ex.locations[i].sph);
     ex.render.spheres.remove(ex.locations[i].sph);
     ex.locations.splice(i,1);
-	save(eid/*iExp*/,"locations",JSON.stringify(ex.locations,["x","y","z"]));
-	selectRow(row,eid/*iExp*/); // this will erase any existing selection
+	save(eid,"locations",JSON.stringify(ex.locations,["x","y","z"]));
+	selectRow(row,eid); // this will erase any existing selection
 }
 function addRow(row)
 {
 	var	par=$(row).closest(".experiment");
-	var eid/*iExp*/=par.attr('id');
+	var eid=par.attr('id');
 	var ex=findExperimentByEID(eid);
     var i=$(row).closest('tr').index();
-	var table=$(".experiment#"+eid/*iExp*/+" .xyztable table")[0];
+	var table=$(".experiment#"+eid+" .xyztable table")[0];
     var	inputType=$(row).attr("class");
     var j,new_row;
     
@@ -759,18 +830,18 @@ function addRow(row)
             "<td><input type='image' id='add' src='/img/plus-circle.svg' onclick='addRow(this)'/></td>"].join("\n");
 	
 	// intercept enter
-	$(new_row).find('td[contentEditable]').each(function(){enterRow(this,eid/*iExp*/);});
+	$(new_row).find('td[contentEditable]').each(function(){enterRow(this,eid);});
 
 	if(!ex.locations)
 		ex.locations=[];
 	ex.locations.splice(j,0,{"x":0,"y":0,"z":0});
-	parseTable($(new_row),eid/*iExp*/);
-	selectRow(new_row,eid/*iExp*/);
+	parseTable($(new_row),eid);
+	selectRow(new_row,eid);
 }
-function splitTable(eid/*iExp*/,irow) {
+function splitTable(eid,irow) {
 	var ex=findExperimentByEID(eid);
 	var iExp=findIndexOfExperimentByEID(eid);
-	if(debug) console.log("Split the table in experiment "+eid/*iExp*/+" at row: "+ex.selectedRow);
+	if(debug) console.log("Split the table in experiment "+eid+" at row: "+ex.selectedRow);
 
 	// clear sphere selection in 3d view
 	ex.render.spheres.children.forEach(function( sph ) { sph.material.color.setRGB( 1,0,0 );});
@@ -782,6 +853,10 @@ function splitTable(eid/*iExp*/,irow) {
 		if(exp[i].id>new_eid)
 			new_eid=exp[i].id;
 	new_eid=(new_eid<100000)?100000:(new_eid+1); // Using 100000 to distinguish from automatic ids (neurosynth/fix)
+	
+	if(ex.tags==undefined)
+		ex.tags="";
+	
 	var newExp={
 		id: new_eid,
 		title: ex.title,
@@ -805,7 +880,7 @@ function importTable(eid) {
 	var container=$("<div id='import-table'>");
 	var lightbox=$("<div>");
 	lightbox.addClass('light_content');
-	$.get(rootdir+"templates/stereoparse.html",function(data) {
+	$.get("/templates/stereoparse.html",function(data) {
 		var i;
 		var newLocations=[];
 
@@ -883,7 +958,7 @@ function importTable(eid) {
 //============
 // 3D Viewer and Table
 //=============
-function parseTable(row,eid/*iExp*/)
+function parseTable(row,eid)
 {
 	var ex=findExperimentByEID(eid);
 	var	i=-1;
@@ -901,7 +976,7 @@ function parseTable(row,eid/*iExp*/)
 			ex.locations[i].y=y;
 			ex.locations[i].z=z;
 			
-			save(eid/*iExp*/,"locations",JSON.stringify(ex.locations,["x","y","z"]));
+			save(eid,"locations",JSON.stringify(ex.locations,["x","y","z"]));
 		}
 	}
 		
@@ -920,14 +995,16 @@ function parseTable(row,eid/*iExp*/)
 		var y=ex.locations[j].y;
 		var z=ex.locations[j].z;
 		var sph = new THREE.Mesh( geometry, new THREE.MeshLambertMaterial({color: color}));
-		sph.position=new THREE.Vector3(x*0.14,y*0.14+3,z*0.14-2);
+		sph.position.x=parseFloat(x)*0.14;
+		sph.position.y=parseFloat(y)*0.14+3;
+		sph.position.z=parseFloat(z)*0.14-2;
 		ex.render.spheres.add(sph);
 		ex.locations[j].sph=sph;
 	}
 }
 function store(obj)
 {
-	var	eid/*iExp*/=$(obj).closest(".experiment").attr("id");
+	var	eid=$(obj).closest(".experiment").attr("id");
 	var	name=$(obj).attr('class').split(" ")[0];
 	var	value=$(obj).text();
 	$(obj).html(value);
@@ -937,7 +1014,7 @@ function store(obj)
 	$(obj).html(value3);
 	save(eid,name,value3);
 }
-function save(eid/*iExp*/,name,value)
+function save(eid,name,value)
 {
 	var ex=findExperimentByEID(eid);
 	if(name=="title")
@@ -970,15 +1047,14 @@ function saveExperiments()
 	
 	// save to database
 	var result=$.ajax({
-		type: "GET",
+		type: "POST",
 		url: "/php/brainspell.php",
 		data: {
 			action:"add_article",
 			command:"experiments",
 			Experiments:experiments_string,
 			PMID:ArticlePMID
-		},
-		async: false
+		}
 	}).done(function( msg ){
 		if(debug) console.log("[saveExperiments]",msg);
 	});
@@ -990,20 +1066,19 @@ function saveMetadata()
 	
 	// save to database
 	var result=$.ajax({
-		type: "GET",
+		type: "POST",
 		url: "/php/brainspell.php",
 		data: {
 			action:"add_article",
 			command:"metadata",
 			Metadata:metadata_string,
 			PMID:ArticlePMID
-		},
-		async: false
+		}
 	}).done(function( msg ){
 		if(debug) console.log("[saveMetadata]",msg);
 	});
 }
-function addOntology(eid/*iExp*/,ontology)
+function addOntology(eid,ontology)
 {
 	var	str="";
 	var ct="",cts=new Array({ontology:"tasks",title:"Cognitive Atlas Tasks"},{ontology:"cognitive",title:"Cognitive Atlas Cognitive Domains"},{ontology:"behavioural",title:"BrainMap Behavioural Domains"});
@@ -1014,29 +1089,29 @@ function addOntology(eid/*iExp*/,ontology)
 			ct=cts[i];
 
 	str+='<div class="ontology" id="'+ontology+'" style="padding-left:5px;padding-bottom:5px">\n';
-	str+='<div class="ontology-name"><span class="tag" style="top:-0.2em"><a onclick="openOntologyModal('+eid/*iExp*/+',\''+ontology+'\',\'+\');">+</a></span><b style="padding-left:4px;font-family:sans-serif">'+ct.title+'</b></div>\n';
+	str+='<div class="ontology-name"><span class="tag" style="top:-0.2em"><a onclick="openOntologyModal('+eid+',\''+ontology+'\',\'+\');">+</a></span><b style="padding-left:4px;font-family:sans-serif">'+ct.title+'</b></div>\n';
 	str+='<ul class="ontology-tags">\n';
 	str+='</ul>\n';
 	str+='</div>\n';
 
 	return str;
 }
-function addTag(eid/*iExp*/,rtag)
+function addTag(eid,rtag)
 {
-	var prevTag=$("div.experiment#"+eid/*iExp*/+" div.ontology#"+rtag.ontology+" li:contains('"+rtag.name+"')").length;
+	var prevTag=$("div.experiment#"+eid+" div.ontology#"+rtag.ontology+" li:contains('"+rtag.name+"')").length;
 	if(prevTag!=0)
 		return;
 		
 	var tag=$("<li>",{class:'tag'});
 	tag.html(rtag.name);
-	tag.click({rtag:rtag},function(e){openTagModal(eid/*iExp*/,e.data.rtag)});
+	tag.click({rtag:rtag},function(e){openTagModal(eid,e.data.rtag)});
 	updateTagColor(tag,rtag);
-	$("div.experiment#"+eid/*iExp*/+" div.ontology#"+rtag.ontology+" ul").append(tag);
+	$("div.experiment#"+eid+" div.ontology#"+rtag.ontology+" ul").append(tag);
 	return tag;
 }
-function removeTag(eid/*iExp*/,rtag)
+function removeTag(eid,rtag)
 {
-	$("div.experiment#"+eid/*iExp*/+" div.ontology#"+rtag.ontology+" li:contains('"+rtag.name+"')").remove();
+	$("div.experiment#"+eid+" div.ontology#"+rtag.ontology+" li:contains('"+rtag.name+"')").remove();
 }
 function updateTagColor(tag,rtag)
 {
@@ -1074,7 +1149,7 @@ function findTag(tags,name,ontology)
 		return 0;
 	return ob;
 }
-function findPreviousVoteByUser(eid/*iExp*/,rtag)
+function findPreviousVoteByUser(eid,rtag)
 {
 	var found=0,vote=0;
 
@@ -1082,7 +1157,7 @@ function findPreviousVoteByUser(eid/*iExp*/,rtag)
 	{
 		var result=$.ajax({
 			type: "GET",
-			url: rootdir+"php/brainspell.php",
+			url: "/php/brainspell.php",
 			data: {
 				action:"get_log",
 				type:"Vote",
@@ -1091,8 +1166,7 @@ function findPreviousVoteByUser(eid/*iExp*/,rtag)
 				TagOntology:rtag.ontology,
 				Experiment:eid, // (iExp<0)?iExp:exp[iExp].id, // HAD TO CHANGE THIS !!!
 				PMID:ArticlePMID
-			},
-			async: false
+			}
 		}).done(function( msg ){
 			var xml=$.parseXML(msg);
 			//var	tagVote=parseInt($.parseJSON($(xml).find("TagVote").text()));
@@ -1103,7 +1177,7 @@ function findPreviousVoteByUser(eid/*iExp*/,rtag)
 	}
 	return vote;
 }
-function findPreviousTableMarkByUser(eid/*iExp*/)
+function findPreviousTableMarkByUser(eid)
 {
 	var found=0,mark=-1;
 
@@ -1111,15 +1185,14 @@ function findPreviousTableMarkByUser(eid/*iExp*/)
 	{
 		result=$.ajax({
 			type: "GET",
-			url: rootdir+"php/brainspell.php",
+			url: "/php/brainspell.php",
 			data: {
 				action:"get_log",
 				type:"MarkTable",
 				UserName:username,
 				Experiment:eid, // (iExp<0)?iExp:exp[iExp].id, // HAD TO CHANGE THIS from iExp
 				PMID:ArticlePMID
-			},
-			async: false
+			}
 		}).done(function( msg ){
 			if(debug) console.log("[findPreviousTableMarkByUser] ",msg);
 			var xml=$.parseXML(msg);
@@ -1138,14 +1211,13 @@ function findPreviousStereoSpaceByUser()
 	{
 		result=$.ajax({
 			type: "GET",
-			url: rootdir+"php/brainspell.php",
+			url: "/php/brainspell.php",
 			data: {
 				action:"get_log",
 				type:"StereoSpace",
 				UserName:username,
 				PMID:ArticlePMID
-			},
-			async: false
+			}
 		}).done(function( msg ){
 			if(debug) console.log("[findPreviousStereoSpaceByUser] ",msg);
 			var xml=$.parseXML(msg);
@@ -1164,14 +1236,13 @@ function findPreviousNSubjectsByUser()
 	{
 		result=$.ajax({
 			type: "GET",
-			url: rootdir+"php/brainspell.php",
+			url: "/php/brainspell.php",
 			data: {
 				action:"get_log",
 				type:"NSubjects",
 				UserName:username,
 				PMID:ArticlePMID
-			},
-			async: false
+			}
 		}).done(function( msg ){
 			if(debug) console.log("[findPreviousNSubjectsByUser] ",msg);
 			var xml=$.parseXML(msg);
@@ -1188,7 +1259,7 @@ function findPreviousNSubjectsByUser()
 		  Selection of tags
 -----------------------------------------------------------------
 */
-function openOntologyModal(eid/*iExp*/,ontology)
+function openOntologyModal(eid,ontology)
 {
 	if(ontology=="tasks")
 		$('body').append(tasks);
@@ -1222,12 +1293,12 @@ function resizeOntologyModal()
 		$('#light .myThing').css('height',(hall-htitle-val)+'px');
 	}
 }
-function openTagModal(eid/*iExp*/,rtag)
+function openTagModal(eid,rtag)
 {
 	if(debug) console.log("[openTagModal]");
 	var	obj=0;
 	
-	if(eid/*iExp*/>-1) {
+	if(eid>-1) {
 		var ex=findExperimentByEID(eid);
 		obj=findTag(ex.tags,rtag.name,rtag.ontology);
 	}
@@ -1238,7 +1309,7 @@ function openTagModal(eid/*iExp*/,rtag)
 	$('body').append(concept);
 	$('#box').show();
 	$('#boxfade').show();
-	$('#box #eid').html(eid/*iExp*/);
+	$('#box #eid').html(eid);
 	$('#box #ontology').html(rtag.ontology);
 	
 	configureTagModal(rtag);
@@ -1246,7 +1317,7 @@ function openTagModal(eid/*iExp*/,rtag)
 }
 function closeTagModal(vote)
 {
-	var	eid/*iExp*/=parseInt($('#box div#eid').text());
+	var	eid=parseInt($('#box div#eid').text());
 	var	agree=parseInt($('#box span.agree').text());
 	var disagree=parseInt($('#box span.disagree').text());
 	var	name=$('#box h2.name').text();
@@ -1257,7 +1328,7 @@ function closeTagModal(vote)
 	if(vote!=0)	
 	{
 		// find the tag
-		if(eid/*iExp*/>=0)	// iExp is >=0 for tables, =-1 for article-level tags
+		if(eid>=0)	// iExp is >=0 for tables, =-1 for article-level tags
 		{
 			var ex=findExperimentByEID(eid);
 			// check whether there were already any tags associated with this
@@ -1278,17 +1349,17 @@ function closeTagModal(vote)
 			{
 				var	rtag=new Object({"name":name,"ontology":ontology,"agree":0,"disagree":0});
 				ex.tags.push(rtag);
-				// addTag(eid/*iExp*/,rtag);
+				// addTag(eid,rtag);
 			}
 
 			if(vote==-1 || vote==1)
-				addTag(eid/*iExp*/,rtag); // addTag only adds the tag if it wasn't already added
+				addTag(eid,rtag); // addTag only adds the tag if it wasn't already added
 		}
 		else
 			rtag=findTag(meta.meshHeadings,name,ontology);
 
 		// compute total tag votes
-		var prevVote=findPreviousVoteByUser(eid/*iExp*/,rtag);
+		var prevVote=findPreviousVoteByUser(eid,rtag);
 		if(prevVote!=0)
 		{
 			if(vote==-2)	// retraction
@@ -1297,8 +1368,8 @@ function closeTagModal(vote)
 					rtag.disagree--;
 				if(prevVote==1)
 					rtag.agree--;
-				if(eid/*iExp*/>=0 && rtag.disagree==0 && rtag.agree==0)
-					removeTag(eid/*iExp*/,rtag); // remove tag from document
+				if(eid>=0 && rtag.disagree==0 && rtag.agree==0)
+					removeTag(eid,rtag); // remove tag from document
 			}
 			else
 			if(vote!=prevVote)	// up-vote or down-vote
@@ -1316,9 +1387,9 @@ function closeTagModal(vote)
 		}
 		
 		// Update tag display and save total tag votes (total agree/disagree stats)
-		if(eid/*iExp*/>=0)
+		if(eid>=0)
 		{
-			tag=$("div.experiment#"+eid/*iExp*/+" div.ontology#"+rtag.ontology+" li").filter(function(){return $(this).text()==rtag.name});
+			tag=$("div.experiment#"+eid+" div.ontology#"+rtag.ontology+" li").filter(function(){return $(this).text()==rtag.name});
 			updateTagColor(tag,rtag);
 			tag=$(".classList span.tag").filter(function(){return $(this).text()==rtag.name});
 			updateTagColor(tag,rtag);
@@ -1330,7 +1401,7 @@ function closeTagModal(vote)
 		}
 
 		// save user vote (up-vote, down-vote or retraction)
-		logVote(eid/*iExp*/,rtag,vote);
+		logVote(eid,rtag,vote);
 	}
 	$('#box').css('display','none');
 	$('#boxfade').css('display','none');
@@ -1359,7 +1430,7 @@ $(window).resize(function()
 						 Save
 ---------------------------------------------------------
 */
-function logVote(eid/*iExp*/,rtag,vote)
+function logVote(eid,rtag,vote)
 {
 	if(debug) console.log("[logVote] Log vote "+vote+" of user "+username);
 
@@ -1373,14 +1444,14 @@ function logVote(eid/*iExp*/,rtag,vote)
 		TagVote:vote,
 		Experiment:eid // (iExp<0)?iExp:exp[iExp].id // HAD TO CHANGE THIS FROM iExp
 	};
-	$.get(rootdir+"php/brainspell.php",obj,function(data){
+	$.get("/php/brainspell.php",obj,function(data){
 		if(debug) console.log("[logVote]",data);
 	});
 }
 function logMarkTable(sender)
 {
-	var	eid/*iExp*/=$(sender).closest("div.experiment").attr('id');
-	var mark=$(".experiment#"+eid/*iExp*/+" input:radio[value='No']").is(':checked')?1:0;
+	var	eid=$(sender).closest("div.experiment").attr('id');
+	var mark=$(".experiment#"+eid+" input:radio[value='No']").is(':checked')?1:0;
 	var	obj={
 		action:"add_log",
 		type:"MarkTable",
@@ -1389,14 +1460,14 @@ function logMarkTable(sender)
 		Mark:mark,
 		Experiment:eid // (iExp<0)?iExp:exp[iExp].id // THIS IS WHAT I HAD TO CHANGE !!
 	};
-	$.get(rootdir+"php/brainspell.php",obj,function(data){
+	$.get("/php/brainspell.php",obj,function(data){
 		var out=$.parseJSON(data);
 		var ex=findExperimentByEID(eid);
 		ex.markBadTable={"bad":out.result.bad,"ok":out.result.ok};
 		if(out.result.ok+out.result.bad>=minVotes)
 		{
-			$(".experiment#"+eid/*iExp*/+":first span#Yes").html('('+out.result.ok+')');
-			$(".experiment#"+eid/*iExp*/+":first span#No").html('('+out.result.bad+')');
+			$(".experiment#"+eid+":first span#Yes").html('('+out.result.ok+')');
+			$(".experiment#"+eid+":first span#No").html('('+out.result.bad+')');
 		}
 	});
 }
@@ -1409,7 +1480,7 @@ function logStereoSpace(sender)
 				PMID:ArticlePMID,
 				UserName:username,
 				StereoSpace:space};
-	$.get(rootdir+"php/brainspell.php",obj,function(data){
+	$.get("/php/brainspell.php",obj,function(data){
 		var out=$.parseJSON(data);
 		if(debug) console.log("[logStereoSpace] out",out.result);
 		meta.stereo=out.result;
@@ -1429,7 +1500,7 @@ function logNSubjects(sender)
 				PMID:ArticlePMID,
 				UserName:username,
 				NSubjects:nsubjects};
-	$.get(rootdir+"php/brainspell.php",obj,function(data){
+	$.get("/php/brainspell.php",obj,function(data){
 		var out=$.parseJSON(data);
 		if(debug) console.log("[logNSubjects] out",out.result);
 
@@ -1463,13 +1534,13 @@ function logComment()
 				PMID:ArticlePMID,
 				UserName:username,
 				Comment:comment};
-	$.get(rootdir+"php/brainspell.php",obj,function(data){
+	$.get("/php/brainspell.php",obj,function(data){
 		if(debug) console.log("[logComment]",data);
 		var out=$.parseJSON(data);
 		var	comment=$.parseJSON(out.result);
 		var	time=new Date();
 		time.setTime(comment.time);
-		$("div.comments").append("</p><a href='"+rootdir+"user/"+username+"'>"+username+"</a> ("+time.toLocaleString()+")<br \>");
+		$("div.comments").append("</p><a href='"+"/user/"+username+"'>"+username+"</a> ("+time.toLocaleString()+")<br \>");
 		$("div.comments").append(comment.comment);
 		$("div.comments").append("</p><br \>");
 		$("textarea").val("");
@@ -1488,43 +1559,29 @@ function logKeyValue(eid,key,value)
 				Experiment:eid,
 				Key:key,
 				Value:value};
-	$.get(rootdir+"php/brainspell.php",obj,function(data){
-		//if(debug)
+	$.get("/php/brainspell.php",obj,function(data){
+		if(debug)
 			console.log("[logKeyValue]",data);
 	});
 }
 
 // Translucent Viewer
-function initTranslucentBrain(eid/*iExp*/)
+function initTranslucentBrain(eid)
 {
 	var ex=findExperimentByEID(eid);
 	if(debug) console.log("ex:"+ex+" eid:"+eid);
 	ex.render={};
-	ex.render.container=$(".experiment#"+eid/*iExp*/+" div.metaCoords");
-
-	// Init rendered
-	if( Detector.webgl ){
-		ex.render.renderer = new THREE.WebGLRenderer({
-			antialias				: true,	// to get smoother output
-			preserveDrawingBuffer	: true	// to allow screenshot
-		});
-		ex.render.renderer.setClearColor( 0xffffff, 0 );
-	}else{
-		ex.render.renderer = new THREE.CanvasRenderer();
-	}
+	ex.render.container=$(".experiment#"+eid+" div.metaCoords");
 
 	var container=ex.render.container;
 	var	width=container.width();
 	var	height=container.height();
-	ex.render.renderer.setSize( width, height );
-	container.append(ex.render.renderer.domElement);
-
+	
 	// create a scene
 	ex.render.scene = new THREE.Scene();
 	
-	// create projector (for hit detection)
-	ex.render.projector = new THREE.Projector();
-	ex.render.renderer.domElement.addEventListener( 'mousedown', function(e){onDocumentMouseDown(e,eid/*iExp*/);}, false );
+	// create raycaster (for hit detection)
+	container[0].addEventListener( 'mousedown', function(e){onDocumentMouseDown(e,eid);}, false );
 
 	// put a camera in the scene
 	ex.render.camera	= new THREE.PerspectiveCamera(40,width/height,25,50);
@@ -1532,7 +1589,7 @@ function initTranslucentBrain(eid/*iExp*/)
 	ex.render.scene.add(ex.render.camera);
 
 	// create a camera control
-	ex.render.cameraControls=new THREE.TrackballControls(ex.render.camera,ex.render.container.get(0) )
+	ex.render.cameraControls=new THREE.TrackballControls(ex.render.camera,ex.render.container[0] )
 	ex.render.cameraControls.noZoom=true;
 	ex.render.cameraControls.addEventListener( 'change', function(){ex.render.light.position.copy( ex.render.camera.position );} );
 
@@ -1575,7 +1632,6 @@ function initTranslucentBrain(eid/*iExp*/)
 			},
 			vertexShader	: [ 'varying vec3	vVertexWorldPosition;',
 								'varying vec3	vVertexNormal;',
-								'varying vec4	vFragColor;',
 								'void main(){',
 								'	vVertexNormal	= normalize(normalMatrix * normal);',
 								'	vVertexWorldPosition	= (modelMatrix * vec4(position, 1.0)).xyz;',
@@ -1587,13 +1643,12 @@ function initTranslucentBrain(eid/*iExp*/)
 								'uniform float	power;',
 								'varying vec3	vVertexNormal;',
 								'varying vec3	vVertexWorldPosition;',
-								'varying vec4	vFragColor;',
 								'void main(){',
-								'	vec3 worldCameraToVertex= vVertexWorldPosition - cameraPosition;',
-								'	vec3 viewCameraToVertex	= (viewMatrix * vec4(worldCameraToVertex, 0.0)).xyz;',
-								'	viewCameraToVertex	= normalize(viewCameraToVertex);',
-								'	float intensity		= pow(coeficient + dot(vVertexNormal, viewCameraToVertex), power);',
-								'	gl_FragColor		= vec4(glowColor, intensity);',
+								'	vec3 worldCameraToVertex=vVertexWorldPosition - cameraPosition;',
+								'	vec3 viewCameraToVertex=(viewMatrix * vec4(worldCameraToVertex, 0.0)).xyz;',
+								'	viewCameraToVertex=normalize(viewCameraToVertex);',
+								'	float intensity=pow(coeficient + dot(vVertexNormal, viewCameraToVertex), power);',
+								'	gl_FragColor=vec4(glowColor, intensity);',
 								'}',
 							].join('\n'),
 			transparent	: true,
@@ -1619,44 +1674,92 @@ function initTranslucentBrain(eid/*iExp*/)
 	oReq.send();
 }
 // hit detection
-function onDocumentMouseDown( event,eid/*iExp*/ ) {
+function onDocumentMouseDown( event,eid ) {
 	event.preventDefault();
 	var ex=findExperimentByEID(eid);
 	var	x,y,i;
 	var r = event.target.getBoundingClientRect();
 
-	projector = new THREE.Projector();
 	mouseVector = new THREE.Vector3();
 	mouseVector.x= ((event.clientX-r.left) / event.target.clientWidth ) * 2 - 1;
 	mouseVector.y=-((event.clientY-r.top) / event.target.clientHeight ) * 2 + 1;
 	
-	var raycaster = projector.pickingRay( mouseVector.clone(), ex.render.camera );
+	var raycaster=new THREE.Raycaster();
+	raycaster.setFromCamera(mouseVector.clone(), ex.render.camera);
 	var intersects = raycaster.intersectObjects( ex.render.spheres.children );
 
 	if(intersects.length==0)
 		return;
 	ex.render.spheres.children.forEach(function( sph ) { sph.material.color.setRGB( 1,0,0 );});
 	intersects[0].object.material.color.setRGB(0,1,0);
-	$(".experiment#"+eid/*iExp*/+" .xyztable table td").css({'background-color':''});
+	$(".experiment#"+eid+" .xyztable table td").css({'background-color':''});
 	for(i=0;i<ex.locations.length;i++)
 		if(ex.locations[i].sph==intersects[0].object)
-			$(".experiment#"+eid/*iExp*/+" .xyztable tr:eq("+i+") td.coordinate").css({"background-color":"lightGreen"});
+			$(".experiment#"+eid+" .xyztable tr:eq("+i+") td.coordinate").css({"background-color":"lightGreen"});
 }
 
 // animation loop
-function animate()
-{
+function animate() {
 	requestAnimationFrame( animate );
+	updateSize();
+	renderer.setClearColor( 0xffffff,0 );
+	renderer.clear( true );
+	renderer.enableScissorTest( true );
 	for(iExp in exp)
 		if(exp[iExp].render)
-			if(exp[iExp].render.renderer)
-				render(iExp);
+			render(iExp);
+	renderer.enableScissorTest( false );
 }
+
 // render the scene
 function render(iExp) {
+	var scene=exp[iExp].render.scene;
+	var camera=exp[iExp].render.camera;
+	var trackball=exp[iExp].render.cameraControls;
+	
 	// update camera controls
-	exp[iExp].render.cameraControls.update();
+	trackball.update();
+	
+	// the scene object contains the element object, which is the div in which
+	// 3d data is displayed.
+	var element = exp[iExp].render.container[0];
+	var rect = element.getBoundingClientRect();
+	if ( rect.bottom < 0 || rect.top  > renderer.domElement.clientHeight ||
+		 rect.right  < 0 || rect.left > renderer.domElement.clientWidth ) {
+	  return;  // it's off screen
+	}
+	// set the viewport
+	var width  = rect.right - rect.left;
+	var height = rect.bottom - rect.top;
+	var left   = rect.left;
+	var bottom = renderer.domElement.clientHeight - rect.bottom;
+	
+	// compensate for window springiness
+	var dy=window.pageYOffset;
+	if(dy<0) {
+		bottom-=dy;
+	} else {
+		dy=window.pageYOffset-document.body.scrollHeight+window.innerHeight;
+		if(dy>0) {
+			bottom-=dy;
+		}
+	}
+	
+	// place viewport
+	camera.aspect = width / height;
+	camera.updateProjectionMatrix();
+	renderer.setViewport( left, bottom, width, height );
+	renderer.setScissor( left, bottom, width, height );
 	
 	// actually render the scene
-	exp[iExp].render.renderer.render(exp[iExp].render.scene,exp[iExp].render.camera );
+	renderer.render( scene, camera );
+}
+
+function updateSize() {
+	var canvas=$("#3d")[0];
+	var width = canvas.clientWidth;
+	var height = canvas.clientHeight;
+	if ( canvas.width !== width || canvas.height != height ) {
+		renderer.setSize ( width, height, false );
+	}
 }

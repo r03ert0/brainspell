@@ -6,7 +6,7 @@
 	<form method="get" action="search">
 		<fieldset id="home-search">
 			<input type="text" id="search" name="query" placeholder="Search articles by title, author, keyword…"/>
-			<button style="border:0;top:5px;width:25px;height:25px"><img src="<!--ROOTDIR-->img/search.svg" alt="Search" class="rollMe" width=25px height=25px/></button>
+			<button style="border:0;top:5px;width:25px;height:25px"><img src="/img/search.svg" alt="Search" class="rollMe" width=25px height=25px/></button>
 		</fieldset>
 	</form>
 	<div style="text-align:right"><!--NumberOfArticlesIndexed--> articles indexed</div>
@@ -32,7 +32,7 @@ function init(){
 function getarticle()
 {
 	console.log("[getarticle] Get random article");
-	$.get("<!--ROOTDIR-->php/brainspell.php",
+	$.get("/php/brainspell.php",
 		  {	action:"get_article",
 			command:"random",
 			argument:"5"},
