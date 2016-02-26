@@ -21,3 +21,34 @@ running `docker-compose up`:
 
 You will also be able to get the ip address of your docker host with
 `docker-machine ip`.
+
+
+
+
+
+
+SETUP steps:
+0a. Make sure you downloaded the docker toolbox (https://www.docker.com/products/docker-toolbox)
+
+0b. Ensure you have VirtualBox installed.
+
+1. Go into the dav branch.
+
+git checkout dav
+
+2. Go into the docker folder.
+
+cd docker
+
+3. Build the image and launch the container.
+
+docker-compose up
+
+5. Check the host ip.
+
+docker-machine ip
+
+6. Open a browser (use Firefox OR CHROME or Internet Explorer) and type/copy-paste the resulting ip address in step (5) into the address bar.
+http://192.168.99.100:8000/ 
+
+7. You should see the brainspell webpage.
