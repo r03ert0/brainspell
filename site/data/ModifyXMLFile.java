@@ -15,10 +15,13 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+
 public class ModifyXMLFile {
 
 	public static void main(String argv[]) {
+	//DO NOT RUN AGAIN--ALEADY ADDED Z VALUES AND RUNNING AGAIN WOULD APPEND UNNECCESSARY EXTRA ZEROS
 
+	/*
 		  try {
 				String filepath = "brainspell.xml";
 				DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
@@ -63,5 +66,7 @@ public class ModifyXMLFile {
 		} catch (SAXException sae) {
 				sae.printStackTrace();
 		}
+		*/
 	}
+
 }
