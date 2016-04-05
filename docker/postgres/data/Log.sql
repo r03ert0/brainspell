@@ -16,13 +16,14 @@ DROP TABLE IF EXISTS "Log";
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE "Log" (
-  "UniqueID" int(25) NOT NULL,
+  "UniqueID" integer NOT NULL,
   "TIMESTAMP" timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  "UserName" text CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
-  "Experiment" int(11) NOT NULL,
-  "PMID" varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
-  "Type" text CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
-  "Data" text CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  -- Probably this should be a foreign key into the User table
+  "UserName" text NOT NULL,
+  "Experiment" integer NOT NULL,
+  "PMID" varchar(64) NOT NULL,
+  "Type" text NOT NULL,
+  "Data" text NOT NULL,
   PRIMARY KEY ("UniqueID")
 );
 /*!40101 SET character_set_client = @saved_cs_client */;

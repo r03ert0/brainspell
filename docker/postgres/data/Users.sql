@@ -16,7 +16,7 @@ DROP TABLE IF EXISTS "Users";
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE "Users" (
-  "UserID" int(25) NOT NULL,
+  "UserID" integer NOT NULL,
   "Username" varchar(65) NOT NULL,
   "Password" varchar(32) NOT NULL,
   "EmailAddress" varchar(255) NOT NULL,

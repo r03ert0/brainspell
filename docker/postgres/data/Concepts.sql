@@ -16,11 +16,11 @@ DROP TABLE IF EXISTS "Concepts";
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE "Concepts" (
-  "UniqueID" int(25) NOT NULL,
-  "Name" text CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
-  "Ontology" text CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
-  "Definition" text CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
-  "Metadata" text CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  "UniqueID" integer NOT NULL,
+  "Name" text NOT NULL,
+  "Ontology" text NOT NULL,
+  "Definition" text NOT NULL,
+  "Metadata" text NOT NULL,
   PRIMARY KEY ("UniqueID")
 );
 /*!40101 SET character_set_client = @saved_cs_client */;

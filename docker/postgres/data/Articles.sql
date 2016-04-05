@@ -16,17 +16,17 @@ DROP TABLE IF EXISTS "Articles";
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE "Articles" (
-  "UniqueID" int(25) NOT NULL,
+  "UniqueID" integer NOT NULL,
   "TIMESTAMP" timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  "Title" text CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
-  "Authors" text CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
-  "Abstract" text CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
-  "Reference" text CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
-  "PMID" varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
-  "DOI" varchar(128) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
-  "NeuroSynthID" varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
-  "Experiments" text CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
-  "Metadata" text CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  "Title" text NOT NULL,
+  "Authors" text NOT NULL,
+  "Abstract" text NOT NULL,
+  "Reference" text NOT NULL,
+  "PMID" varchar(64) NOT NULL,
+  "DOI" varchar(128) NOT NULL,
+  "NeuroSynthID" varchar(64) NOT NULL,
+  "Experiments" jsonb NOT NULL,
+  "Metadata" jsonb NOT NULL,
   PRIMARY KEY ("UniqueID")
 );
 /*!40101 SET character_set_client = @saved_cs_client */;
