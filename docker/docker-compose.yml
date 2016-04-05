@@ -21,3 +21,15 @@ db:
         # somewhere...
         # - ./mysql/storage/:/var/lib/mysql/
         - ./mysql/data:/docker-entrypoint-initdb.d
+
+pg:
+    build: postgres
+    environment:
+        POSTGRES_PASSWORD: beo8hkii
+        POSTGRES_DB: brainspell
+    volumes:
+        # Creates trouble unless we make it world-writable or play tricks to
+        # match the group or user id inside and outside the container.
+        # By default, some Docker magic will create an external volume
+        # somewhere...
+        - ./postgres/data:/docker-entrypoint-initdb.d
