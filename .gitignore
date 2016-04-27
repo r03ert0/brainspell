@@ -1,5 +1,10 @@
 <<<<<<< HEAD
 *.lock.file
+<<<<<<< HEAD
 =======
 php/base.php
 >>>>>>> 0c580a64030c924d29aebd7758d9351411aeefe3
+=======
+.DS_Store
+.ipynb_checkpoints/
+>>>>>>> 724794fb8b26d8ea7dc7b458c6ffb064fb081112
